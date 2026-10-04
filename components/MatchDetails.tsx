@@ -55,7 +55,6 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
   const getSkillEvidence = (skillName: string): string => {
     const sLower = skillName.toLowerCase();
     
-    // Check in experience
     for (const exp of (profile?.experience || [])) {
       if (!exp) continue;
       if ((exp.description || '').toLowerCase().includes(sLower) || (exp.role || '').toLowerCase().includes(sLower)) {
@@ -63,7 +62,6 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
       }
     }
     
-    // Check in projects
     for (const proj of (profile?.projects || [])) {
       if (!proj) continue;
       if ((proj.technologies || []).some((t) => t.toLowerCase().includes(sLower)) || (proj.description || '').toLowerCase().includes(sLower)) {
@@ -78,21 +76,21 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
     switch (status) {
       case 'SUPPORTED':
         return (
-          <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 inline-flex items-center gap-1">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+          <span className="text-[11px] font-extrabold px-2.5 py-0.5 rounded-lg bg-[#E8F0E6] text-[#28745D] border border-[#28745D]/30 inline-flex items-center gap-1 uppercase">
+            <CheckCircle2 className="w-3.5 h-3.5 text-[#28745D]" />
             SUPPORTED
           </span>
         );
       case 'CONTRADICTORY':
         return (
-          <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-red-50 text-red-700 border border-red-200 inline-flex items-center gap-1">
+          <span className="text-[11px] font-extrabold px-2.5 py-0.5 rounded-lg bg-red-50 text-red-700 border border-red-200 inline-flex items-center gap-1 uppercase">
             <AlertCircle className="w-3.5 h-3.5 text-red-600" />
             CONTRADICTORY
           </span>
         );
       case 'UNSUPPORTED':
         return (
-          <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 inline-flex items-center gap-1">
+          <span className="text-[11px] font-extrabold px-2.5 py-0.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 inline-flex items-center gap-1 uppercase">
             <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
             UNSUPPORTED
           </span>
@@ -100,7 +98,7 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
       case 'NOT_ENOUGH_EVIDENCE':
       default:
         return (
-          <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 inline-flex items-center gap-1">
+          <span className="text-[11px] font-extrabold px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-700 border border-slate-200 inline-flex items-center gap-1 uppercase">
             <HelpCircle className="w-3.5 h-3.5 text-slate-500" />
             NOT ENOUGH EVIDENCE
           </span>
@@ -113,49 +111,49 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
   const initials = getCandidateInitials(name, `C${rank}`);
   const avatarColor = getAvatarColorClass(name);
 
-  // Percentage calculations for thin bar indicators
+  // Percentage calculations
   const reqPercent = Math.round((match.requiredSkillScore / 30) * 100);
   const prefPercent = Math.round((match.preferredSkillScore / 10) * 100);
   const expPercent = Math.round((match.experienceScore / 25) * 100);
   const eduPercent = Math.round((match.educationScore / 15) * 100);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-2xs flex items-center justify-end motion-fade">
-      <div className="bg-white w-full max-w-5xl h-full shadow-2xl flex flex-col border-l border-[#E5E7EB] motion-drawer">
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-2xs flex items-center justify-end">
+      <div className="bg-white w-full max-w-5xl h-full shadow-2xl flex flex-col border-l border-[#E5E2DC]">
         
-        {/* Recruiter Dossier Top Bar with Avatar */}
-        <div className="px-8 py-5 border-b border-[#E5E7EB] bg-white flex flex-wrap items-center justify-between gap-4">
+        {/* Recruiter Dossier Top Bar */}
+        <div className="px-8 py-5 border-b border-[#E5E2DC] bg-white flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 text-[#6B7280] hover:text-[#202124] hover:bg-[#F3F4F6] rounded-md cursor-pointer transition-colors"
+              className="p-2 text-[#525866] hover:text-[#18181B] hover:bg-[#FAF7F2] rounded-xl cursor-pointer transition-colors"
               title="Back to Candidates"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
 
             <div className="flex items-center gap-3.5">
-              <div className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-sm shrink-0 font-mono shadow-2xs ${avatarColor}`}>
+              <div className={`w-11 h-11 rounded-full flex items-center justify-center font-black text-sm shrink-0 font-mono shadow-2xs ${avatarColor}`}>
                 {initials}
               </div>
 
               <div>
                 <div className="flex items-center gap-3">
-                  <h2 className="text-xl font-bold text-[#202124] font-heading">
+                  <h2 className="text-xl font-black text-[#18181B] font-heading">
                     {name}
                   </h2>
-                  <span className="text-xs px-2.5 py-0.5 rounded font-mono font-bold bg-[#EEF2FF] text-[#6366F1]">
+                  <span className="text-xs px-2.5 py-0.5 rounded-lg font-mono font-bold bg-[#E8F0E6] text-[#0D3834] uppercase">
                     {match.totalScore}% Match
                   </span>
-                  <span className="text-xs px-2.5 py-0.5 rounded font-medium bg-[#F3F4F6] text-[#4B5563]">
+                  <span className="text-xs px-2.5 py-0.5 rounded-lg font-bold bg-[#FAF7F2] text-[#525866] uppercase">
                     {currentStage}
                   </span>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-[#6B7280] mt-1">
+                <div className="flex items-center gap-3 text-xs text-[#525866] mt-1 font-sans">
                   <span>{profile?.experience?.[0]?.role || 'Software Engineer'}</span>
                   <span>·</span>
-                  <span>{match.experienceMatch.candidateYears !== null ? `${match.experienceMatch.candidateYears} yrs verified` : 'Tenure n/a'}</span>
+                  <span className="font-bold">{match.experienceMatch.candidateYears !== null ? `${match.experienceMatch.candidateYears} yrs verified` : 'Tenure n/a'}</span>
                   <span>·</span>
                   <span className="font-mono text-[11px]">{candidate.fileName}</span>
                 </div>
@@ -164,11 +162,10 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
           </div>
 
           <div className="flex items-center gap-2.5">
-            {/* Stage Selector */}
             <select
               value={currentStage}
               onChange={(e) => setCurrentStage(e.target.value as any)}
-              className="px-3 py-1.5 border border-[#E5E7EB] rounded-md text-xs font-semibold bg-white text-[#202124] cursor-pointer focus:outline-none focus:border-[#202124]"
+              className="px-3 py-1.5 border border-[#E5E2DC] rounded-xl text-xs font-bold bg-white text-[#18181B] cursor-pointer focus:outline-none focus:border-[#0D3834]"
             >
               <option value="Screening">Stage: Screening</option>
               <option value="Matched">Stage: Matched</option>
@@ -181,20 +178,20 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
               <button
                 type="button"
                 onClick={() => onToggleShortlist(profile.id)}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold border transition-all cursor-pointer ${
+                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider border transition-all cursor-pointer ${
                   isShortlisted
-                    ? 'bg-[#FDF2F7] text-[#E83E8C] border-[#E83E8C]/30'
-                    : 'bg-white text-[#202124] border-[#E5E7EB] hover:bg-[#F9FAFB]'
+                    ? 'bg-[#E8F0E6] text-[#0D3834] border-[#0D3834]'
+                    : 'bg-white text-[#18181B] border-[#E5E2DC] hover:bg-[#FAF7F2]'
                 }`}
               >
                 {isShortlisted ? (
                   <>
-                    <BookmarkCheck className="w-3.5 h-3.5 text-[#E83E8C]" />
+                    <BookmarkCheck className="w-3.5 h-3.5 text-[#0D3834]" />
                     Shortlisted
                   </>
                 ) : (
                   <>
-                    <Bookmark className="w-3.5 h-3.5 text-[#6B7280]" />
+                    <Bookmark className="w-3.5 h-3.5 text-[#525866]" />
                     Shortlist
                   </>
                 )}
@@ -204,7 +201,7 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 text-[#6B7280] hover:text-[#202124] hover:bg-[#F3F4F6] rounded-md cursor-pointer"
+              className="p-2 text-[#525866] hover:text-[#18181B] hover:bg-[#FAF7F2] rounded-xl cursor-pointer"
               aria-label="Close"
             >
               <X className="w-5 h-5" />
@@ -212,376 +209,241 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
           </div>
         </div>
 
-        {/* Two-Column Recruiter Dossier Body */}
-        <div className="flex-1 overflow-y-auto p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 bg-[#F7F8FA]">
+        {/* Dossier Body */}
+        <div className="flex-1 overflow-y-auto p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 bg-[#FAF7F2]">
           
-          {/* LEFT COLUMN (65% on desktop): Profile, Experience, Education */}
+          {/* LEFT COLUMN */}
           <div className="lg:col-span-7 space-y-6">
             
-            {/* Contact Information & Summary */}
-            <div className="bg-white rounded-lg border border-[#E5E7EB] p-6 space-y-4 shadow-2xs motion-fade-up stagger-1">
-              <div className="flex items-center justify-between pb-3 border-b border-[#F3F4F6]">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#6B7280]">
+            {/* Contact Information */}
+            <div className="bg-white rounded-2xl border border-[#E5E2DC] p-6 space-y-4 shadow-2xs">
+              <div className="flex items-center justify-between pb-3 border-b border-[#E5E2DC]">
+                <h3 className="text-xs font-black uppercase tracking-wider text-[#525866]">
                   Contact & Profile Summary
                 </h3>
-                <span className="text-xs text-[#6B7280] font-mono">
+                <span className="text-xs text-[#525866] font-mono font-bold">
                   ID: {profile?.id}
                 </span>
               </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-[#202124]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-[#18181B] font-semibold">
                 <div className="flex items-center gap-2">
-                  <Mail className="w-4 h-4 text-[#6B7280] shrink-0" />
+                  <Mail className="w-4 h-4 text-[#525866] shrink-0" />
                   <span>{profile?.email || 'Email not provided'}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-[#6B7280] shrink-0" />
+                  <Phone className="w-4 h-4 text-[#525866] shrink-0" />
                   <span>{profile?.phone || 'Phone not provided'}</span>
                 </div>
               </div>
 
               {profile?.summary && (
-                <p className="text-xs text-[#4B5563] leading-relaxed pt-2 border-t border-[#F3F4F6]">
+                <p className="text-xs text-[#525866] leading-relaxed pt-2 border-t border-[#E5E2DC]">
                   {profile.summary}
                 </p>
               )}
             </div>
 
-            {/* Why This Candidate Matches & What is Missing */}
-            <div className="bg-white rounded-lg border border-[#E5E7EB] p-6 space-y-4 shadow-2xs motion-fade-up stagger-2">
-              <div className="pb-3 border-b border-[#F3F4F6] flex items-center justify-between">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#202124] font-heading flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-[#6366F1]" />
+            {/* Evaluation Reasoning */}
+            <div className="bg-white rounded-2xl border border-[#E5E2DC] p-6 space-y-4 shadow-2xs">
+              <div className="pb-3 border-b border-[#E5E2DC] flex items-center justify-between">
+                <h3 className="text-xs font-black uppercase tracking-wider text-[#18181B] font-heading flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-[#0D3834]" />
                   Evaluation Reasoning
                 </h3>
-                <span className="text-xs font-bold text-[#202124]">{match.label}</span>
+                <span className="text-xs font-black text-[#0D3834] uppercase">{match.label}</span>
               </div>
 
-              {/* Why Matches */}
               <div className="space-y-2">
-                <span className="text-xs font-bold text-emerald-800 block">
+                <span className="text-xs font-bold text-[#28745D] block uppercase">
                   Why this candidate matches:
                 </span>
-                <ul className="space-y-1.5 pl-4 list-disc text-xs text-[#374151]">
+                <ul className="space-y-1.5 pl-4 list-disc text-xs text-[#18181B] font-medium">
                   {match.matchedRequiredSkills.length > 0 && (
                     <li>
-                      <span className="font-semibold text-[#202124]">Strong technical alignment:</span> {match.matchedRequiredSkills.join(', ')}
+                      <strong className="text-[#18181B]">Strong technical alignment:</strong> {match.matchedRequiredSkills.join(', ')}
                     </li>
                   )}
-                  {struct?.whyMatches.experience ? (
+                  {match.experienceMatch.candidateYears !== null && (
                     <li>
-                      <span className="font-semibold text-[#202124]">Tenure verification:</span> {struct.whyMatches.experience}
+                      <strong className="text-[#18181B]">Tenure verification:</strong> {match.experienceMatch.candidateYears} years of quantified experience
                     </li>
-                  ) : match.experienceMatch.candidateYears !== null ? (
-                    <li>
-                      <span className="font-semibold text-[#202124]">Tenure verification:</span> {match.experienceMatch.candidateYears} years of quantified experience
-                    </li>
-                  ) : null}
+                  )}
                   {match.relevantProjects.length > 0 && (
                     <li>
-                      <span className="font-semibold text-[#202124]">Project evidence:</span> {match.relevantProjects.join(', ')}
-                    </li>
-                  )}
-                  {struct?.whyMatches.education && (
-                    <li>
-                      <span className="font-semibold text-[#202124]">Education alignment:</span> {struct.whyMatches.education}
+                      <strong className="text-[#18181B]">Project evidence:</strong> {match.relevantProjects.join(', ')}
                     </li>
                   )}
                 </ul>
               </div>
 
               {/* What is Missing */}
-              <div className="space-y-2 pt-3 border-t border-[#F3F4F6]">
-                <span className="text-xs font-bold text-amber-800 block">
+              <div className="space-y-2 pt-3 border-t border-[#E5E2DC]">
+                <span className="text-xs font-bold text-amber-900 block uppercase">
                   What is missing / Gaps:
                 </span>
-                <ul className="space-y-1.5 pl-4 list-disc text-xs text-[#374151]">
+                <ul className="space-y-1.5 pl-4 list-disc text-xs text-[#18181B] font-medium">
                   {match.missingRequiredSkills.length > 0 ? (
                     <li>
-                      <span className="font-semibold text-[#202124]">Missing required skills:</span> {match.missingRequiredSkills.join(', ')}
+                      <strong className="text-[#18181B]">Missing required skills:</strong> {match.missingRequiredSkills.join(', ')}
                     </li>
                   ) : (
-                    <li className="text-emerald-700 font-medium">✓ All mandatory core technical skills are satisfied.</li>
-                  )}
-                  {struct?.whatIsMissing.experience && (
                     <li>
-                      <span className="font-semibold text-[#202124]">Experience gap:</span> {struct.whatIsMissing.experience}
-                    </li>
-                  )}
-                  {struct?.whatIsMissing.education && (
-                    <li>
-                      <span className="font-semibold text-[#202124]">Education gap:</span> {struct.whatIsMissing.education}
+                      <strong className="text-[#059669]">No missing required skills.</strong> Candidate satisfies all mandatory technical prerequisites.
                     </li>
                   )}
                 </ul>
               </div>
             </div>
 
-            {/* Work History */}
-            <div className="bg-white rounded-lg border border-[#E5E7EB] p-6 space-y-4 shadow-2xs motion-fade-up stagger-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[#6B7280]">
+            {/* Work Experience Timeline */}
+            <div className="bg-white rounded-2xl border border-[#E5E2DC] p-6 space-y-4 shadow-2xs">
+              <h3 className="text-xs font-black uppercase tracking-wider text-[#18181B] font-heading flex items-center gap-2">
+                <Briefcase className="w-4 h-4 text-[#0D3834]" />
                 Work Experience History
               </h3>
-              
-              {profile?.experience && profile.experience.length > 0 ? (
-                <div className="space-y-4">
-                  {profile.experience.map((exp, idx) => (
-                    <div key={idx} className="border-l-2 border-[#E5E7EB] pl-4 py-1 space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-xs text-[#202124]">{exp.role || 'Role not specified'}</span>
-                        <span className="text-xs text-[#6B7280]">
-                          {exp.startDate && exp.endDate ? `${exp.startDate} - ${exp.endDate}` : 'Dates not specified'}
-                        </span>
-                      </div>
-                      <span className="text-xs text-[#6B7280] font-medium block">{exp.company || 'Company not specified'}</span>
-                      {exp.description ? (
-                        <p className="text-xs text-[#4B5563] leading-relaxed pt-1">{exp.description}</p>
-                      ) : (
-                        <p className="text-xs text-[#9CA3AF] italic">No description provided.</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-xs text-[#6B7280] italic">No work history provided in resume.</p>
-              )}
-            </div>
 
-            {/* Portfolio Projects */}
-            <div className="bg-white rounded-lg border border-[#E5E7EB] p-6 space-y-3 shadow-2xs">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[#6B7280]">
-                Portfolio Projects
-              </h3>
-              {profile?.projects && profile.projects.length > 0 ? (
-                <div className="space-y-3">
-                  {profile.projects.map((proj, idx) => (
-                    <div key={idx} className="p-3 rounded-md bg-[#FAFBFC] border border-[#E5E7EB] text-xs space-y-1">
-                      <span className="font-bold text-[#202124] block">{proj.name || 'Project'}</span>
-                      {proj.description && <p className="text-xs text-[#4B5563]">{proj.description}</p>}
-                      {proj.technologies && proj.technologies.length > 0 && (
-                        <span className="text-[11px] text-[#6366F1] font-mono block">
-                          Tech: {proj.technologies.join(', ')}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-xs text-[#6B7280] italic">No projects listed in resume.</p>
-              )}
-            </div>
-
-            {/* Education Credentials */}
-            <div className="bg-white rounded-lg border border-[#E5E7EB] p-6 space-y-3 shadow-2xs">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[#6B7280]">
-                Education Credentials
-              </h3>
-              {profile?.education && profile.education.length > 0 ? (
-                <div className="space-y-2">
-                  {profile.education.map((edu, idx) => (
-                    <div key={idx} className="flex items-center justify-between text-xs py-1 border-b border-[#F3F4F6] last:border-0">
+              <div className="space-y-4">
+                {(profile?.experience || []).map((exp, idx) => (
+                  <div key={idx} className="p-4 rounded-xl bg-[#FAF7F2] border border-[#E5E2DC] space-y-2">
+                    <div className="flex items-start justify-between">
                       <div>
-                        <span className="font-bold text-[#202124] block">{edu.degree || 'Degree not specified'}</span>
-                        <span className="text-[#6B7280]">{[edu.field, edu.institution].filter(Boolean).join(' · ') || 'Institution not specified'}</span>
+                        <h4 className="font-extrabold text-sm text-[#18181B]">{exp.role}</h4>
+                        <span className="text-xs font-bold text-[#0D3834]">{exp.company}</span>
                       </div>
-                      {edu.graduationYear && <span className="text-[#6B7280] font-mono text-xs">{edu.graduationYear}</span>}
+                      <span className="text-xs font-mono font-bold text-[#525866]">
+                        {exp.startDate} – {exp.endDate || 'Present'}
+                      </span>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-xs text-[#6B7280] italic">No formal education credentials listed in resume.</p>
-              )}
+
+                    <p className="text-xs text-[#525866] leading-relaxed">{exp.description}</p>
+
+                    {exp.technologies && exp.technologies.length > 0 && (
+                      <div className="flex flex-wrap gap-1 pt-1">
+                        {exp.technologies.map((tech, tIdx) => (
+                          <span key={tIdx} className="text-[10px] px-2 py-0.5 rounded bg-white text-[#18181B] font-bold border border-[#E5E2DC]">
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
+
           </div>
 
-          {/* RIGHT COLUMN (35% on desktop): AI Match, Evidence & Claims */}
+          {/* RIGHT COLUMN */}
           <div className="lg:col-span-5 space-y-6">
             
-            {/* Signature AI Match Breakdown Component */}
-            <div className="bg-white rounded-lg border border-[#E5E7EB] p-6 shadow-2xs space-y-4 motion-fade-up stagger-1">
-              <div className="flex items-baseline justify-between pb-3 border-b border-[#F3F4F6]">
-                <div>
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#6B7280]">
-                    AI Match Breakdown
-                  </h3>
-                  <div className="flex items-baseline gap-1.5 mt-1">
-                    <span className="text-3xl font-black text-[#202124] font-mono">{match.totalScore}</span>
-                    <span className="text-xs font-bold text-[#6B7280]">/ 100 Points</span>
-                  </div>
-                </div>
-                <span className="text-xs px-2.5 py-1 rounded-md font-bold bg-[#EEF2FF] text-[#6366F1]">
-                  {match.label}
-                </span>
-              </div>
+            {/* 100-Point Rubric Breakdown */}
+            <div className="bg-white rounded-2xl border border-[#E5E2DC] p-6 space-y-4 shadow-2xs">
+              <h3 className="text-xs font-black uppercase tracking-wider text-[#0D3834] font-heading">
+                100-Point Rubric Breakdown
+              </h3>
 
-              {/* Thin Progress Visualizations */}
-              <div className="space-y-3.5 text-xs">
+              <div className="space-y-3 text-xs">
                 <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-[#202124] font-medium">Required Technical Skills</span>
-                    <span className="font-mono font-bold text-[#202124]">{match.requiredSkillScore} / 30 pts</span>
+                  <div className="flex justify-between font-bold mb-1">
+                    <span>Required Skills ({match.requiredSkillScore}/30 pts)</span>
+                    <span className="font-mono text-[#0D3834]">{reqPercent}%</span>
                   </div>
-                  <div className="w-full h-1.5 bg-[#F3F4F6] rounded-full overflow-hidden">
-                    <div className="h-full bg-[#202124] rounded-full" style={{ width: `${reqPercent}%` }} />
+                  <div className="w-full bg-[#FAF7F2] rounded-full h-2 overflow-hidden border border-[#E5E2DC]">
+                    <div className="bg-[#0D3834] h-full" style={{ width: `${reqPercent}%` }} />
                   </div>
                 </div>
 
                 <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-[#202124] font-medium">Preferred Qualifications</span>
-                    <span className="font-mono font-bold text-[#202124]">{match.preferredSkillScore} / 10 pts</span>
+                  <div className="flex justify-between font-bold mb-1">
+                    <span>Preferred Skills ({match.preferredSkillScore}/10 pts)</span>
+                    <span className="font-mono text-[#0D3834]">{prefPercent}%</span>
                   </div>
-                  <div className="w-full h-1.5 bg-[#F3F4F6] rounded-full overflow-hidden">
-                    <div className="h-full bg-[#6B7280] rounded-full" style={{ width: `${prefPercent}%` }} />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-[#202124] font-medium">Experience Tenure</span>
-                    <span className="font-mono font-bold text-[#202124]">{match.experienceScore} / 25 pts</span>
-                  </div>
-                  <div className="w-full h-1.5 bg-[#F3F4F6] rounded-full overflow-hidden">
-                    <div className="h-full bg-[#202124] rounded-full" style={{ width: `${expPercent}%` }} />
+                  <div className="w-full bg-[#FAF7F2] rounded-full h-2 overflow-hidden border border-[#E5E2DC]">
+                    <div className="bg-[#0D3834] h-full" style={{ width: `${prefPercent}%` }} />
                   </div>
                 </div>
 
                 <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-[#202124] font-medium">Education Alignment</span>
-                    <span className="font-mono font-bold text-[#202124]">{match.educationScore} / 15 pts</span>
+                  <div className="flex justify-between font-bold mb-1">
+                    <span>Experience Tenure ({match.experienceScore}/25 pts)</span>
+                    <span className="font-mono text-[#0D3834]">{expPercent}%</span>
                   </div>
-                  <div className="w-full h-1.5 bg-[#F3F4F6] rounded-full overflow-hidden">
-                    <div className="h-full bg-[#202124] rounded-full" style={{ width: `${eduPercent}%` }} />
+                  <div className="w-full bg-[#FAF7F2] rounded-full h-2 overflow-hidden border border-[#E5E2DC]">
+                    <div className="bg-[#0D3834] h-full" style={{ width: `${expPercent}%` }} />
                   </div>
                 </div>
 
                 <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-[#202124] font-medium">Projects & Requirements</span>
-                    <span className="font-mono font-bold text-[#202124]">{match.projectScore + match.requirementsScore} / 20 pts</span>
+                  <div className="flex justify-between font-bold mb-1">
+                    <span>Education Credentials ({match.educationScore}/15 pts)</span>
+                    <span className="font-mono text-[#0D3834]">{eduPercent}%</span>
                   </div>
-                  <div className="w-full h-1.5 bg-[#F3F4F6] rounded-full overflow-hidden">
-                    <div className="h-full bg-[#6366F1] rounded-full" style={{ width: `${((match.projectScore + match.requirementsScore) / 20) * 100}%` }} />
+                  <div className="w-full bg-[#FAF7F2] rounded-full h-2 overflow-hidden border border-[#E5E2DC]">
+                    <div className="bg-[#0D3834] h-full" style={{ width: `${eduPercent}%` }} />
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Recruiter Attention: Claims to Verify (Stage 6) */}
-            <div className="bg-white rounded-lg border border-[#E5E7EB] p-6 shadow-2xs space-y-3 motion-fade-up stagger-2">
-              <div className="flex items-center justify-between pb-3 border-b border-[#F3F4F6]">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#202124] flex items-center gap-1.5">
-                  <ShieldAlert className="w-4 h-4 text-amber-600" />
-                  Recruiter Attention · Claims to Verify
-                </h3>
-                <span className="text-xs text-[#6B7280]">
-                  {profile?.claimsToVerify?.length || 0} claims
-                </span>
-              </div>
-
-              {profile?.claimsToVerify && profile.claimsToVerify.length > 0 ? (
-                <div className="space-y-3">
-                  {profile.claimsToVerify.map((item: ResumeClaim, idx: number) => (
-                    <div key={idx} className="p-3 bg-[#FAFBFC] border border-[#E5E7EB] rounded-md space-y-1.5 text-xs">
-                      <div className="flex items-start justify-between gap-2">
-                        <span className="font-bold text-[#202124]">
-                          "{item.claim}"
-                        </span>
-                        {getClaimStatusBadge(item.status)}
-                      </div>
-                      <p className="resume-quote">
-                        {item.evidence ? `"${item.evidence}"` : 'No direct supporting metrics detailed in resume.'}
-                      </p>
-                      <p className="text-[11px] text-[#6B7280]">
-                        <span className="font-semibold text-[#4B5563]">Note: </span>
-                        {item.explanation || 'Needs verification during candidate screening.'}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-xs text-[#6B7280] italic">
-                  No unverified or extraordinary claims flagged.
-                </p>
-              )}
-            </div>
-
-            {/* Evidence Behind The Match */}
-            <div className="bg-white rounded-lg border border-[#E5E7EB] p-6 shadow-2xs space-y-3 motion-fade-up stagger-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[#202124] pb-3 border-b border-[#F3F4F6]">
-                Evidence Behind the Match
+            {/* Claims Verification Audit */}
+            <div className="bg-white rounded-2xl border border-[#E5E2DC] p-6 space-y-4 shadow-2xs">
+              <h3 className="text-xs font-black uppercase tracking-wider text-[#18181B] font-heading flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 text-[#0D3834]" />
+                Resume Claim Verification Audit
               </h3>
 
               <div className="space-y-3">
-                {match.matchedRequiredSkills.map((skill, idx) => (
-                  <div key={idx} className="space-y-1 text-xs">
+                {(profile?.claimsToVerify || []).map((claim, idx) => (
+                  <div key={idx} className="p-3.5 rounded-xl bg-[#FAF7F2] border border-[#E5E2DC] space-y-2 text-xs">
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-[#202124] flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                        {skill}
-                      </span>
-                      <span className="text-[10px] font-semibold text-emerald-700">
-                        Strong match
-                      </span>
+                      <span className="font-bold text-[#18181B]">{claim.claim}</span>
+                      {getClaimStatusBadge(claim.status)}
                     </div>
-                    <p className="resume-quote">
-                      {getSkillEvidence(skill)}
-                    </p>
+                    {claim.evidence && (
+                      <p className="resume-quote">{claim.evidence}</p>
+                    )}
+                    <p className="text-[11px] text-[#525866]">{claim.explanation}</p>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Recruiter Activity Log */}
-            <div className="bg-white rounded-lg border border-[#E5E7EB] p-6 shadow-2xs space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[#6B7280] pb-2 border-b border-[#F3F4F6]">
-                Recruiter Notes
+            {/* Recruiter Notes */}
+            <div className="bg-white rounded-2xl border border-[#E5E2DC] p-6 space-y-4 shadow-2xs">
+              <h3 className="text-xs font-black uppercase tracking-wider text-[#18181B] font-heading">
+                Recruiter Evaluation Notes
               </h3>
-              
-              <div className="space-y-2">
+
+              <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
                 {notes.map((note, idx) => (
-                  <div key={idx} className="p-2.5 bg-[#FAFBFC] border border-[#E5E7EB] rounded-md text-xs flex items-start gap-2">
-                    <Clock className="w-3.5 h-3.5 text-[#6B7280] shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-[#202124]">{note}</p>
-                    </div>
+                  <div key={idx} className="p-2.5 bg-[#FAF7F2] rounded-lg border border-[#E5E2DC] text-xs text-[#18181B] font-medium">
+                    {note}
                   </div>
                 ))}
               </div>
 
-              <form onSubmit={handleAddNote} className="flex gap-2 pt-2">
+              <form onSubmit={handleAddNote} className="flex gap-2">
                 <input
                   type="text"
                   value={newNote}
                   onChange={(e) => setNewNote(e.target.value)}
-                  placeholder="Add note or interview observation..."
-                  className="flex-1 px-3 py-1.5 border border-[#E5E7EB] rounded-md text-xs focus:outline-none focus:border-[#202124]"
+                  placeholder="Add evaluation note..."
+                  className="flex-1 px-3 py-2 bg-[#FAF7F2] border border-[#E5E2DC] rounded-xl text-xs font-semibold focus:bg-white focus:outline-none focus:border-[#0D3834]"
                 />
                 <button
                   type="submit"
-                  className="px-3.5 py-1.5 bg-[#202124] hover:bg-black text-white rounded-md text-xs font-semibold cursor-pointer"
+                  className="px-4 py-2 bg-[#0D3834] text-white rounded-xl text-xs font-extrabold cursor-pointer hover:bg-[#082825]"
                 >
                   Add
                 </button>
               </form>
             </div>
+
           </div>
+
         </div>
 
-        {/* Footer Bar */}
-        <div className="px-8 py-4 border-t border-[#E5E7EB] bg-white flex items-center justify-between text-xs">
-          <span className="text-xs text-[#6B7280]">
-            Deterministic Matching Engine · Fact Grounded
-          </span>
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-5 py-2 bg-[#202124] hover:bg-black text-white rounded-md text-xs font-semibold cursor-pointer transition-colors"
-          >
-            Close Record
-          </button>
-        </div>
       </div>
     </div>
   );

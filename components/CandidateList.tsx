@@ -28,12 +28,10 @@ interface CandidateListProps {
 }
 
 const AVATAR_COLORS = [
-  'bg-[#202124] text-white',
-  'bg-[#6366F1] text-white',
-  'bg-[#0D9488] text-white',
-  'bg-[#4F46E5] text-white',
-  'bg-[#D97706] text-white',
-  'bg-[#475569] text-white',
+  'bg-[#0D3834] text-white',
+  'bg-[#00A86B] text-white',
+  'bg-[#123B39] text-white',
+  'bg-[#18181B] text-white',
 ];
 
 export function getCandidateInitials(name?: string | null, fallback: string = 'CD'): string {
@@ -98,25 +96,19 @@ export const CandidateList: React.FC<CandidateListProps> = ({
         // 1. Text search
         const q = (searchQuery || '').toLowerCase().trim();
         if (q) {
-          const name = String(cand.profile?.name || '').toLowerCase();
-          const email = String(cand.profile?.email || '').toLowerCase();
-          const fileName = String(cand.fileName || '').toLowerCase();
-          const skills = Array.isArray(cand.profile?.skills)
-            ? cand.profile.skills.map((s) => String(s || '').toLowerCase())
-            : [];
-          const roles = Array.isArray(cand.profile?.experience)
-            ? cand.profile.experience.map((e) => String(e?.role || '').toLowerCase())
-            : [];
-          const matchedSkills = Array.isArray(cand.match?.matchedRequiredSkills)
-            ? cand.match.matchedRequiredSkills.map((s) => String(s || '').toLowerCase())
-            : [];
+          const nameMatch = (cand.profile?.name || '').toLowerCase().includes(q);
+          const emailMatch = (cand.profile?.email || '').toLowerCase().includes(q);
+          const roleMatch = (cand.profile?.experience?.[0]?.role || '').toLowerCase().includes(q);
+
+          const matchedSkills = [
+            ...(cand.profile?.skills || []),
+            ...(cand.match?.matchedRequiredSkills || []),
+          ].map((s) => String(s || '').toLowerCase());
 
           const matches =
-            name.includes(q) ||
-            email.includes(q) ||
-            fileName.includes(q) ||
-            skills.some((s) => s.includes(q)) ||
-            roles.some((r) => r.includes(q)) ||
+            nameMatch ||
+            emailMatch ||
+            roleMatch ||
             matchedSkills.some((s) => s.includes(q));
 
           if (!matches) return false;
@@ -167,27 +159,27 @@ export const CandidateList: React.FC<CandidateListProps> = ({
   return (
     <div className="space-y-4">
       
-      {/* Search & Filter Toolbar with Clean Visual Breadth */}
-      <div className="bg-white rounded-lg border border-[#E5E7EB] p-4 flex flex-wrap items-center justify-between gap-4 text-xs shadow-2xs">
+      {/* Search & Filter Toolbar */}
+      <div className="bg-white rounded-2xl border border-[#E5E2DC] p-4 flex flex-wrap items-center justify-between gap-4 text-xs shadow-2xs">
         <div className="flex items-center gap-3 flex-1 min-w-[300px]">
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-[#6B7280] absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-[#525866] absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by candidate name, skill, or role title..."
-              className="w-full pl-10 pr-3 py-2 bg-[#F9FAFB] border border-[#E5E7EB] rounded-md text-xs text-[#202124] focus:bg-white focus:outline-none focus:border-[#202124] transition-all placeholder:text-[#9CA3AF]"
+              placeholder="Search by candidate name, skill, or role..."
+              className="w-full pl-10 pr-3 py-2 bg-[#FAF7F2] border border-[#E5E2DC] rounded-xl text-xs text-[#18181B] font-medium focus:bg-white focus:outline-none focus:border-[#0D3834] transition-all placeholder:text-[#525866]"
             />
           </div>
 
           <button
             type="button"
             onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-            className={`px-3.5 py-2 border rounded-md font-medium cursor-pointer transition-colors flex items-center gap-1.5 ${
+            className={`px-3.5 py-2 border rounded-xl font-bold cursor-pointer transition-colors flex items-center gap-1.5 ${
               showAdvancedFilters || minScore > 0 || minExp > 0 || skillFilter
-                ? 'bg-[#EEF2FF] border-[#6366F1]/40 text-[#6366F1]'
-                : 'bg-white border-[#E5E7EB] text-[#4B5563] hover:bg-[#F9FAFB]'
+                ? 'bg-[#E8F0E6] border-[#0D3834] text-[#0D3834]'
+                : 'bg-white border-[#E5E2DC] text-[#525866] hover:bg-[#FAF7F2]'
             }`}
           >
             <SlidersHorizontal className="w-3.5 h-3.5" />
@@ -196,16 +188,16 @@ export const CandidateList: React.FC<CandidateListProps> = ({
         </div>
 
         {/* Tier Filter Tabs */}
-        <div className="flex items-center gap-1 bg-[#F9FAFB] p-1 rounded-md border border-[#E5E7EB]">
+        <div className="flex items-center gap-1 bg-[#FAF7F2] p-1 rounded-xl border border-[#E5E2DC]">
           {(['All', 'Strong Match', 'Good Match', 'Moderate Match', 'Weak Match'] as const).map((tier) => (
             <button
               key={tier}
               type="button"
               onClick={() => setTierFilter(tier)}
-              className={`px-3 py-1 rounded text-xs font-medium cursor-pointer transition-all ${
+              className={`px-3 py-1 rounded-lg text-xs font-extrabold cursor-pointer transition-all ${
                 tierFilter === tier
-                  ? 'bg-white text-[#202124] shadow-2xs font-semibold'
-                  : 'text-[#6B7280] hover:text-[#202124]'
+                  ? 'bg-white text-[#0D3834] shadow-2xs font-black'
+                  : 'text-[#525866] hover:text-[#18181B]'
               }`}
             >
               {tier === 'All' ? 'All Tiers' : tier.replace(' Match', '')}
@@ -214,12 +206,12 @@ export const CandidateList: React.FC<CandidateListProps> = ({
         </div>
 
         {/* Sort Select */}
-        <div className="flex items-center gap-1.5 border border-[#E5E7EB] rounded-md px-3 py-1.5 bg-white">
-          <ArrowUpDown className="w-3.5 h-3.5 text-[#6B7280]" />
+        <div className="flex items-center gap-1.5 border border-[#E5E2DC] rounded-xl px-3 py-1.5 bg-white">
+          <ArrowUpDown className="w-3.5 h-3.5 text-[#525866]" />
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
-            className="bg-transparent text-xs text-[#202124] focus:outline-none cursor-pointer pr-1 font-medium"
+            className="bg-transparent text-xs font-bold text-[#18181B] focus:outline-none cursor-pointer pr-1"
           >
             <option value="rank">Rank (#1 first)</option>
             <option value="score">Match Score (High to Low)</option>
@@ -229,11 +221,11 @@ export const CandidateList: React.FC<CandidateListProps> = ({
         </div>
       </div>
 
-      {/* Advanced Filters Expandable */}
+      {/* Advanced Filters */}
       {showAdvancedFilters && (
-        <div className="bg-[#FAFBFC] border border-[#E5E7EB] rounded-lg p-5 grid grid-cols-1 sm:grid-cols-3 gap-5 text-xs animate-in fade-in duration-100">
+        <div className="bg-[#FAF7F2] border border-[#E5E2DC] rounded-2xl p-5 grid grid-cols-1 sm:grid-cols-3 gap-5 text-xs">
           <div>
-            <label className="text-[#6B7280] font-semibold block mb-1.5">
+            <label className="text-[#525866] font-bold block mb-1.5">
               Minimum Score Threshold ({minScore}%):
             </label>
             <input
@@ -243,12 +235,12 @@ export const CandidateList: React.FC<CandidateListProps> = ({
               step="5"
               value={minScore}
               onChange={(e) => setMinScore(Number(e.target.value))}
-              className="w-full accent-[#202124]"
+              className="w-full accent-[#0D3834]"
             />
           </div>
 
           <div>
-            <label className="text-[#6B7280] font-semibold block mb-1.5">
+            <label className="text-[#525866] font-bold block mb-1.5">
               Minimum Verified Tenure ({minExp} yrs):
             </label>
             <input
@@ -258,37 +250,37 @@ export const CandidateList: React.FC<CandidateListProps> = ({
               step="1"
               value={minExp}
               onChange={(e) => setMinExp(Number(e.target.value))}
-              className="w-full accent-[#202124]"
+              className="w-full accent-[#0D3834]"
             />
           </div>
 
           <div>
-            <label className="text-[#6B7280] font-semibold block mb-1.5">Filter by Specific Skill:</label>
+            <label className="text-[#525866] font-bold block mb-1.5">Filter by Specific Skill:</label>
             <input
               type="text"
               value={skillFilter}
               onChange={(e) => setSkillFilter(e.target.value)}
               placeholder="e.g. Java, React, Docker..."
-              className="w-full px-3 py-1.5 border border-[#E5E7EB] rounded bg-white text-xs focus:outline-none focus:border-[#202124]"
+              className="w-full px-3 py-1.5 border border-[#E5E2DC] rounded-xl bg-white text-xs font-semibold focus:outline-none focus:border-[#0D3834]"
             />
           </div>
         </div>
       )}
 
-      {/* Table Information & Actions Row */}
-      <div className="flex items-center justify-between text-xs text-[#6B7280] px-1">
+      {/* Table Metadata */}
+      <div className="flex items-center justify-between text-xs text-[#525866] px-1 font-mono">
         <span>
-          Showing <span className="font-bold text-[#202124]">{filteredAndSortedCandidates.length}</span> of {candidates.length} ranked candidate records
+          Showing <strong className="text-[#0D3834] font-black">{filteredAndSortedCandidates.length}</strong> of {candidates.length} ranked candidate records
         </span>
         {selectedRowIds.size > 0 && (
-          <span className="font-semibold text-[#202124]">
+          <span className="font-extrabold text-[#0D3834]">
             {selectedRowIds.size} candidates selected for batch action
           </span>
         )}
       </div>
 
-      {/* Premium Ranked Candidate Table with Avatars & Skill Chips */}
-      <div className="bg-white rounded-lg border border-[#E5E7EB] overflow-hidden shadow-2xs">
+      {/* Ranked Candidate Table */}
+      <div className="bg-white rounded-2xl border border-[#E5E2DC] overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left enterprise-table">
             <thead>
@@ -301,7 +293,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                       selectedRowIds.size === candidates.length
                     }
                     onChange={handleSelectAll}
-                    className="accent-[#202124] rounded cursor-pointer"
+                    className="accent-[#0D3834] rounded cursor-pointer"
                   />
                 </th>
                 <th className="w-14 text-center">Rank</th>
@@ -326,7 +318,6 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                   const avatarColor = getAvatarColorClass(name);
 
                   const expYears = cand.match?.experienceMatch?.candidateYears;
-                  const staggerClass = idx < 6 ? `stagger-${idx + 1}` : '';
 
                   const topSkills = (cand.match?.matchedRequiredSkills || [])
                     .slice(0, 3)
@@ -337,8 +328,8 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                     <tr
                       key={cand.id}
                       onClick={() => onSelectCandidate(candidateId)}
-                      className={`cursor-pointer transition-colors motion-fade-up ${staggerClass} ${
-                        isSelected ? 'bg-[#F5F7FF]' : 'hover:bg-[#FAFBFC]'
+                      className={`cursor-pointer transition-colors ${
+                        isSelected ? 'bg-[#E8F0E6]/50' : 'hover:bg-[#FAF7F2]'
                       }`}
                     >
                       <td className="text-center" onClick={(e) => handleToggleRow(candidateId, e)}>
@@ -346,33 +337,33 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                           type="checkbox"
                           checked={isChecked}
                           onChange={() => {}}
-                          className="accent-[#202124] rounded cursor-pointer"
+                          className="accent-[#0D3834] rounded cursor-pointer"
                         />
                       </td>
 
-                      <td className="text-center font-bold text-[#202124]">
-                        <span className="inline-block px-2 py-0.5 rounded bg-[#F3F4F6] text-[#202124] font-mono text-xs font-semibold">
+                      <td className="text-center font-black text-[#0D3834]">
+                        <span className="inline-block px-2.5 py-0.5 rounded-lg bg-[#E8F0E6] text-[#0D3834] font-mono text-xs font-bold">
                           #{cand.rank}
                         </span>
                       </td>
 
-                      {/* Candidate Avatar, Name, Role & Tenure */}
+                      {/* Candidate Avatar & Tenure */}
                       <td>
                         <div className="flex items-center gap-3">
-                          <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs shrink-0 font-mono shadow-2xs ${avatarColor}`}>
+                          <div className={`w-9 h-9 rounded-full flex items-center justify-center font-black text-xs shrink-0 font-mono shadow-2xs ${avatarColor}`}>
                             {initials}
                           </div>
                           <div>
-                            <div className="font-bold text-[#202124] text-[14px] flex items-center gap-1.5">
-                              <span className="hover:text-[#6366F1] transition-colors">{name}</span>
+                            <div className="font-extrabold text-[#18181B] text-[14px] flex items-center gap-1.5 font-heading">
+                              <span className="hover:text-[#0D3834] transition-colors">{name}</span>
                               {isShortlisted && (
-                                <BookmarkCheck className="w-3.5 h-3.5 text-[#E83E8C]" />
+                                <BookmarkCheck className="w-3.5 h-3.5 text-[#00A86B]" />
                               )}
                             </div>
-                            <div className="text-xs text-[#6B7280] flex items-center gap-2 mt-0.5">
+                            <div className="text-xs text-[#525866] flex items-center gap-2 mt-0.5 font-sans">
                               <span>{cand.profile?.experience?.[0]?.role || 'Software Engineer'}</span>
                               <span>·</span>
-                              <span className="font-medium text-[#202124]">
+                              <span className="font-bold text-[#18181B] font-mono">
                                 {expYears !== null && expYears !== undefined ? `${expYears} yrs` : 'Tenure n/a'}
                               </span>
                             </div>
@@ -387,46 +378,46 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                             topSkills.map((s, sIdx) => (
                               <span
                                 key={sIdx}
-                                className="px-2 py-0.5 rounded bg-[#F3F4F6] text-[#374151] text-[11px] font-medium border border-[#E5E7EB]"
+                                className="px-2.5 py-0.5 rounded-md bg-[#FAF7F2] text-[#18181B] text-[11px] font-bold border border-[#E5E2DC]"
                               >
                                 {s}
                               </span>
                             ))
                           ) : (
-                            <span className="text-xs text-[#9CA3AF] italic">General qualifications</span>
+                            <span className="text-xs text-[#525866] italic">General qualifications</span>
                           )}
                         </div>
                       </td>
 
-                      {/* Match Score with Subtle Indigo Badge */}
+                      {/* Match Score */}
                       <td>
-                        <div className="flex flex-col items-start gap-0.5">
+                        <div className="flex flex-col items-start gap-0.5 font-mono">
                           <div className="flex items-baseline gap-1.5">
-                            <span className="font-extrabold text-[#202124] text-[15px] font-mono">
+                            <span className="font-black text-[#0D3834] text-[16px]">
                               {cand.match.totalScore}%
                             </span>
-                            <span className="text-[10px] font-bold text-[#6366F1] uppercase">
-                              AI MATCH
+                            <span className="text-[10px] font-bold text-[#00A86B] uppercase">
+                              RUBRIC
                             </span>
                           </div>
-                          <span className="text-[11px] font-medium text-[#6B7280]">
+                          <span className="text-[11px] font-bold text-[#525866] font-sans">
                             {cand.match.label}
                           </span>
                         </div>
                       </td>
 
-                      {/* Skill Gap or Verification Flag */}
+                      {/* Skill Gap */}
                       <td className="max-w-[160px]">
                         {(cand.match?.missingRequiredSkills || []).length > 0 ? (
-                          <span className="text-amber-800 bg-amber-50 px-2 py-0.5 rounded text-xs border border-amber-200 truncate inline-block max-w-[150px]">
+                          <span className="text-amber-900 bg-amber-50 px-2.5 py-0.5 rounded-lg text-xs font-semibold border border-amber-200 truncate inline-block max-w-[150px]">
                             {cand.match.missingRequiredSkills[0]}
                             {cand.match.missingRequiredSkills.length > 1
                               ? ` +${cand.match.missingRequiredSkills.length - 1}`
                               : ''}
                           </span>
                         ) : (
-                          <span className="text-emerald-700 text-xs font-medium inline-flex items-center gap-1">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> All met
+                          <span className="text-[#059669] text-xs font-bold inline-flex items-center gap-1">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-[#059669]" /> All met
                           </span>
                         )}
                       </td>
@@ -434,12 +425,12 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                       {/* Recommendation */}
                       <td>
                         {cand.match.totalScore >= 75 ? (
-                          <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 inline-flex items-center gap-1">
-                            <Sparkles className="w-3 h-3 text-emerald-600" />
+                          <span className="text-[11px] font-extrabold px-2.5 py-0.5 rounded-lg bg-[#E8F0E6] text-[#0D3834] border border-[#0D3834]/20 inline-flex items-center gap-1 uppercase tracking-wider">
+                            <Sparkles className="w-3 h-3 text-[#0D3834]" />
                             Shortlist
                           </span>
                         ) : (
-                          <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-gray-100 text-gray-700">
+                          <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-lg bg-gray-100 text-gray-700 uppercase">
                             Review
                           </span>
                         )}
@@ -452,15 +443,15 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                             <button
                               type="button"
                               onClick={(e) => onToggleShortlist(candidateId, e)}
-                              className={`p-1.5 rounded border cursor-pointer transition-colors ${
+                              className={`p-2 rounded-xl border cursor-pointer transition-colors ${
                                 isShortlisted
-                                  ? 'bg-[#FDF2F7] text-[#E83E8C] border-[#E83E8C]/30'
-                                  : 'bg-white text-[#6B7280] border-[#E5E7EB] hover:text-[#202124]'
+                                  ? 'bg-[#E8F0E6] text-[#0D3834] border-[#0D3834]'
+                                  : 'bg-white text-[#525866] border-[#E5E2DC] hover:text-[#18181B]'
                               }`}
                               title={isShortlisted ? 'Shortlisted' : 'Add to Shortlist'}
                             >
                               {isShortlisted ? (
-                                <BookmarkCheck className="w-4 h-4 text-[#E83E8C]" />
+                                <BookmarkCheck className="w-4 h-4 text-[#0D3834]" />
                               ) : (
                                 <Bookmark className="w-4 h-4" />
                               )}
@@ -470,10 +461,10 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                           <button
                             type="button"
                             onClick={() => onSelectCandidate(candidateId)}
-                            className="px-3 py-1.5 rounded bg-white hover:bg-[#F3F4F6] text-[#202124] border border-[#E5E7EB] font-medium text-xs cursor-pointer inline-flex items-center gap-1 transition-colors"
+                            className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-[#FAF7F2] text-[#0D3834] border border-[#E5E2DC] font-extrabold text-xs cursor-pointer inline-flex items-center gap-1 transition-colors"
                           >
                             <span>View match</span>
-                            <ArrowRight className="w-3.5 h-3.5 text-[#6B7280]" />
+                            <ArrowRight className="w-3.5 h-3.5 text-[#0D3834]" />
                           </button>
                         </div>
                       </td>
@@ -482,8 +473,8 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                 })
               ) : (
                 <tr>
-                  <td colSpan={8} className="text-center py-12 text-[#6B7280]">
-                    <p className="font-semibold text-[#202124] text-xs">No matching candidate records found.</p>
+                  <td colSpan={8} className="text-center py-12 text-[#525866]">
+                    <p className="font-bold text-[#18181B] text-xs">No matching candidate records found.</p>
                     <p className="text-[11px] mt-1">Try resetting search criteria or adjusting score thresholds.</p>
                   </td>
                 </tr>

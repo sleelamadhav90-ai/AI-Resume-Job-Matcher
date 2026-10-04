@@ -31,7 +31,7 @@ export function getGeminiClient(): GoogleGenAI {
 }
 
 export function getModelName(): string {
-  return process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite';
+  return process.env.GEMINI_MODEL || 'gemini-3.8-flash';
 }
 
 // JSON Schema for Resume CandidateProfile
@@ -392,8 +392,8 @@ async function callGeminiWithFallback(
 ): Promise<string> {
   const primaryModel = getModelName();
   const modelsToTry = [primaryModel];
-  if (primaryModel !== 'gemini-3.1-flash-lite') {
-    modelsToTry.push('gemini-3.1-flash-lite');
+  if (primaryModel !== 'gemini-3.8-flash') {
+    modelsToTry.push('gemini-3.8-flash');
   }
 
   let lastError: any = null;

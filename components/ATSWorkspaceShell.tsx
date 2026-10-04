@@ -255,58 +255,109 @@ export const ATSWorkspaceShell: React.FC<ATSWorkspaceShellProps> = ({
           {/* ========================================================================= */}
           {/* 3. 4 KPI CARDS */}
           {/* ========================================================================= */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 pb-1">
+          {/* ========================================================================= */}
+          {/* 3. 4 KPI CARDS */}
+          {/* ========================================================================= */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pb-1 ATSWorkspaceShell-metrics-container">
             
             {/* KPI 1: Evaluated Dossiers */}
-            <MagicCard glowFrom="#174C4A" glowTo="#DCEAE6" gradientOpacity={0.10} className="p-4 bg-white border-[#DDDCD6] shadow-2xs space-y-1">
-              <span className="text-[10px] font-mono uppercase font-bold tracking-wider text-[#686A66] block">
-                EVALUATED DOSSIERS
-              </span>
-              <div className="text-3xl font-black font-mono text-[#171817]">
-                <NumberTicker value={totalEvaluated} />
+            <MagicCard 
+              glowFrom="#6366F1" 
+              glowTo="#8B5CF6" 
+              gradientOpacity={0.15} 
+              className="p-5 bg-white border-[#E5E2DC] hover:border-[#6366F1]/30 transition-all shadow-xs space-y-3"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-mono uppercase font-black tracking-wider text-[#525866]">
+                  Evaluated Dossiers
+                </span>
+                <div className="w-7 h-7 rounded-lg bg-[#6366F1]/10 flex items-center justify-center text-[#6366F1]">
+                  <FileText className="w-4 h-4" />
+                </div>
               </div>
-              <span className="text-[11px] font-medium text-[#686A66] block">
-                Candidates analyzed
-              </span>
+              <div className="space-y-0.5">
+                <div className="text-3xl font-black font-mono text-[#18181B] tracking-tight">
+                  <NumberTicker value={totalEvaluated} />
+                </div>
+                <span className="text-[11px] font-bold text-[#525866] block">
+                  Resumes fully analyzed
+                </span>
+              </div>
             </MagicCard>
 
             {/* KPI 2: Strong Matches */}
-            <MagicCard glowFrom="#28745D" glowTo="#DCEAE6" gradientOpacity={0.12} className="p-4 bg-[#DCEAE6]/20 border-[#28745D]/30 shadow-2xs space-y-1">
-              <span className="text-[10px] font-mono uppercase font-bold tracking-wider text-[#28745D] block">
-                STRONG MATCHES
-              </span>
-              <div className="text-3xl font-black font-mono text-[#28745D]">
-                <NumberTicker value={strongMatches.length} />
+            <MagicCard 
+              glowFrom="#6366F1" 
+              glowTo="#8B5CF6" 
+              gradientOpacity={0.15} 
+              className="p-5 bg-white border-[#E5E2DC] hover:border-[#6366F1]/30 transition-all shadow-xs space-y-3"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-mono uppercase font-black tracking-wider text-[#525866]">
+                  Strong Matches
+                </span>
+                <div className="w-7 h-7 rounded-lg bg-[#8B5CF6]/10 flex items-center justify-center text-[#8B5CF6]">
+                  <Sparkles className="w-4 h-4" />
+                </div>
               </div>
-              <span className="text-[11px] font-medium text-[#28745D] block">
-                85%+ fit
-              </span>
+              <div className="space-y-0.5">
+                <div className="text-3xl font-black font-mono text-[#0D3834] tracking-tight">
+                  <NumberTicker value={strongMatches.length} />
+                </div>
+                <span className="text-[11px] font-bold text-[#525866] block">
+                  Scored 85%+ overall fit
+                </span>
+              </div>
             </MagicCard>
 
             {/* KPI 3: Average Match */}
-            <MagicCard glowFrom="#174C4A" glowTo="#DCEAE6" gradientOpacity={0.12} className="p-4 bg-[#DCEAE6]/20 border-[#174C4A]/30 shadow-2xs space-y-1">
-              <span className="text-[10px] font-mono uppercase font-bold tracking-wider text-[#174C4A] block">
-                AVERAGE MATCH
-              </span>
-              <div className="text-3xl font-black font-mono text-[#174C4A]">
-                <NumberTicker value={avgMatch} suffix="%" />
+            <MagicCard 
+              glowFrom="#6366F1" 
+              glowTo="#8B5CF6" 
+              gradientOpacity={0.15} 
+              className="p-5 bg-white border-[#E5E2DC] hover:border-[#6366F1]/30 transition-all shadow-xs space-y-3"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-mono uppercase font-black tracking-wider text-[#525866]">
+                  Average Match
+                </span>
+                <div className="w-7 h-7 rounded-lg bg-[#6366F1]/10 flex items-center justify-center text-[#6366F1]">
+                  <Activity className="w-4 h-4" />
+                </div>
               </div>
-              <span className="text-[11px] font-medium text-[#174C4A] block">
-                Across evaluated candidates
-              </span>
+              <div className="space-y-0.5">
+                <div className="text-3xl font-black font-mono text-[#0D3834] tracking-tight">
+                  <NumberTicker value={avgMatch} suffix="%" />
+                </div>
+                <span className="text-[11px] font-bold text-[#525866] block">
+                  Active session average
+                </span>
+              </div>
             </MagicCard>
 
             {/* KPI 4: Requires Review */}
-            <MagicCard glowFrom="#B77928" glowTo="#FBF4EC" gradientOpacity={0.12} className="p-4 bg-[#FBF4EC] border-[#B77928]/30 shadow-2xs space-y-1">
-              <span className="text-[10px] font-mono uppercase font-bold tracking-wider text-[#B77928] block">
-                REQUIRES REVIEW
-              </span>
-              <div className="text-3xl font-black font-mono text-[#B77928]">
-                <NumberTicker value={reviewRequired.length} />
+            <MagicCard 
+              glowFrom="#6366F1" 
+              glowTo="#8B5CF6" 
+              gradientOpacity={0.15} 
+              className="p-5 bg-white border-[#E5E2DC] hover:border-[#6366F1]/30 transition-all shadow-xs space-y-3"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-mono uppercase font-black tracking-wider text-[#525866]">
+                  Needs Review
+                </span>
+                <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-600">
+                  <AlertTriangle className="w-4 h-4" />
+                </div>
               </div>
-              <span className="text-[11px] font-medium text-[#B77928] block">
-                Needs recruiter attention
-              </span>
+              <div className="space-y-0.5">
+                <div className="text-3xl font-black font-mono text-[#DC2626] tracking-tight">
+                  <NumberTicker value={reviewRequired.length} />
+                </div>
+                <span className="text-[11px] font-bold text-[#525866] block">
+                  Flagged claim issues
+                </span>
+              </div>
             </MagicCard>
 
           </div>

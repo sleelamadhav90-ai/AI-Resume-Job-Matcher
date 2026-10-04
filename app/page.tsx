@@ -31,7 +31,17 @@ import {
   HelpCircle,
   UploadCloud,
   Play,
-  RefreshCw
+  Pause,
+  RefreshCw,
+  X,
+  Lock,
+  Mail,
+  User,
+  Building,
+  Phone,
+  Mic,
+  Volume2,
+  Settings
 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { JobDescriptionInput } from '../components/JobDescriptionInput';
@@ -150,7 +160,7 @@ Preferred:
   },
 ];
 
-// Initial pre-loaded demonstration session for immediate evaluation
+// Initial pre-loaded demonstration session
 const INITIAL_DEMO_CANDIDATES: RankedCandidate[] = [
   {
     rank: 1,
@@ -377,7 +387,7 @@ export default function HireMeApp() {
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [analysisStep, setAnalysisStep] = useState<number>(0);
   
-  // LIVE SESSION STATE: Real analyzed results or initial active demo session
+  // LIVE SESSION STATE
   const [stage5Result, setStage5Result] = useState<AnalyzeStage5Response | null>({
     success: true,
     message: 'Analysis complete',
@@ -402,6 +412,35 @@ export default function HireMeApp() {
   const [candidateSearch, setCandidateSearch] = useState<string>('');
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
 
+  // Interactive Modals & Drawers State
+  const [isSignInOpen, setIsSignInOpen] = useState(false);
+  const [isRequestDemoOpen, setIsRequestDemoOpen] = useState(false);
+  const [isVoiceAIOpen, setIsVoiceAIOpen] = useState(false);
+  const [isJobAlertOpen, setIsJobAlertOpen] = useState(false);
+  const [isAskAIOpen, setIsAskAIOpen] = useState(false);
+  const [showCookieBanner, setShowCookieBanner] = useState(true);
+  const [isCookiePrefsOpen, setIsCookiePrefsOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Check Cookie consent from localStorage
+  useEffect(() => {
+    const consent = localStorage.getItem('hireme_cookie_consent');
+    if (consent === 'accepted') {
+      setShowCookieBanner(false);
+    }
+  }, []);
+
+  const handleAcceptCookies = () => {
+    localStorage.setItem('hireme_cookie_consent', 'accepted');
+    setShowCookieBanner(false);
+    showToast('Cookie preferences saved successfully.');
+  };
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
   // Step progression during analysis
   useEffect(() => {
     let interval: any;
@@ -419,8 +458,13 @@ export default function HireMeApp() {
   const handleToggleShortlist = (candidateId: string) => {
     setShortlistedIds((prev) => {
       const next = new Set(prev);
-      if (next.has(candidateId)) next.delete(candidateId);
-      else next.add(candidateId);
+      if (next.has(candidateId)) {
+        next.delete(candidateId);
+        showToast('Removed candidate from shortlist.');
+      } else {
+        next.add(candidateId);
+        showToast('Candidate added to shortlist!');
+      }
       return next;
     });
   };
@@ -463,6 +507,7 @@ export default function HireMeApp() {
       if (data.candidates && data.candidates.length > 0) {
         setSelectedCandidateId(data.candidates[0].profile?.id || data.candidates[0].id);
       }
+      showToast(`Analysis complete! Evaluated ${data.candidates.length} candidate(s).`);
     } catch (err: any) {
       setErrorBanner(err.message || 'An error occurred during resume analysis.');
     } finally {
@@ -470,7 +515,7 @@ export default function HireMeApp() {
     }
   };
 
-  // Live evaluated candidates strictly from the active analysis session
+  // Live evaluated candidates
   const liveCandidates: RankedCandidate[] = stage5Result?.candidates || [];
 
   const selectedCandidateRecord: RankedCandidate | undefined =
@@ -479,40 +524,45 @@ export default function HireMeApp() {
     ) || (liveCandidates.length > 0 ? liveCandidates[0] : undefined);
 
   return (
-    <div className="min-h-screen bg-[#F5F3EE] text-[#171817] flex flex-col font-sans selection:bg-[#174C4A]/20 selection:text-[#171817]">
+    <div className="min-h-screen bg-[#F5F3EE] text-[#171817] flex flex-col font-sans selection:bg-[#174C4A]/20 selection:text-[#171817] relative">
       
+      {/* Toast Notification Popup */}
+      {toastMessage && (
+        <div className="fixed top-4 right-4 z-50 bg-[#171817] text-white px-5 py-3 rounded-2xl border border-white/20 shadow-2xl flex items-center gap-3 text-xs font-bold animate-bounce">
+          <CheckCircle2 className="w-4 h-4 text-[#7FAEA7]" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       {/* ========================================================================= */}
-      {/* 1. TOP SUB-HEADER BAR (Zoho Suite Product Ribbon - Reference Image) */}
+      {/* 1. TOP SUB-HEADER BAR */}
       {/* ========================================================================= */}
-      <div className="bg-[#171817] text-white py-1.5 px-6 sm:px-10 text-[11px] font-mono font-medium border-b border-white/10">
+      <div className="bg-[#171817] text-white py-2 px-6 sm:px-10 text-[11px] font-mono font-medium border-b border-white/10">
         <div className="max-w-[1400px] mx-auto flex items-center justify-between">
-          
           <div className="flex items-center gap-5 overflow-x-auto no-scrollbar">
             <span className="text-[#7FAEA7] font-extrabold uppercase tracking-wider">HireMe Suite:</span>
-            <span className="hover:text-[#7FAEA7] cursor-pointer transition-colors">CRM</span>
-            <span className="hover:text-[#7FAEA7] cursor-pointer transition-colors">People</span>
-            <span className="hover:text-[#7FAEA7] cursor-pointer transition-colors">Creator</span>
-            <span className="hover:text-[#7FAEA7] cursor-pointer transition-colors">Voice</span>
-            <span className="hover:text-[#7FAEA7] cursor-pointer transition-colors">Sign</span>
-            <span className="hover:text-[#7FAEA7] cursor-pointer transition-colors">Payroll</span>
-            <span className="hover:text-[#7FAEA7] cursor-pointer transition-colors inline-flex items-center gap-1">
-              <span>All Products</span>
-              <ChevronDown className="w-3 h-3 text-[#7FAEA7]" />
-            </span>
+            <span className="hover:text-[#7FAEA7] cursor-pointer transition-colors" onClick={() => setActiveNav('home')}>CRM</span>
+            <span className="hover:text-[#7FAEA7] cursor-pointer transition-colors" onClick={() => setActiveNav('candidates')}>People</span>
+            <span className="hover:text-[#7FAEA7] cursor-pointer transition-colors" onClick={() => setActiveNav('jobs')}>Creator</span>
+            <span className="hover:text-[#7FAEA7] cursor-pointer transition-colors" onClick={() => setIsVoiceAIOpen(true)}>Voice AI</span>
+            <span className="hover:text-[#7FAEA7] cursor-pointer transition-colors" onClick={() => setActiveNav('reports')}>Audit</span>
           </div>
 
           <div className="flex items-center gap-4 shrink-0">
-            <Search className="w-3.5 h-3.5 text-[#DDDCD6] cursor-pointer hover:text-white" />
-            <span className="text-white hover:text-[#7FAEA7] cursor-pointer font-bold border-l border-white/20 pl-3">
+            <Search className="w-3.5 h-3.5 text-[#DDDCD6] cursor-pointer hover:text-white" onClick={() => setIsAskAIOpen(true)} />
+            <button
+              type="button"
+              onClick={() => setIsSignInOpen(true)}
+              className="text-white hover:text-[#7FAEA7] cursor-pointer font-bold border-l border-white/20 pl-3"
+            >
               Sign In
-            </span>
+            </button>
           </div>
-
         </div>
       </div>
 
       {/* ========================================================================= */}
-      {/* 2. MAIN PRODUCT NAVIGATION BAR (Matching Reference Image) */}
+      {/* 2. MAIN PRODUCT NAVIGATION BAR */}
       {/* ========================================================================= */}
       <header className="bg-white border-b border-[#DDDCD6] sticky top-0 z-40 shadow-2xs">
         <div className="max-w-[1400px] mx-auto px-6 sm:px-10 flex items-center justify-between h-16">
@@ -608,16 +658,26 @@ export default function HireMeApp() {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Ask AI Pill Button (Matching "Ask Zia" in reference image) */}
+            {/* Ask AI Pill Button */}
             <button
               type="button"
-              onClick={() => setActiveNav('matching')}
+              onClick={() => setIsAskAIOpen(true)}
               className="px-3.5 py-1.5 rounded-full border border-[#174C4A] bg-[#DCEAE6] text-[#174C4A] font-black text-xs inline-flex items-center gap-1.5 hover:bg-[#174C4A] hover:text-white transition-all cursor-pointer shadow-2xs"
             >
               <span>Ask AI</span>
-              <Sparkles className="w-3.5 h-3.5 text-[#174C4A] group-hover:text-white" />
+              <Sparkles className="w-3.5 h-3.5 text-[#174C4A]" />
             </button>
 
+            {/* Request a Demo CTA */}
+            <button
+              type="button"
+              onClick={() => setIsRequestDemoOpen(true)}
+              className="hidden sm:inline-flex px-4 py-2 bg-white hover:bg-[#F5F3EE] text-[#171817] border border-[#DDDCD6] font-extrabold text-xs uppercase tracking-wider rounded-xl cursor-pointer transition-all"
+            >
+              Request a demo
+            </button>
+
+            {/* Upload Resume CTA */}
             <button
               type="button"
               onClick={() => setActiveNav('matching')}
@@ -650,13 +710,9 @@ export default function HireMeApp() {
       {/* Main Workspace Surface */}
       <main className="flex-1 max-w-[1400px] w-full mx-auto px-6 sm:px-10 py-6">
         
-        {/* ========================================================================= */}
-        {/* VIEW 1: COMPLETE PRODUCT LANDING & LIVE RECRUITER WORKSPACE */}
-        {/* ========================================================================= */}
+        {/* VIEW 1: HOME */}
         {activeNav === 'home' && (
           <div className="space-y-6">
-            
-            {/* 1. HERO SECTION (Matching Reference Image Tour + Form Layout) */}
             <HeroSection
               onStartMatching={() => setActiveNav('matching')}
               onSeeHowItWorks={() => {
@@ -664,9 +720,11 @@ export default function HireMeApp() {
                 if (el) el.scrollIntoView({ behavior: 'smooth' });
                 else setActiveNav('matching');
               }}
+              onOpenVoiceAI={() => setIsVoiceAIOpen(true)}
+              onOpenJobAlert={() => setIsJobAlertOpen(true)}
             />
 
-            {/* 2. PROMINENT UPLOAD YOUR RESUME SECTION */}
+            {/* PROMINENT UPLOAD YOUR RESUME SECTION */}
             <section className="bg-white rounded-3xl border border-[#DDDCD6] p-6 sm:p-8 shadow-xl space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#DDDCD6]">
                 <div>
@@ -738,33 +796,19 @@ export default function HireMeApp() {
               </div>
             </section>
 
-            {/* 3. MARQUEE */}
             <HiringSignalsMarquee />
 
-            {/* 4. AI CANDIDATE MATCHING */}
             <div id="insights-section">
               <AICandidateMatchingSection />
             </div>
 
-            {/* 5. AUTOMATION SECTION */}
             <AutomationSection />
-
-            {/* 6. CONNECTED WORKFLOW */}
             <WorkflowSection />
-
-            {/* 7. STATS SECTION */}
             <StatsSection />
-
-            {/* 8. INTEGRATIONS SECTION WITH PICTURE SHOWCASE */}
             <IntegrationsSection />
-
-            {/* 9. ATS CHECK */}
             <ATSCheckSection />
-
-            {/* 10. LANDING CTA */}
             <LandingCTA onStartMatching={() => setActiveNav('matching')} />
 
-            {/* 11. LIVE RECRUITER WORKSPACE */}
             <section className="py-12 border-t border-[#DDDCD6] space-y-6">
               <div className="space-y-1 mb-4">
                 <h2 className="text-2xl font-black font-heading text-[#171817] uppercase">
@@ -787,9 +831,7 @@ export default function HireMeApp() {
           </div>
         )}
 
-        {/* ========================================================================= */}
-        {/* VIEW 2: CANDIDATES DATABASE */}
-        {/* ========================================================================= */}
+        {/* VIEW 2: CANDIDATES */}
         {activeNav === 'candidates' && (
           <div className="space-y-6">
             <div className="flex flex-wrap items-baseline justify-between gap-4">
@@ -830,9 +872,7 @@ export default function HireMeApp() {
           </div>
         )}
 
-        {/* ========================================================================= */}
-        {/* VIEW 3: JOBS REQUISITIONS DIRECTORY */}
-        {/* ========================================================================= */}
+        {/* VIEW 3: JOBS */}
         {activeNav === 'jobs' && (
           <div className="space-y-6">
             <div>
@@ -892,13 +932,9 @@ export default function HireMeApp() {
           </div>
         )}
 
-        {/* ========================================================================= */}
-        {/* VIEW 4: MATCHING WORKSPACE (PROMINENT RESUME UPLOADER) */}
-        {/* ========================================================================= */}
+        {/* VIEW 4: MATCHING */}
         {activeNav === 'matching' && (
           <div className="space-y-6">
-            
-            {/* Header Area */}
             <div className="flex flex-wrap items-baseline justify-between gap-4 pb-2 border-b border-[#DDDCD6]">
               <div>
                 <h1 className="text-2xl font-black font-heading text-[#171817] tracking-tight uppercase">
@@ -921,7 +957,6 @@ export default function HireMeApp() {
               )}
             </div>
 
-            {/* Analysis Progress / Loading State */}
             {isAnalyzing && (
               <div className="bg-[#DCEAE6]/40 rounded-3xl p-6 border border-[#174C4A]/30 shadow-2xs space-y-4">
                 <div className="flex items-center justify-between">
@@ -986,11 +1021,8 @@ export default function HireMeApp() {
               </div>
             )}
 
-            {/* Input Workspace Panel */}
             {!isAnalyzing && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                
-                {/* 1. Job Requisition Criteria */}
                 <div className="lg:col-span-6 bg-white rounded-3xl border border-[#DDDCD6] p-6 sm:p-8 shadow-2xs space-y-6">
                   <div className="pb-4 border-b border-[#DDDCD6]">
                     <h2 className="text-base font-black text-[#171817] font-heading uppercase">
@@ -1007,7 +1039,6 @@ export default function HireMeApp() {
                   />
                 </div>
 
-                {/* 2. Prominent Resume Upload Area */}
                 <div className="lg:col-span-6 bg-white rounded-3xl border border-[#DDDCD6] p-6 sm:p-8 shadow-2xs space-y-6 flex flex-col justify-between">
                   <div className="space-y-6">
                     <div className="pb-4 border-b border-[#DDDCD6] flex items-center justify-between">
@@ -1031,7 +1062,6 @@ export default function HireMeApp() {
                     />
                   </div>
 
-                  {/* Prominent Analyze Resume Button */}
                   <div className="pt-6 border-t border-[#DDDCD6]">
                     <button
                       type="button"
@@ -1052,11 +1082,9 @@ export default function HireMeApp() {
                     </button>
                   </div>
                 </div>
-
               </div>
             )}
 
-            {/* Evaluated Candidates Results */}
             {liveCandidates.length > 0 && !isAnalyzing && (
               <div className="space-y-4 pt-4 border-t border-[#DDDCD6]">
                 <div className="flex items-center justify-between">
@@ -1078,13 +1106,10 @@ export default function HireMeApp() {
                 />
               </div>
             )}
-
           </div>
         )}
 
-        {/* ========================================================================= */}
-        {/* VIEW 5: SHORTLISTED CANDIDATES */}
-        {/* ========================================================================= */}
+        {/* VIEW 5: SHORTLISTED */}
         {activeNav === 'shortlisted' && (
           <div className="space-y-6">
             <div>
@@ -1130,7 +1155,7 @@ export default function HireMeApp() {
                           <button
                             type="button"
                             onClick={() => handleToggleShortlist(id)}
-                            className="text-xs text-[#686A66] hover:text-[#171817] underline cursor-pointer"
+                            className="text-xs text-[#686A66] hover:text-[#171817] underline cursor-pointer font-bold"
                           >
                             Remove
                           </button>
@@ -1150,9 +1175,7 @@ export default function HireMeApp() {
           </div>
         )}
 
-        {/* ========================================================================= */}
-        {/* VIEW 6: AUDIT & RUBRIC BREAKDOWN */}
-        {/* ========================================================================= */}
+        {/* VIEW 6: REPORTS & AUDIT */}
         {activeNav === 'reports' && (
           <div className="space-y-6">
             <div>
@@ -1217,6 +1240,426 @@ export default function HireMeApp() {
 
       {/* FOOTER */}
       <Footer />
+
+      {/* ========================================================================= */}
+      {/* 3. ALL INTERACTIVE MODALS & POPUPS */}
+      {/* ========================================================================= */}
+
+      {/* SIGN IN MODAL */}
+      {isSignInOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border border-[#DDDCD6] p-8 max-w-md w-full shadow-2xl space-y-6 relative animate-in fade-in">
+            <button
+              type="button"
+              onClick={() => setIsSignInOpen(false)}
+              className="absolute top-5 right-5 text-[#686A66] hover:text-[#171817] p-1 cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="space-y-1">
+              <span className="text-xs font-mono font-bold uppercase text-[#174C4A]">RECRUITER ACCESS</span>
+              <h3 className="text-2xl font-black font-heading text-[#171817] uppercase">SIGN IN TO HIREME AI</h3>
+              <p className="text-xs text-[#686A66]">Enter your organization credentials to access saved talent pipelines.</p>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setIsSignInOpen(false);
+                showToast('Signed in as Senior Recruiter (Arjun Sharma)');
+              }}
+              className="space-y-4"
+            >
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-[#171817] block">Work Email</label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-[#686A66] absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="email"
+                    required
+                    defaultValue="arjun.sharma@enterprise.com"
+                    className="w-full pl-9 pr-3 py-2 bg-[#F5F3EE] border border-[#DDDCD6] rounded-xl text-xs font-semibold focus:bg-white focus:outline-none focus:border-[#174C4A]"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-[#171817] block">Password</label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-[#686A66] absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="password"
+                    required
+                    defaultValue="••••••••••••"
+                    className="w-full pl-9 pr-3 py-2 bg-[#F5F3EE] border border-[#DDDCD6] rounded-xl text-xs focus:bg-white focus:outline-none focus:border-[#174C4A]"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 rounded-xl bg-[#174C4A] hover:bg-[#123B39] text-white font-extrabold text-xs uppercase tracking-wider cursor-pointer shadow-md transition-all"
+              >
+                SIGN IN
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* REQUEST A DEMO MODAL */}
+      {isRequestDemoOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border border-[#DDDCD6] p-8 max-w-lg w-full shadow-2xl space-y-6 relative animate-in fade-in">
+            <button
+              type="button"
+              onClick={() => setIsRequestDemoOpen(false)}
+              className="absolute top-5 right-5 text-[#686A66] hover:text-[#171817] p-1 cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="space-y-1">
+              <span className="text-xs font-mono font-bold uppercase text-[#174C4A]">TALENT PLATFORM DEMO</span>
+              <h3 className="text-2xl font-black font-heading text-[#171817] uppercase">REQUEST A LIVE DEMO</h3>
+              <p className="text-xs text-[#686A66]">Schedule a 15-minute walkthrough with our talent engineering team.</p>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setIsRequestDemoOpen(false);
+                showToast('Demo request received! Our team will contact you shortly.');
+                setActiveNav('matching');
+              }}
+              className="space-y-4"
+            >
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-[#171817] block">First Name</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Arjun"
+                    className="w-full px-3 py-2 bg-[#F5F3EE] border border-[#DDDCD6] rounded-xl text-xs focus:bg-white focus:outline-none focus:border-[#174C4A]"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-[#171817] block">Last Name</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Sharma"
+                    className="w-full px-3 py-2 bg-[#F5F3EE] border border-[#DDDCD6] rounded-xl text-xs focus:bg-white focus:outline-none focus:border-[#174C4A]"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-[#171817] block">Work Email</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="arjun@company.com"
+                  className="w-full px-3 py-2 bg-[#F5F3EE] border border-[#DDDCD6] rounded-xl text-xs focus:bg-white focus:outline-none focus:border-[#174C4A]"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-[#171817] block">Team Size</label>
+                <select className="w-full px-3 py-2 bg-[#F5F3EE] border border-[#DDDCD6] rounded-xl text-xs focus:bg-white focus:outline-none focus:border-[#174C4A]">
+                  <option>1 - 10 recruiters</option>
+                  <option>11 - 50 recruiters</option>
+                  <option>50+ enterprise recruiters</option>
+                </select>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3.5 rounded-xl bg-[#174C4A] hover:bg-[#123B39] text-white font-extrabold text-xs uppercase tracking-wider cursor-pointer shadow-md transition-all"
+              >
+                REQUEST DEMO NOW
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* VOICE AI BRIEFINGS MODAL */}
+      {isVoiceAIOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-[#171817] text-white rounded-3xl border border-white/20 p-8 max-w-lg w-full shadow-2xl space-y-6 relative animate-in fade-in">
+            <button
+              type="button"
+              onClick={() => setIsVoiceAIOpen(false)}
+              className="absolute top-5 right-5 text-white/70 hover:text-white p-1 cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="space-y-1">
+              <span className="text-xs font-mono font-bold uppercase text-[#7FAEA7]">VOICE AI INTELLIGENCE</span>
+              <h3 className="text-2xl font-black font-heading text-white uppercase">CANDIDATE AUDIO BRIEFINGS</h3>
+              <p className="text-xs text-[#DDDCD6]">Listen to synthesized AI voice overviews of top candidate resumes.</p>
+            </div>
+
+            <div className="p-5 bg-white/5 border border-white/10 rounded-2xl space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-[#174C4A] text-white flex items-center justify-center font-extrabold font-mono text-xs">
+                    SK
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-sm text-white">Sarah Kim Summary</h4>
+                    <span className="text-[10px] text-[#7FAEA7] font-mono">Senior Full Stack Engineer · 94% Match</span>
+                  </div>
+                </div>
+                <span className="text-xs font-mono text-[#7FAEA7] font-bold">0:42 / 1:15</span>
+              </div>
+
+              <div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
+                <div className="bg-[#7FAEA7] h-full w-2/3 animate-pulse" />
+              </div>
+
+              <p className="text-xs text-[#DDDCD6] italic bg-white/5 p-3 rounded-xl border border-white/10 font-sans leading-relaxed">
+                "Sarah Kim demonstrates 4.2 years of verified Java and Spring Boot microservices experience on AWS infrastructure. Her Docker certification claim is pending additional tenure verification."
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between pt-2">
+              <button
+                type="button"
+                onClick={() => showToast('Playing AI verbal summary...')}
+                className="px-5 py-2.5 rounded-full bg-[#174C4A] hover:bg-[#123B39] text-white text-xs font-extrabold inline-flex items-center gap-2 cursor-pointer"
+              >
+                <Volume2 className="w-4 h-4" />
+                <span>Play Verbal Briefing</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsVoiceAIOpen(false)}
+                className="text-xs font-bold text-[#DDDCD6] hover:text-white cursor-pointer underline"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* JOB ALERT MODAL */}
+      {isJobAlertOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border border-[#DDDCD6] p-8 max-w-md w-full shadow-2xl space-y-6 relative animate-in fade-in">
+            <button
+              type="button"
+              onClick={() => setIsJobAlertOpen(false)}
+              className="absolute top-5 right-5 text-[#686A66] hover:text-[#171817] p-1 cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="space-y-1">
+              <span className="text-xs font-mono font-bold uppercase text-[#174C4A]">MATCH NOTIFICATIONS</span>
+              <h3 className="text-2xl font-black font-heading text-[#171817] uppercase">CREATE A JOB ALERT</h3>
+              <p className="text-xs text-[#686A66]">Get notified whenever a candidate meets your required skills threshold.</p>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setIsJobAlertOpen(false);
+                showToast('Job Alert activated! You will receive email alerts for new 85%+ matches.');
+              }}
+              className="space-y-4"
+            >
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-[#171817] block">Target Role</label>
+                <input
+                  type="text"
+                  required
+                  defaultValue="Senior Full Stack Engineer"
+                  className="w-full px-3 py-2 bg-[#F5F3EE] border border-[#DDDCD6] rounded-xl text-xs font-bold focus:bg-white focus:outline-none focus:border-[#174C4A]"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-[#171817] block">Match Score Threshold</label>
+                <select className="w-full px-3 py-2 bg-[#F5F3EE] border border-[#DDDCD6] rounded-xl text-xs font-bold focus:bg-white focus:outline-none focus:border-[#174C4A]">
+                  <option>≥ 90% Strong Match only</option>
+                  <option>≥ 80% Good Match & above</option>
+                  <option>All new applicants</option>
+                </select>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3.5 rounded-xl bg-[#174C4A] hover:bg-[#123B39] text-white font-extrabold text-xs uppercase tracking-wider cursor-pointer shadow-md transition-all"
+              >
+                ACTIVATE JOB ALERT
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ASK AI DRAWER */}
+      {isAskAIOpen && (
+        <div className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white border-l border-[#DDDCD6] shadow-2xl p-6 flex flex-col justify-between animate-in slide-in-from-right">
+          <div className="space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-[#DDDCD6]">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-[#174C4A]" />
+                <h3 className="font-extrabold text-base text-[#171817] uppercase font-heading">
+                  ASK AI RECRUITMENT ASSISTANT
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAskAIOpen(false)}
+                className="p-1 text-[#686A66] hover:text-[#171817] cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-[#686A66]">
+              Ask instant questions about your active candidate pool or rubric criteria:
+            </p>
+
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => {
+                  showToast('AI Query: "Jane Doe has 4.2 yrs Java & Spring Boot experience."');
+                  setIsAskAIOpen(false);
+                }}
+                className="w-full p-3 bg-[#F5F3EE] hover:bg-[#DCEAE6] rounded-xl text-xs text-[#171817] font-bold text-left border border-[#DDDCD6] transition-colors cursor-pointer"
+              >
+                🔍 "Who satisfies all 5 required skills for Senior Full Stack?"
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  showToast('AI Query: "1 candidate has unverified Docker claim."');
+                  setIsAskAIOpen(false);
+                }}
+                className="w-full p-3 bg-[#F5F3EE] hover:bg-[#DCEAE6] rounded-xl text-xs text-[#171817] font-bold text-left border border-[#DDDCD6] transition-colors cursor-pointer"
+              >
+                ⚠️ "Which candidates need claim verification?"
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  showToast('AI Query: "Jane Doe leads with 94% total score."');
+                  setIsAskAIOpen(false);
+                }}
+                className="w-full p-3 bg-[#F5F3EE] hover:bg-[#DCEAE6] rounded-xl text-xs text-[#171817] font-bold text-left border border-[#DDDCD6] transition-colors cursor-pointer"
+              >
+                🏆 "Compare top 2 candidates side-by-side"
+              </button>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-[#DDDCD6]">
+            <input
+              type="text"
+              placeholder="Ask anything about candidate resumes..."
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  showToast('Query processed! Displaying matching candidates.');
+                  setIsAskAIOpen(false);
+                  setActiveNav('candidates');
+                }
+              }}
+              className="w-full px-4 py-3 bg-[#F5F3EE] border border-[#DDDCD6] rounded-xl text-xs font-semibold focus:bg-white focus:outline-none focus:border-[#174C4A]"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* COOKIE PREFERENCES MODAL */}
+      {isCookiePrefsOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border border-[#DDDCD6] p-8 max-w-md w-full shadow-2xl space-y-6 relative animate-in fade-in">
+            <button
+              type="button"
+              onClick={() => setIsCookiePrefsOpen(false)}
+              className="absolute top-5 right-5 text-[#686A66] hover:text-[#171817] p-1 cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="space-y-1">
+              <span className="text-xs font-mono font-bold uppercase text-[#174C4A]">PRIVACY & COOKIES</span>
+              <h3 className="text-2xl font-black font-heading text-[#171817] uppercase">COOKIE PREFERENCES</h3>
+              <p className="text-xs text-[#686A66]">Manage how HireMe AI uses cookies and analytics tags.</p>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div className="flex items-center justify-between p-3 bg-[#F5F3EE] rounded-xl border border-[#DDDCD6]">
+                <div>
+                  <strong className="text-[#171817] block">Essential Cookies</strong>
+                  <span className="text-[#686A66] text-[11px]">Required for session security & ATS functionality.</span>
+                </div>
+                <input type="checkbox" checked disabled className="accent-[#174C4A]" />
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-[#F5F3EE] rounded-xl border border-[#DDDCD6]">
+                <div>
+                  <strong className="text-[#171817] block">Analytics & Performance</strong>
+                  <span className="text-[#686A66] text-[11px]">Helps us optimize resume extraction speed.</span>
+                </div>
+                <input type="checkbox" defaultChecked className="accent-[#174C4A] cursor-pointer" />
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setIsCookiePrefsOpen(false);
+                handleAcceptCookies();
+              }}
+              className="w-full py-3.5 rounded-xl bg-[#174C4A] hover:bg-[#123B39] text-white font-extrabold text-xs uppercase tracking-wider cursor-pointer shadow-md transition-all"
+            >
+              SAVE PREFERENCES
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* COOKIE ACCEPTANCE BOTTOM BANNER */}
+      {showCookieBanner && (
+        <div className="fixed bottom-0 inset-x-0 z-50 bg-[#171817] text-white border-t border-white/20 p-4 shadow-2xl animate-in slide-in-from-bottom">
+          <div className="max-w-[1400px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-sans">
+            <p className="text-[#DDDCD6] leading-relaxed max-w-3xl">
+              By clicking "Accept all cookies," you agree to the storing of cookies on your device to enhance site navigation, analyze site usage, and assist in our recruiting intelligence marketing efforts.
+            </p>
+
+            <div className="flex items-center gap-4 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsCookiePrefsOpen(true)}
+                className="text-[#7FAEA7] hover:text-white text-xs font-bold underline cursor-pointer transition-colors"
+              >
+                Cookie preferences
+              </button>
+
+              <button
+                type="button"
+                onClick={handleAcceptCookies}
+                className="px-6 py-2.5 rounded-full bg-[#174C4A] hover:bg-[#123B39] text-white font-extrabold text-xs uppercase tracking-wider cursor-pointer shadow-md transition-all"
+              >
+                Accept all cookies
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Candidate Record Inspection Drawer */}
       {selectedCandidateId && selectedCandidateRecord && (

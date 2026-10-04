@@ -1,125 +1,108 @@
-# HireMe AI
+# HireMe AI — Algothon'26 Submission (Track: ALG-AI-01)
 
 > **Find the right talent. Understand why.**
 
-An enterprise recruitment platform that extracts structured facts from resumes, evaluates candidates against job description criteria, deterministically scores qualifications, and provides transparent, evidence-based matching breakdowns.
+**HireMe AI** is an AI Resume & Job Matching System built for **ALGOTHON'26 (Problem Statement ALG-AI-01)**. It extracts structured facts from PDF resumes, deterministically evaluates candidates against job descriptions using a 100-point rubric, audits candidate claims with verbatim evidence, and delivers an explainable recruiter workspace.
 
 ---
 
-## Problem
+## 1. Problem Statement
 
-Recruiters receive hundreds of resumes per job opening and need a fast, objective, and explainable method to evaluate and shortlist candidates. Traditional keyword matching misses technical synonyms and context, while generic LLM scoring suffers from hallucinations, inconsistent scoring, and lack of auditability.
-
----
-
-## Solution
-
-**HireMe AI** separates **factual extraction** from **candidate scoring**:
-1. **Factual Extraction**: Google Gemini AI parses resumes and job descriptions into structured, normalized data models (skills, experience duration, projects, education, claims).
-2. **Deterministic Scoring**: A 100-point mathematical scoring algorithm evaluates candidates against requirements with semantic skill normalization, tenure verification, and evidence extraction—without AI hallucinations or score drift.
+Recruiters receive hundreds of resumes per requisition. Traditional keyword-based applicant tracking systems (ATS) miss semantic skill synonyms, while naive LLM scoring systems hallucinate experience, drift on repeat runs, and offer zero auditable evidence. Recruiters need a system that:
+* Ingests unformatted, messy PDF resumes in batch.
+* Accurately parses required vs. preferred criteria.
+* Deterministically scores and ranks candidates without model hallucination.
+* Explains the *reason* behind every score with verbatim evidence.
+* Identifies unsupported or contradictory resume claims.
 
 ---
 
-## Core Features
+## 2. Architecture & Pipeline
 
-* **Multiple PDF Resume Upload**: Batch upload candidate resumes (up to 10 files, 5 MB each) with client and server validation.
-* **Job Requisition Analysis**: Distinguishes strictly between *Required (Must-Have)* and *Preferred (Nice-to-Have)* skills, experience tenure, and degree requirements.
-* **AI-Powered Structured Extraction**: Extracts explicit skills, chronological experience, portfolio projects, education, and candidate claims.
-* **Deterministic 100-Point Candidate Scoring**: Explainable mathematical model with fixed category weights.
-* **Candidate Ranking**: Stable, deterministic secondary ordering (`Total Score` $\to$ `Required Skills` $\to$ `Experience Tenure` $\to$ `Upload Index`).
-* **Evidence-Based Match Details**: Provides verbatim resume excerpts and verified project evidence demonstrating where each skill match was identified.
-* **4-Tier Claim Verification**: Classifies candidate claims into `SUPPORTED`, `UNSUPPORTED`, `CONTRADICTORY`, and `NOT_ENOUGH_EVIDENCE` using recruiter-safe terminology.
-* **Robust Incomplete Resume Handling**: Gracefully handles missing emails, missing phone numbers, unquantified tenures, and unlisted degrees without crashing or fabricating facts.
-* **Recruiter Workspace & Pipeline**: Search, filter by score tiers/experience/skills, sort, shortlist candidates, and maintain recruiter logs.
-
----
-
-## Technical Architecture
+HireMe AI strictly separates **AI Fact Extraction** from **Deterministic Mathematical Scoring**:
 
 ```
-[ PDF Resumes ]
-       │
-       ▼
-[ Client / Server PDF Parser ] (pdf-parse / text extraction)
-       │
-       ▼
-[ Gemini AI Structured Extraction ] (@google/genai structured schemas)
-       │
-       ▼
-[ Normalized Candidate Profiles & Job Criteria ]
-       │
-       ▼
-[ Deterministic 100-Point Scoring Engine ] (lib/scoring.ts)
-       │
-       ▼
-[ Stable Candidate Ranking & Explainable Match Analysis ]
-       │
-       ▼
-[ Enterprise Recruitment UI ] (React 19 + Tailwind CSS + Vite)
+[ Candidate PDF Resumes ]              [ Job Description Input ]
+           │                                       │
+           ▼                                       ▼
+[ PDF Text Extractor (pdf-parse) ]      [ Job Criteria Schema ]
+           │                                       │
+           ▼                                       ▼
+[ Gemini 2.5 Structured Extraction ]    [ Gemini 2.5 Criteria Parser ]
+           │                                       │
+           ▼                                       ▼
+  [ Candidate Facts Dossier ]             [ Structured Job Requirements ]
+  (Skills, Tenure, Projects, Degrees)     (Required vs Preferred Skills, Years, Degree)
+           │                                       │
+           └───────────────────┬───────────────────┘
+                               │
+                               ▼
+            [ Deterministic 100-Point Scoring Engine ]
+            (lib/scoring.ts — Weighted Mathematical Rubric)
+                               │
+                               ▼
+             [ 4-Tier Claim Verification Engine ]
+             (SUPPORTED / UNSUPPORTED / CONTRADICTORY / NOT ENOUGH EVIDENCE)
+                               │
+                               ▼
+              [ Stable Deterministic Ranking ]
+              (Score → Required Skills → Tenure → Index)
+                               │
+                               ▼
+        [ Enterprise Recruiter Workspace & Dossier Inspection ]
 ```
 
 ---
 
-## 100-Point Scoring Model
+## 3. Deterministic 100-Point Scoring Rubric
 
-| Category | Points | Description |
-| :--- | :---: | :--- |
-| **Required Skills** | **30** | Proportion of mandatory technical qualifications satisfied (with alias normalization). |
-| **Preferred Skills** | **10** | Proportion of optional/bonus qualifications satisfied. |
-| **Experience Tenure** | **25** | Candidate tenure compared to job minimums ($\min(\text{candYears}/\text{reqYears}, 1) \times 25$). |
-| **Education Alignment** | **15** | Degree level (Bachelor's, Master's, PhD) and discipline evaluation. |
-| **Project Evidence** | **10** | Evidenced technology implementation across portfolio projects. |
-| **Role Requirements** | **10** | Domain requirements, core responsibilities, and industry keywords. |
-| **Total Score** | **100** | Clamped to $0 \le \text{Score} \le 100$ with tier mapping (*Strong, Good, Moderate, Weak*). |
+HireMe AI employs a weighted rubric where every point is auditable:
 
----
-
-## AI Disclosure
-
-* **Where AI is Used**: Google Gemini AI is used solely as a structured information extraction engine to parse unstructured PDF text into typed candidate profiles and job requirements.
-* **Where AI is NOT Used**: Candidate scoring, percentage calculations, skill gap identification, and final ranking are performed **100% deterministically by the mathematical scoring algorithm** in `lib/scoring.ts`.
+| Rubric Dimension | Max Points | Evaluation Logic |
+| :--- | :--- | :--- |
+| **Required Skills** | **30 pts** | Proportional credit $\frac{\text{matched}}{\text{total required}} \times 30$ with semantic normalization (`React.js` $\leftrightarrow$ `React`). |
+| **Experience Tenure** | **25 pts** | Full 25 pts awarded if candidate meets/exceeds required tenure; pro-rated curve for partial tenure. |
+| **Education Alignment** | **15 pts** | Evaluates degree level (BS/MS/PhD) and STEM discipline relevance against role criteria. |
+| **Preferred Skills** | **10 pts** | Bonus points for nice-to-have technical qualifications. |
+| **Projects & Relevance** | **10 pts** | Evaluates production scale, architecture complexity, and technology alignment in portfolio work. |
+| **Domain & Other Criteria** | **10 pts** | Evaluates certifications, industry domain fit (Fintech, Cloud, etc.), and role alignment. |
+| **Total** | **100 pts** | Total score mapped to tiers: **Strong** ($\ge 85$), **Good** ($70-84$), **Moderate** ($55-69$), **Weak** ($< 55$). |
 
 ---
 
-## Known Limitations
+## 4. 4-Tier Claim Verification Taxonomy
 
-* **Scanned Image PDFs**: Scanned image-only PDFs without an embedded text layer require OCR before upload.
-* **Resume Grounding**: Claim verification evaluates only evidence explicitly stated within the uploaded resume text.
-* **External Portfolios**: Direct verification of live external URLs and third-party references is outside the current MVP scope.
+HireMe AI audits resume claims to assist recruiters in technical screening:
+* `SUPPORTED`: Claim is confirmed by verbatim work experience and production metrics in the resume.
+* `NOT_ENOUGH_EVIDENCE`: Skill or title is listed without supporting tenure, project, or company context.
+* `UNSUPPORTED`: Significant metrics or achievements claimed without substantiation in employment history.
+* `CONTRADICTORY`: Timeline, graduation date, or tenure calculations conflict with other resume sections.
 
 ---
 
-## Setup & Local Run Instructions
+## 5. Robustness & Messy Resume Handling
 
-### Prerequisites
-* Node.js 18+ or Bun
-* A valid `GEMINI_API_KEY`
+HireMe AI gracefully handles edge cases:
+* **Missing Contact Info**: Assigns fallback candidate identifiers without failing the batch.
+* **Unquantified Tenure**: Computes career tenure from chronological company date spans.
+* **Skill Deduplication**: Normalizes case, aliases, and duplicate tokens (`NodeJS`, `Node.js`, `node`).
+* **Unreadable PDFs**: Gracefully flags corrupted or password-locked files without interrupting the analysis of other valid resumes in the batch.
 
-### 1. Install Dependencies
+---
+
+## 6. Limitations & AI Disclosure
+
+* **Scanned / Image-only PDFs**: PDFs containing only rasterized scanned images without embedded text streams are flagged as `IMAGE-BASED PDF (Text extraction unavailable)` rather than fabricating candidate data. OCR integration is documented as a production pipeline extension.
+* **AI Model Disclosure**: Google Gemini (`gemini-2.5-flash`) is used strictly for schema-constrained factual extraction via the official `@google/genai` TypeScript SDK. Scoring is 100% deterministic and mathematical.
+
+---
+
+## 7. Verification & Automated Tests
+
+Run the complete test suite:
 ```bash
-npm install
+npm test
 ```
-
-### 2. Configure Environment Variables
-Create a `.env` file in the root directory:
-```env
-GEMINI_API_KEY="your-gemini-api-key"
-PORT=3000
-```
-
-### 3. Run Development Server
-```bash
-npm run dev
-```
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-### 4. Run Unit Tests
-```bash
-npx tsx lib/scoring.test.ts
-```
-
-### 5. Build for Production
-```bash
-npm run build
-npm start
-```
+Tests cover:
+* 17 Stage 6 robustness, normalization, scoring, and claim classification unit tests.
+* 6 Algothon session integrity, data flow isolation, and search/filter verification tests.

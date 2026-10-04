@@ -9,6 +9,7 @@ import {
   Plus,
   Bell,
   ChevronRight,
+  ChevronDown,
   ArrowRight,
   Sparkles,
   Bookmark,
@@ -480,11 +481,43 @@ export default function HireMeApp() {
   return (
     <div className="min-h-screen bg-[#F5F3EE] text-[#171817] flex flex-col font-sans selection:bg-[#174C4A]/20 selection:text-[#171817]">
       
-      {/* 1. NAVBAR */}
-      <header className="bg-white border-b border-[#DDDCD6] sticky top-0 z-40">
+      {/* ========================================================================= */}
+      {/* 1. TOP SUB-HEADER BAR (Zoho Suite Product Ribbon - Reference Image) */}
+      {/* ========================================================================= */}
+      <div className="bg-[#171817] text-white py-1.5 px-6 sm:px-10 text-[11px] font-mono font-medium border-b border-white/10">
+        <div className="max-w-[1400px] mx-auto flex items-center justify-between">
+          
+          <div className="flex items-center gap-5 overflow-x-auto no-scrollbar">
+            <span className="text-[#7FAEA7] font-extrabold uppercase tracking-wider">HireMe Suite:</span>
+            <span className="hover:text-[#7FAEA7] cursor-pointer transition-colors">CRM</span>
+            <span className="hover:text-[#7FAEA7] cursor-pointer transition-colors">People</span>
+            <span className="hover:text-[#7FAEA7] cursor-pointer transition-colors">Creator</span>
+            <span className="hover:text-[#7FAEA7] cursor-pointer transition-colors">Voice</span>
+            <span className="hover:text-[#7FAEA7] cursor-pointer transition-colors">Sign</span>
+            <span className="hover:text-[#7FAEA7] cursor-pointer transition-colors">Payroll</span>
+            <span className="hover:text-[#7FAEA7] cursor-pointer transition-colors inline-flex items-center gap-1">
+              <span>All Products</span>
+              <ChevronDown className="w-3 h-3 text-[#7FAEA7]" />
+            </span>
+          </div>
+
+          <div className="flex items-center gap-4 shrink-0">
+            <Search className="w-3.5 h-3.5 text-[#DDDCD6] cursor-pointer hover:text-white" />
+            <span className="text-white hover:text-[#7FAEA7] cursor-pointer font-bold border-l border-white/20 pl-3">
+              Sign In
+            </span>
+          </div>
+
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 2. MAIN PRODUCT NAVIGATION BAR (Matching Reference Image) */}
+      {/* ========================================================================= */}
+      <header className="bg-white border-b border-[#DDDCD6] sticky top-0 z-40 shadow-2xs">
         <div className="max-w-[1400px] mx-auto px-6 sm:px-10 flex items-center justify-between h-16">
           
-          <div className="flex items-center gap-10">
+          <div className="flex items-center gap-8">
             <button
               type="button"
               onClick={() => setActiveNav('home')}
@@ -493,13 +526,13 @@ export default function HireMeApp() {
               <Logo size="md" showTagline={false} />
             </button>
             
-            <nav className="hidden md:flex items-center gap-6 text-xs font-semibold">
+            <nav className="hidden md:flex items-center gap-5 text-xs font-extrabold">
               <button
                 type="button"
                 onClick={() => setActiveNav('home')}
-                className={`py-1 transition-colors cursor-pointer border-b-2 ${
+                className={`py-1 transition-colors cursor-pointer border-b-2 uppercase tracking-wide ${
                   activeNav === 'home'
-                    ? 'border-[#174C4A] text-[#174C4A] font-extrabold'
+                    ? 'border-[#174C4A] text-[#174C4A] font-black'
                     : 'border-transparent text-[#686A66] hover:text-[#171817]'
                 }`}
               >
@@ -509,9 +542,9 @@ export default function HireMeApp() {
               <button
                 type="button"
                 onClick={() => setActiveNav('matching')}
-                className={`py-1 transition-colors cursor-pointer flex items-center gap-1.5 border-b-2 ${
+                className={`py-1 transition-colors cursor-pointer flex items-center gap-1.5 border-b-2 uppercase tracking-wide ${
                   activeNav === 'matching'
-                    ? 'border-[#174C4A] text-[#174C4A] font-extrabold'
+                    ? 'border-[#174C4A] text-[#174C4A] font-black'
                     : 'border-transparent text-[#686A66] hover:text-[#171817]'
                 }`}
               >
@@ -527,9 +560,9 @@ export default function HireMeApp() {
               <button
                 type="button"
                 onClick={() => setActiveNav('candidates')}
-                className={`py-1 transition-colors cursor-pointer border-b-2 ${
+                className={`py-1 transition-colors cursor-pointer border-b-2 uppercase tracking-wide ${
                   activeNav === 'candidates'
-                    ? 'border-[#174C4A] text-[#174C4A] font-extrabold'
+                    ? 'border-[#174C4A] text-[#174C4A] font-black'
                     : 'border-transparent text-[#686A66] hover:text-[#171817]'
                 }`}
               >
@@ -539,9 +572,9 @@ export default function HireMeApp() {
               <button
                 type="button"
                 onClick={() => setActiveNav('jobs')}
-                className={`py-1 transition-colors cursor-pointer border-b-2 ${
+                className={`py-1 transition-colors cursor-pointer border-b-2 uppercase tracking-wide ${
                   activeNav === 'jobs'
-                    ? 'border-[#174C4A] text-[#174C4A] font-extrabold'
+                    ? 'border-[#174C4A] text-[#174C4A] font-black'
                     : 'border-transparent text-[#686A66] hover:text-[#171817]'
                 }`}
               >
@@ -551,9 +584,9 @@ export default function HireMeApp() {
               <button
                 type="button"
                 onClick={() => setActiveNav('shortlisted')}
-                className={`py-1 transition-colors cursor-pointer border-b-2 ${
+                className={`py-1 transition-colors cursor-pointer border-b-2 uppercase tracking-wide ${
                   activeNav === 'shortlisted'
-                    ? 'border-[#174C4A] text-[#174C4A] font-extrabold'
+                    ? 'border-[#174C4A] text-[#174C4A] font-black'
                     : 'border-transparent text-[#686A66] hover:text-[#171817]'
                 }`}
               >
@@ -563,9 +596,9 @@ export default function HireMeApp() {
               <button
                 type="button"
                 onClick={() => setActiveNav('reports')}
-                className={`py-1 transition-colors cursor-pointer border-b-2 ${
+                className={`py-1 transition-colors cursor-pointer border-b-2 uppercase tracking-wide ${
                   activeNav === 'reports'
-                    ? 'border-[#174C4A] text-[#174C4A] font-extrabold'
+                    ? 'border-[#174C4A] text-[#174C4A] font-black'
                     : 'border-transparent text-[#686A66] hover:text-[#171817]'
                 }`}
               >
@@ -574,22 +607,21 @@ export default function HireMeApp() {
             </nav>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="hidden lg:flex items-center relative">
-              <Search className="w-3.5 h-3.5 text-[#686A66] absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={candidateSearch}
-                onChange={(e) => setCandidateSearch(e.target.value)}
-                placeholder="Search candidates..."
-                className="pl-8 pr-3 py-1.5 bg-[#F5F3EE] border border-[#DDDCD6] rounded-lg text-xs w-48 focus:w-56 focus:bg-white focus:outline-none focus:border-[#174C4A] transition-all"
-              />
-            </div>
+          <div className="flex items-center gap-3">
+            {/* Ask AI Pill Button (Matching "Ask Zia" in reference image) */}
+            <button
+              type="button"
+              onClick={() => setActiveNav('matching')}
+              className="px-3.5 py-1.5 rounded-full border border-[#174C4A] bg-[#DCEAE6] text-[#174C4A] font-black text-xs inline-flex items-center gap-1.5 hover:bg-[#174C4A] hover:text-white transition-all cursor-pointer shadow-2xs"
+            >
+              <span>Ask AI</span>
+              <Sparkles className="w-3.5 h-3.5 text-[#174C4A] group-hover:text-white" />
+            </button>
 
             <button
               type="button"
               onClick={() => setActiveNav('matching')}
-              className="px-4 py-2 bg-[#174C4A] hover:bg-[#123B39] text-white font-bold text-xs rounded-xl inline-flex items-center gap-1.5 cursor-pointer shadow-2xs transition-all"
+              className="px-4 py-2 bg-[#174C4A] hover:bg-[#123B39] text-white font-extrabold text-xs uppercase tracking-wider rounded-xl inline-flex items-center gap-1.5 cursor-pointer shadow-2xs transition-all"
             >
               <UploadCloud className="w-4 h-4" />
               <span>Upload Resume</span>
@@ -624,7 +656,7 @@ export default function HireMeApp() {
         {activeNav === 'home' && (
           <div className="space-y-6">
             
-            {/* 1. HERO SECTION */}
+            {/* 1. HERO SECTION (Matching Reference Image Tour + Form Layout) */}
             <HeroSection
               onStartMatching={() => setActiveNav('matching')}
               onSeeHowItWorks={() => {
@@ -635,18 +667,18 @@ export default function HireMeApp() {
             />
 
             {/* 2. PROMINENT UPLOAD YOUR RESUME SECTION */}
-            <section className="bg-white rounded-2xl border border-[#DDDCD6] p-6 sm:p-8 shadow-sm space-y-6">
+            <section className="bg-white rounded-3xl border border-[#DDDCD6] p-6 sm:p-8 shadow-xl space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#DDDCD6]">
                 <div>
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#DCEAE6] text-[#174C4A] text-xs font-mono font-bold mb-1">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#DCEAE6] text-[#174C4A] text-xs font-mono font-extrabold mb-1">
                     <UploadCloud className="w-3.5 h-3.5" />
-                    <span>PROMINENT RESUME UPLOAD</span>
+                    <span>PROMINENT RESUME UPLOAD WORKFLOW</span>
                   </div>
-                  <h3 className="text-2xl font-black font-heading text-[#171817] uppercase">
-                    UPLOAD YOUR RESUME FOR AI ANALYSIS
-                  </h3>
+                  <h2 className="text-2xl sm:text-3xl font-black font-heading text-[#171817] uppercase">
+                    UPLOAD YOUR RESUME FOR REAL-TIME AI ANALYSIS
+                  </h2>
                   <p className="text-xs text-[#686A66]">
-                    Upload PDF or DOCX resume files to extract candidate profiles and evaluate 100-point rubric match scores.
+                    Upload candidate PDF or DOCX files to extract structured profiles and compute 100-point rubric match scores.
                   </p>
                 </div>
 
@@ -666,7 +698,7 @@ export default function HireMeApp() {
                   />
                 </div>
 
-                <div className="lg:col-span-5 bg-[#F5F3EE] p-6 rounded-xl border border-[#DDDCD6] space-y-4">
+                <div className="lg:col-span-5 bg-[#F5F3EE] p-6 rounded-2xl border border-[#DDDCD6] space-y-4">
                   <h4 className="font-extrabold text-sm text-[#171817] font-heading uppercase">
                     100-Point AI Rubric Analysis
                   </h4>
@@ -679,7 +711,7 @@ export default function HireMeApp() {
                       type="button"
                       onClick={handleAnalyze}
                       disabled={isAnalyzing || uploadedFiles.length === 0}
-                      className={`w-full py-3.5 px-6 rounded-xl font-black text-xs inline-flex items-center justify-center gap-2 cursor-pointer shadow-sm transition-all ${
+                      className={`w-full py-3.5 px-6 rounded-xl font-black text-xs uppercase tracking-wider inline-flex items-center justify-center gap-2 cursor-pointer shadow-md transition-all ${
                         isAnalyzing || uploadedFiles.length === 0
                           ? 'bg-[#DDDCD6] text-[#686A66] cursor-not-allowed opacity-60'
                           : 'bg-[#174C4A] hover:bg-[#123B39] text-white'
@@ -696,7 +728,7 @@ export default function HireMeApp() {
                           <span>
                             {uploadedFiles.length > 0
                               ? `Analyze ${uploadedFiles.length} Uploaded Resume(s)`
-                              : 'Select Resume to Enable Analysis'}
+                              : 'Select Resume File to Enable Analysis'}
                           </span>
                         </>
                       )}
@@ -723,7 +755,7 @@ export default function HireMeApp() {
             {/* 7. STATS SECTION */}
             <StatsSection />
 
-            {/* 8. INTEGRATIONS SECTION */}
+            {/* 8. INTEGRATIONS SECTION WITH PICTURE SHOWCASE */}
             <IntegrationsSection />
 
             {/* 9. ATS CHECK */}
@@ -735,9 +767,9 @@ export default function HireMeApp() {
             {/* 11. LIVE RECRUITER WORKSPACE */}
             <section className="py-12 border-t border-[#DDDCD6] space-y-6">
               <div className="space-y-1 mb-4">
-                <h3 className="text-2xl font-extrabold font-heading text-[#171817] uppercase">
-                  LIVE TALENT OPERATIONS
-                </h3>
+                <h2 className="text-2xl font-black font-heading text-[#171817] uppercase">
+                  LIVE TALENT OPERATIONS CONSOLE
+                </h2>
                 <p className="text-xs text-[#686A66]">
                   Real-time candidate evaluation environment powered by the 100-point deterministic rubric engine.
                 </p>
@@ -762,7 +794,7 @@ export default function HireMeApp() {
           <div className="space-y-6">
             <div className="flex flex-wrap items-baseline justify-between gap-4">
               <div>
-                <h1 className="text-2xl font-bold text-[#171817] font-heading tracking-tight uppercase">
+                <h1 className="text-2xl font-black font-heading text-[#171817] tracking-tight uppercase">
                   Evaluated Candidate Pool ({liveCandidates.length})
                 </h1>
                 <p className="text-xs text-[#686A66] mt-1">
@@ -773,7 +805,7 @@ export default function HireMeApp() {
               <button
                 type="button"
                 onClick={() => setActiveNav('matching')}
-                className="px-4 py-2 bg-[#174C4A] hover:bg-[#123B39] text-white rounded-xl text-xs font-extrabold cursor-pointer"
+                className="px-4 py-2 bg-[#174C4A] hover:bg-[#123B39] text-white rounded-xl text-xs font-black uppercase tracking-wider cursor-pointer"
               >
                 + Upload & Analyze Resumes
               </button>
@@ -789,9 +821,9 @@ export default function HireMeApp() {
                 jobTitle={stage5Result?.jobRequirements?.jobTitle || selectedJob.title}
               />
             ) : (
-              <div className="p-12 text-center bg-white rounded-2xl border border-[#DDDCD6] space-y-3">
+              <div className="p-12 text-center bg-white rounded-3xl border border-[#DDDCD6] space-y-3">
                 <UploadCloud className="w-10 h-10 text-[#686A66] mx-auto" />
-                <h4 className="font-bold text-base text-[#171817]">No Live Candidates in Pool</h4>
+                <h4 className="font-bold text-base text-[#171817] uppercase">No Live Candidates in Pool</h4>
                 <p className="text-xs text-[#686A66]">Upload PDF or DOCX resumes to analyze and evaluate candidates.</p>
               </div>
             )}
@@ -804,8 +836,8 @@ export default function HireMeApp() {
         {activeNav === 'jobs' && (
           <div className="space-y-6">
             <div>
-              <h1 className="text-2xl font-bold text-[#171817] font-heading tracking-tight uppercase">
-                Job Requisitions
+              <h1 className="text-2xl font-black font-heading text-[#171817] tracking-tight uppercase">
+                Job Requisitions Directory
               </h1>
               <p className="text-xs text-[#686A66] mt-1">
                 Select a requisition to launch matching or configure role criteria.
@@ -816,24 +848,24 @@ export default function HireMeApp() {
               {SAMPLE_JOBS.map((job) => (
                 <div
                   key={job.id}
-                  className="bg-white rounded-2xl border border-[#DDDCD6] p-6 space-y-4 flex flex-col justify-between"
+                  className="bg-white rounded-3xl border border-[#DDDCD6] p-6 space-y-4 flex flex-col justify-between shadow-2xs"
                 >
                   <div className="space-y-3">
                     <div className="flex items-start justify-between">
                       <div>
-                        <h3 className="font-bold text-base text-[#171817] font-heading">{job.title}</h3>
+                        <h3 className="font-black text-base text-[#171817] font-heading">{job.title}</h3>
                         <span className="text-xs text-[#686A66]">{job.department} · {job.location}</span>
                       </div>
-                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-[#DCEAE6] text-[#28745D] border border-[#28745D]/30">
+                      <span className="text-[11px] font-bold uppercase px-2 py-0.5 rounded bg-[#DCEAE6] text-[#28745D] border border-[#28745D]/30">
                         {job.status}
                       </span>
                     </div>
 
                     <div className="space-y-1 text-xs">
-                      <span className="text-[#686A66] font-semibold block text-[11px]">Required Skills:</span>
+                      <span className="text-[#686A66] font-bold block text-[11px] uppercase">Required Skills:</span>
                       <div className="flex flex-wrap gap-1.5">
                         {job.requiredSkills.map((s, sIdx) => (
-                          <span key={sIdx} className="text-xs px-2.5 py-0.5 bg-[#F5F3EE] rounded-md border border-[#DDDCD6] text-[#171817]">
+                          <span key={sIdx} className="text-xs px-2.5 py-0.5 bg-[#F5F3EE] rounded-md border border-[#DDDCD6] text-[#171817] font-semibold">
                             {s}
                           </span>
                         ))}
@@ -848,7 +880,7 @@ export default function HireMeApp() {
                     <button
                       type="button"
                       onClick={() => handleStartMatchingForJob(job)}
-                      className="px-4 py-2 bg-[#174C4A] hover:bg-[#123B39] text-white rounded-xl text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer transition-colors"
+                      className="px-4 py-2 bg-[#174C4A] hover:bg-[#123B39] text-white rounded-xl text-xs font-black uppercase tracking-wider inline-flex items-center gap-1.5 cursor-pointer transition-colors"
                     >
                       <span>Match Candidates</span>
                       <ChevronRight className="w-3.5 h-3.5" />
@@ -869,7 +901,7 @@ export default function HireMeApp() {
             {/* Header Area */}
             <div className="flex flex-wrap items-baseline justify-between gap-4 pb-2 border-b border-[#DDDCD6]">
               <div>
-                <h1 className="text-2xl font-extrabold text-[#171817] font-heading tracking-tight uppercase">
+                <h1 className="text-2xl font-black font-heading text-[#171817] tracking-tight uppercase">
                   Candidate Matching Console
                 </h1>
                 <p className="text-xs text-[#686A66] mt-1">
@@ -891,11 +923,11 @@ export default function HireMeApp() {
 
             {/* Analysis Progress / Loading State */}
             {isAnalyzing && (
-              <div className="bg-[#DCEAE6]/40 rounded-2xl p-6 border border-[#174C4A]/30 shadow-2xs space-y-4">
+              <div className="bg-[#DCEAE6]/40 rounded-3xl p-6 border border-[#174C4A]/30 shadow-2xs space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Loader2 className="w-4 h-4 text-[#174C4A] animate-spin" />
-                    <span className="font-extrabold text-xs uppercase tracking-wider text-[#174C4A] font-mono">
+                    <span className="font-black text-xs uppercase tracking-wider text-[#174C4A] font-mono">
                       Analyzing Candidate Resumes
                     </span>
                   </div>
@@ -959,11 +991,11 @@ export default function HireMeApp() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 
                 {/* 1. Job Requisition Criteria */}
-                <div className="lg:col-span-6 bg-white rounded-2xl border border-[#DDDCD6] p-6 sm:p-8 shadow-2xs space-y-6">
+                <div className="lg:col-span-6 bg-white rounded-3xl border border-[#DDDCD6] p-6 sm:p-8 shadow-2xs space-y-6">
                   <div className="pb-4 border-b border-[#DDDCD6]">
-                    <h3 className="text-base font-extrabold text-[#171817] font-heading uppercase">
+                    <h2 className="text-base font-black text-[#171817] font-heading uppercase">
                       1. Job Description & Role Criteria
-                    </h3>
+                    </h2>
                     <p className="text-xs text-[#686A66] mt-0.5">
                       Define required skills, experience duration, and education prerequisites.
                     </p>
@@ -976,18 +1008,18 @@ export default function HireMeApp() {
                 </div>
 
                 {/* 2. Prominent Resume Upload Area */}
-                <div className="lg:col-span-6 bg-white rounded-2xl border border-[#DDDCD6] p-6 sm:p-8 shadow-2xs space-y-6 flex flex-col justify-between">
+                <div className="lg:col-span-6 bg-white rounded-3xl border border-[#DDDCD6] p-6 sm:p-8 shadow-2xs space-y-6 flex flex-col justify-between">
                   <div className="space-y-6">
                     <div className="pb-4 border-b border-[#DDDCD6] flex items-center justify-between">
                       <div>
-                        <h3 className="text-base font-extrabold text-[#171817] font-heading uppercase">
+                        <h2 className="text-base font-black text-[#171817] font-heading uppercase">
                           2. Upload Candidate Resumes
-                        </h3>
+                        </h2>
                         <p className="text-xs text-[#686A66] mt-0.5">
                           Select PDF or DOCX resume files to run AI extraction.
                         </p>
                       </div>
-                      <span className="px-2.5 py-1 rounded bg-[#DCEAE6] text-[#174C4A] font-mono text-xs font-bold">
+                      <span className="px-2.5 py-1 rounded-full bg-[#DCEAE6] text-[#174C4A] font-mono text-xs font-bold">
                         PDF & DOCX
                       </span>
                     </div>
@@ -1028,10 +1060,10 @@ export default function HireMeApp() {
             {liveCandidates.length > 0 && !isAnalyzing && (
               <div className="space-y-4 pt-4 border-t border-[#DDDCD6]">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-black text-[#171817] uppercase font-heading">
+                  <h2 className="text-xl font-black text-[#171817] uppercase font-heading">
                     Analyzed Candidates ({liveCandidates.length})
-                  </h3>
-                  <span className="text-xs font-mono text-[#686A66]">
+                  </h2>
+                  <span className="text-xs font-mono text-[#686A66] font-bold">
                     Ranked by 100-Point Rubric
                   </span>
                 </div>
@@ -1056,7 +1088,7 @@ export default function HireMeApp() {
         {activeNav === 'shortlisted' && (
           <div className="space-y-6">
             <div>
-              <h1 className="text-2xl font-bold text-[#171817] font-heading tracking-tight uppercase">
+              <h1 className="text-2xl font-black font-heading text-[#171817] tracking-tight uppercase">
                 Shortlisted Candidates ({shortlistedIds.size})
               </h1>
               <p className="text-xs text-[#686A66] mt-1">
@@ -1064,7 +1096,7 @@ export default function HireMeApp() {
               </p>
             </div>
 
-            <div className="bg-white rounded-2xl border border-[#DDDCD6] p-6 shadow-2xs">
+            <div className="bg-white rounded-3xl border border-[#DDDCD6] p-6 shadow-2xs">
               {shortlistedIds.size > 0 ? (
                 <div className="divide-y divide-[#DDDCD6]">
                   {Array.from(shortlistedIds).map((id, idx) => {
@@ -1124,7 +1156,7 @@ export default function HireMeApp() {
         {activeNav === 'reports' && (
           <div className="space-y-6">
             <div>
-              <h1 className="text-2xl font-bold text-[#171817] font-heading tracking-tight uppercase">
+              <h1 className="text-2xl font-black font-heading text-[#171817] tracking-tight uppercase">
                 Scoring Engine Rubric & Audit
               </h1>
               <p className="text-xs text-[#686A66] mt-1">
@@ -1133,7 +1165,7 @@ export default function HireMeApp() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white rounded-2xl border border-[#DDDCD6] p-6 space-y-2">
+              <div className="bg-white rounded-3xl border border-[#DDDCD6] p-6 space-y-2">
                 <span className="text-xs font-mono font-bold text-[#174C4A] uppercase">Required Skills</span>
                 <span className="text-2xl font-black text-[#171817] font-mono block">30 Points</span>
                 <p className="text-xs text-[#686A66] leading-relaxed">
@@ -1141,7 +1173,7 @@ export default function HireMeApp() {
                 </p>
               </div>
 
-              <div className="bg-white rounded-2xl border border-[#DDDCD6] p-6 space-y-2">
+              <div className="bg-white rounded-3xl border border-[#DDDCD6] p-6 space-y-2">
                 <span className="text-xs font-mono font-bold text-[#174C4A] uppercase">Experience Tenure</span>
                 <span className="text-2xl font-black text-[#171817] font-mono block">25 Points</span>
                 <p className="text-xs text-[#686A66] leading-relaxed">
@@ -1149,7 +1181,7 @@ export default function HireMeApp() {
                 </p>
               </div>
 
-              <div className="bg-white rounded-2xl border border-[#DDDCD6] p-6 space-y-2">
+              <div className="bg-white rounded-3xl border border-[#DDDCD6] p-6 space-y-2">
                 <span className="text-xs font-mono font-bold text-[#174C4A] uppercase">Education & Projects</span>
                 <span className="text-2xl font-black text-[#171817] font-mono block">25 Points</span>
                 <p className="text-xs text-[#686A66] leading-relaxed">
@@ -1158,7 +1190,7 @@ export default function HireMeApp() {
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-[#DDDCD6] p-6 space-y-3">
+            <div className="bg-white rounded-3xl border border-[#DDDCD6] p-6 space-y-3">
               <h3 className="font-bold text-sm text-[#171817]">4-Tier Claim Verification Taxonomy</h3>
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
                 <div className="p-3 rounded-xl bg-[#DCEAE6] border border-[#28745D]/30">

@@ -337,12 +337,12 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                           type="checkbox"
                           checked={isChecked}
                           onChange={() => {}}
-                          className="accent-[#0D3834] rounded cursor-pointer"
+                          className="accent-[#174C4A] rounded cursor-pointer"
                         />
                       </td>
 
-                      <td className="text-center font-black text-[#0D3834]">
-                        <span className="inline-block px-2.5 py-0.5 rounded-lg bg-[#E8F0E6] text-[#0D3834] font-mono text-xs font-bold">
+                      <td className="text-center font-black text-[#174C4A]">
+                        <span className="inline-block px-2 py-0.5 rounded bg-[#E8F0E6] text-[#174C4A] font-mono text-xs font-bold border border-[#174C4A]/10">
                           #{cand.rank}
                         </span>
                       </td>
@@ -355,7 +355,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                           </div>
                           <div>
                             <div className="font-extrabold text-[#18181B] text-[14px] flex items-center gap-1.5 font-heading">
-                              <span className="hover:text-[#0D3834] transition-colors">{name}</span>
+                              <span className="hover:text-[#174C4A] transition-colors">{name}</span>
                               {isShortlisted && (
                                 <BookmarkCheck className="w-3.5 h-3.5 text-[#00A86B]" />
                               )}
@@ -378,7 +378,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                             topSkills.map((s, sIdx) => (
                               <span
                                 key={sIdx}
-                                className="px-2.5 py-0.5 rounded-md bg-[#FAF7F2] text-[#18181B] text-[11px] font-bold border border-[#E5E2DC]"
+                                className="px-2 py-0.5 rounded bg-[#F5F3EE] text-[#18181B] text-[11px] font-bold border border-[#DDDCD6]"
                               >
                                 {s}
                               </span>
@@ -393,7 +393,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                       <td>
                         <div className="flex flex-col items-start gap-0.5 font-mono">
                           <div className="flex items-baseline gap-1.5">
-                            <span className="font-black text-[#0D3834] text-[16px]">
+                            <span className="font-black text-[#174C4A] text-[16px]">
                               {cand.match.totalScore}%
                             </span>
                             <span className="text-[10px] font-bold text-[#00A86B] uppercase">
@@ -409,7 +409,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                       {/* Skill Gap */}
                       <td className="max-w-[160px]">
                         {(cand.match?.missingRequiredSkills || []).length > 0 ? (
-                          <span className="text-amber-900 bg-amber-50 px-2.5 py-0.5 rounded-lg text-xs font-semibold border border-amber-200 truncate inline-block max-w-[150px]">
+                          <span className="text-amber-800 bg-amber-50/60 px-2 py-0.5 rounded text-[11px] font-semibold border border-amber-200/50 truncate inline-block max-w-[150px]">
                             {cand.match.missingRequiredSkills[0]}
                             {cand.match.missingRequiredSkills.length > 1
                               ? ` +${cand.match.missingRequiredSkills.length - 1}`
@@ -425,12 +425,12 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                       {/* Recommendation */}
                       <td>
                         {cand.match.totalScore >= 75 ? (
-                          <span className="text-[11px] font-extrabold px-2.5 py-0.5 rounded-lg bg-[#E8F0E6] text-[#0D3834] border border-[#0D3834]/20 inline-flex items-center gap-1 uppercase tracking-wider">
-                            <Sparkles className="w-3 h-3 text-[#0D3834]" />
+                          <span className="text-[11px] font-extrabold px-2 py-0.5 rounded bg-[#E8F0E6] text-[#174C4A] border border-[#174C4A]/20 inline-flex items-center gap-1 uppercase tracking-wider">
+                            <Sparkles className="w-3 h-3 text-[#174C4A]" />
                             Shortlist
                           </span>
                         ) : (
-                          <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-lg bg-gray-100 text-gray-700 uppercase">
+                          <span className="text-[11px] font-bold px-2.5 py-0.5 rounded bg-gray-100 text-gray-700 uppercase">
                             Review
                           </span>
                         )}
@@ -445,7 +445,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                               onClick={(e) => onToggleShortlist(candidateId, e)}
                               className={`p-2 rounded-xl border cursor-pointer transition-colors ${
                                 isShortlisted
-                                  ? 'bg-[#E8F0E6] text-[#0D3834] border-[#0D3834]'
+                                  ? 'bg-[#E8F0E6] text-[#174C4A] border-[#174C4A]'
                                   : 'bg-white text-[#525866] border-[#E5E2DC] hover:text-[#18181B]'
                               }`}
                               title={isShortlisted ? 'Shortlisted' : 'Add to Shortlist'}

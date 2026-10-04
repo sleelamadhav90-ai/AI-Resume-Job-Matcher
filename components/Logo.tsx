@@ -18,15 +18,15 @@ export const LogoSymbol: React.FC<{ size?: number; className?: string }> = ({ si
       aria-label="HireMe AI Symbol"
     >
       {/* Crisp enterprise square with subtle radius */}
-      <rect width="24" height="24" rx="5" fill="#171817" />
+      <rect width="24" height="24" rx="6" fill="#174C4A" />
       
       {/* Clean talent lens node + matching checkmark */}
       <rect x="5.5" y="6" width="2.5" height="12" rx="1" fill="#FFFFFF" />
       <rect x="16" y="6" width="2.5" height="12" rx="1" fill="#FFFFFF" />
-      <circle cx="12" cy="8.5" r="1.5" fill="#174C4A" />
+      <circle cx="12" cy="8.5" r="1.5" fill="#FFFFFF" />
       <path
         d="M7 12.5H11L13 14.5L17 10.5"
-        stroke="#174C4A"
+        stroke="#FFFFFF"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"

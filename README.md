@@ -129,8 +129,8 @@ graph TD
 
 ### Installation
 ```bash
-git clone https://github.com/your-username/hireme-ai.git
-cd hireme-ai
+git clone https://github.com/sleelamadhav90-ai/HireMe-AI.git
+cd HireMe-AI
 npm install
 ```
 
@@ -138,7 +138,7 @@ npm install
 Create a `.env` file in the root directory:
 ```env
 GEMINI_API_KEY=your_gemini_api_key_here
-GEMINI_MODEL=gemini-3.8-flash
+GEMINI_MODEL=gemini-3.1-flash-lite
 PORT=3000
 ```
 
@@ -182,4 +182,4 @@ npx tsc --noEmit
 
 ## 13. AI Disclosure
 
-Google Gemini (`gemini-2.5-flash`) is used strictly for schema-constrained factual extraction and evidence/claim analysis via the official `@google/genai` TypeScript SDK. The final candidate score and ranking are calculated by HireMe AI's deterministic scoring engine rather than asking the LLM to directly assign the final score. The project was developed with AI-assisted coding where applicable.
+Google Gemini (`gemini-3.1-flash-lite`) is used strictly for schema-constrained factual extraction and evidence/claim analysis via the official `@google/genai` TypeScript SDK. The final candidate score and ranking are calculated by HireMe AI's deterministic scoring engine rather than asking the LLM to directly assign the final score. The project was developed with AI-assisted coding where applicable.

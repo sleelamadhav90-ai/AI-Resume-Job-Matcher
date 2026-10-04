@@ -1,6 +1,6 @@
 {
   "name": "AI Resume & Job Matcher",
-  "description": "Find the right candidate faster with AI-powered resume parsing, semantic job matching, and transparent candidate ranking.",
+  "description": "AI-powered resume and job matching system with explainable candidate scoring.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

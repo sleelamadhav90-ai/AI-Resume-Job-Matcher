@@ -255,64 +255,64 @@ export const ATSWorkspaceShell: React.FC<ATSWorkspaceShellProps> = ({
           {/* ========================================================================= */}
           {/* 3. 4 KPI CARDS */}
           {/* ========================================================================= */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pb-1 ATSWorkspaceShell-metrics-container bg-[#171817] p-5 rounded-2xl border border-white/10">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pb-1 ATSWorkspaceShell-metrics-container bg-[#F5F3EE] p-5 rounded-2xl border border-[#DDDCD6]">
             
             {/* KPI 1: 100 Point Matching */}
             <MagicCard 
-              glowFrom="#00A86B" 
-              glowTo="#174C4A" 
-              gradientOpacity={0.20} 
-              className="p-6 bg-[#242524] border-white/5 hover:border-[#00A86B]/30 transition-all shadow-xl space-y-2 flex flex-col justify-center text-center"
+              glowFrom="#174C4A" 
+              glowTo="#7FAEA7" 
+              gradientOpacity={0.12} 
+              className="p-6 bg-white border-[#E5E2DC] hover:border-[#174C4A]/30 transition-all shadow-xs space-y-2 flex flex-col justify-center text-center"
             >
-              <div className="text-4xl font-extrabold font-mono text-white tracking-tight">
+              <div className="text-4xl font-extrabold font-mono text-[#174C4A] tracking-tight">
                 <NumberTicker value={100} />
               </div>
-              <span className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-[#7FAEA7] font-black block">
+              <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-widest text-[#525866] font-bold block">
                 POINT MATCHING
               </span>
             </MagicCard>
 
             {/* KPI 2: 4 Claim Verification */}
             <MagicCard 
-              glowFrom="#00A86B" 
-              glowTo="#174C4A" 
-              gradientOpacity={0.20} 
-              className="p-6 bg-[#242524] border-white/5 hover:border-[#00A86B]/30 transition-all shadow-xl space-y-2 flex flex-col justify-center text-center"
+              glowFrom="#174C4A" 
+              glowTo="#7FAEA7" 
+              gradientOpacity={0.12} 
+              className="p-6 bg-white border-[#E5E2DC] hover:border-[#174C4A]/30 transition-all shadow-xs space-y-2 flex flex-col justify-center text-center"
             >
-              <div className="text-4xl font-extrabold font-mono text-white tracking-tight">
+              <div className="text-4xl font-extrabold font-mono text-[#174C4A] tracking-tight">
                 <NumberTicker value={4} />
               </div>
-              <span className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-[#7FAEA7] font-black block">
-                CLAIM VERIFICATION STATES
+              <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-widest text-[#525866] font-bold block">
+                CLAIM VERIFICATION
               </span>
             </MagicCard>
 
             {/* KPI 3: Multiple Resume Analysis */}
             <MagicCard 
-              glowFrom="#00A86B" 
-              glowTo="#174C4A" 
-              gradientOpacity={0.20} 
-              className="p-6 bg-[#242524] border-white/5 hover:border-[#00A86B]/30 transition-all shadow-xl space-y-2 flex flex-col justify-center text-center"
+              glowFrom="#174C4A" 
+              glowTo="#7FAEA7" 
+              gradientOpacity={0.12} 
+              className="p-6 bg-white border-[#E5E2DC] hover:border-[#174C4A]/30 transition-all shadow-xs space-y-2 flex flex-col justify-center text-center"
             >
-              <div className="text-3xl font-black font-sans text-white tracking-tight uppercase py-1">
+              <div className="text-3xl font-black font-sans text-[#174C4A] tracking-tight uppercase py-1">
                 {totalEvaluated > 1 ? 'MULTIPLE' : 'ACTIVE'}
               </div>
-              <span className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-[#7FAEA7] font-black block">
+              <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-widest text-[#525866] font-bold block">
                 RESUME ANALYSIS ({totalEvaluated} Live)
               </span>
             </MagicCard>
 
             {/* KPI 4: Evidence Backed Results */}
             <MagicCard 
-              glowFrom="#00A86B" 
-              glowTo="#174C4A" 
-              gradientOpacity={0.20} 
-              className="p-6 bg-[#242524] border-white/5 hover:border-[#00A86B]/30 transition-all shadow-xl space-y-2 flex flex-col justify-center text-center"
+              glowFrom="#174C4A" 
+              glowTo="#7FAEA7" 
+              gradientOpacity={0.12} 
+              className="p-6 bg-white border-[#E5E2DC] hover:border-[#174C4A]/30 transition-all shadow-xs space-y-2 flex flex-col justify-center text-center"
             >
-              <div className="text-3xl font-black font-sans text-[#E8F0E6] tracking-tight uppercase py-1">
+              <div className="text-3xl font-black font-sans text-[#174C4A] tracking-tight uppercase py-1">
                 EVIDENCE
               </div>
-              <span className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-[#7FAEA7] font-black block">
+              <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-widest text-[#525866] font-bold block">
                 BACKED RESULTS ({avgMatch}% avg)
               </span>
             </MagicCard>

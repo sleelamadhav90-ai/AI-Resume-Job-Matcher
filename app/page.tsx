@@ -1325,7 +1325,17 @@ export default function HireMeApp() {
               onSubmit={(e) => {
                 e.preventDefault();
                 setIsSignInOpen(false);
-                showToast('Signed in as Senior Recruiter (Arjun Sharma)');
+                const formData = new FormData(e.currentTarget);
+                const enteredEmail = (formData.get('email') as string) || 'sleelamadhav90@gmail.com';
+                
+                // Parse a clean, professional name from the email prefix
+                const prefix = enteredEmail.split('@')[0];
+                const parts = prefix.split(/[._-]/).filter(Boolean);
+                const cleanName = parts.length > 0 
+                  ? parts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ')
+                  : 'Recruiter';
+                
+                showToast(`Signed in successfully as ${cleanName} (${enteredEmail})`);
               }}
               className="space-y-4"
             >
@@ -1335,8 +1345,9 @@ export default function HireMeApp() {
                   <Mail className="w-4 h-4 text-[#686A66] absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="email"
+                    name="email"
                     required
-                    defaultValue="arjun.sharma@enterprise.com"
+                    defaultValue="sleelamadhav90@gmail.com"
                     className="w-full pl-9 pr-3 py-2 bg-[#F5F3EE] border border-[#DDDCD6] rounded-xl text-xs font-semibold focus:bg-white focus:outline-none focus:border-[#174C4A]"
                   />
                 </div>

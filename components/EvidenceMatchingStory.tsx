@@ -139,7 +139,7 @@ export const EvidenceMatchingStory: React.FC = () => {
                 </div>
               </div>
 
-              {/* 100 Point Rubric Breakdown */}
+              {/* 100 Point Rubric Breakdown (Exact Implementation Weights) */}
               <div className="pt-4 border-t border-[#E5E7EB] space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-[10px] font-mono uppercase text-[#94A3B8]">100-Pt Rubric</span>
@@ -148,10 +148,11 @@ export const EvidenceMatchingStory: React.FC = () => {
 
                 <div className="space-y-1.5 font-mono text-[11px] text-[#4B5563]">
                   <div className="flex justify-between"><span>Required Skills</span><span className="font-bold text-[#181B2F]">30 pts</span></div>
+                  <div className="flex justify-between"><span>Preferred Skills</span><span className="font-bold text-[#181B2F]">10 pts</span></div>
                   <div className="flex justify-between"><span>Experience Tenure</span><span className="font-bold text-[#181B2F]">25 pts</span></div>
                   <div className="flex justify-between"><span>Education Level</span><span className="font-bold text-[#181B2F]">15 pts</span></div>
-                  <div className="flex justify-between"><span>Project Relevance</span><span className="font-bold text-[#181B2F]">10 pts</span></div>
-                  <div className="flex justify-between"><span>Domain & Other</span><span className="font-bold text-[#181B2F]">20 pts</span></div>
+                  <div className="flex justify-between"><span>Projects</span><span className="font-bold text-[#181B2F]">10 pts</span></div>
+                  <div className="flex justify-between"><span>Other Req.</span><span className="font-bold text-[#181B2F]">10 pts</span></div>
                 </div>
               </div>
             </div>
@@ -339,8 +340,8 @@ export const EvidenceMatchingStory: React.FC = () => {
                   <div className="flex justify-between"><span>Required Skills</span><span className="font-bold text-[#181B2F]">{selectedCandidate === 'jane' ? '30 / 30' : selectedCandidate === 'rahul' ? '24 / 30' : '15 / 30'}</span></div>
                   <div className="flex justify-between"><span>Experience Tenure</span><span className="font-bold text-[#181B2F]">25 / 25</span></div>
                   <div className="flex justify-between"><span>Education Level</span><span className="font-bold text-[#181B2F]">15 / 15</span></div>
-                  <div className="flex justify-between"><span>Project Relevance</span><span className="font-bold text-[#181B2F]">{selectedCandidate === 'jane' ? '9 / 10' : '8 / 10'}</span></div>
-                  <div className="flex justify-between"><span>Domain & Other</span><span className="font-bold text-[#181B2F]">{selectedCandidate === 'jane' ? '15 / 20' : '12 / 20'}</span></div>
+                  <div className="flex justify-between"><span>Projects</span><span className="font-bold text-[#181B2F]">{selectedCandidate === 'jane' ? '9 / 10' : '8 / 10'}</span></div>
+                  <div className="flex justify-between"><span>Other Requirements</span><span className="font-bold text-[#181B2F]">{selectedCandidate === 'jane' ? '15 / 10' : '10 / 10'}</span></div>
                 </div>
               </div>
 

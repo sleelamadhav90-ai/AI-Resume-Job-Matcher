@@ -17,10 +17,10 @@ export const LogoSymbol: React.FC<{ size?: number; className?: string }> = ({ si
       className={`shrink-0 ${className}`}
       aria-label="HireMe AI Symbol"
     >
-      {/* Crisp solid square with subtle radius */}
+      {/* Crisp enterprise square with subtle radius */}
       <rect width="24" height="24" rx="5" fill="#202124" />
       
-      {/* Geometric 'H' with candidate focus node and match check */}
+      {/* Clean talent lens node + matching checkmark */}
       <rect x="5.5" y="6" width="2.5" height="12" rx="1" fill="#FFFFFF" />
       <rect x="16" y="6" width="2.5" height="12" rx="1" fill="#FFFFFF" />
       <circle cx="12" cy="8.5" r="1.5" fill="#E83E8C" />
@@ -50,12 +50,19 @@ export const Logo: React.FC<LogoProps> = ({
     <div className={`flex items-center gap-2 select-none ${className}`}>
       <LogoSymbol size={size === 'sm' ? 20 : size === 'md' ? 24 : 28} />
       <div className="flex flex-col">
-        <div className={`font-bold tracking-tight ${textSizes[size]} text-[#202124] leading-none flex items-baseline gap-0.5`}>
-          <span>HIREME</span>
-          <span className="text-[#E83E8C] font-extrabold">AI</span>
+        {/* HireMe AI wordmark in Manrope SemiBold */}
+        <div
+          className={`font-brand font-semibold tracking-tight ${textSizes[size]} text-[#202124] leading-none flex items-baseline gap-1`}
+          style={{ fontFamily: "'Manrope', 'Inter', sans-serif", fontWeight: 600 }}
+        >
+          <span>HireMe</span>
+          <span className="text-[#E83E8C] font-bold">AI</span>
         </div>
         {showTagline && (
-          <span className="text-[10px] text-[#6B7280] font-normal tracking-tight mt-0.5">
+          <span
+            className="text-[10px] text-[#6B7280] font-normal tracking-tight mt-0.5"
+            style={{ fontFamily: "'Inter', sans-serif" }}
+          >
             Find the right talent. Understand why.
           </span>
         )}

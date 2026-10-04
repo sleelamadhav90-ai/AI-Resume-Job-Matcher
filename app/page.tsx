@@ -30,6 +30,10 @@ import { JobDescriptionInput } from '../components/JobDescriptionInput';
 import { ResumeUploader } from '../components/ResumeUploader';
 import { CandidateList, getCandidateInitials, getAvatarColorClass } from '../components/CandidateList';
 import { MatchDetails } from '../components/MatchDetails';
+import { AIMatchVisual } from '../components/AIMatchVisual';
+import { LoopingTypography } from '../components/LoopingTypography';
+import { HiringSignalsMarquee } from '../components/HiringSignalsMarquee';
+import { RecruitmentPipelineFlow } from '../components/RecruitmentPipelineFlow';
 import { AnalyzeStage5Response, RankedCandidate } from '../lib/types';
 import { useCountUp } from '../lib/useCountUp';
 
@@ -454,6 +458,12 @@ export default function HireMeApp() {
         </div>
       </header>
 
+      {/* Looping Continuous Typography Bar */}
+      <LoopingTypography />
+
+      {/* Hiring Signals Live Ticker Marquee */}
+      <HiringSignalsMarquee />
+
       {/* Error Banner */}
       {errorBanner && (
         <div className="bg-amber-50 border-b border-amber-200 px-6 py-2.5 text-xs text-amber-900 flex items-center justify-between max-w-[1440px] mx-auto w-full motion-fade">
@@ -480,10 +490,13 @@ export default function HireMeApp() {
         {activeNav === 'home' && (
           <div className="space-y-10">
             
-            {/* TOP ASYMMETRIC DASHBOARD SECTION (65% Welcome & Stats / 35% AI Match Health) */}
+            {/* 1. SIGNATURE AI MATCHING VISUAL (Connected Nodes with Signal Animation) */}
+            <AIMatchVisual onStartMatching={() => setActiveNav('matching')} />
+
+            {/* 2. ASYMMETRIC OVERVIEW SECTION (65% Welcome & Stats / 35% AI Match Health) */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
               
-              {/* Left 65%: Welcome, Overview Stats & Action */}
+              {/* Left 65%: Welcome & Stats */}
               <div className="lg:col-span-8 bg-white rounded-lg border border-[#E5E7EB] p-8 shadow-2xs flex flex-col justify-between space-y-6 motion-fade-up">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -564,7 +577,7 @@ export default function HireMeApp() {
                 </div>
               </div>
 
-              {/* Right 35%: Signature "AI MATCH HEALTH / HIRING SIGNAL" Widget */}
+              {/* Right 35%: Signature AI Match Health Signal */}
               <div className="lg:col-span-4 bg-white rounded-lg border border-[#E5E7EB] p-8 shadow-2xs flex flex-col justify-between space-y-4 motion-fade-up stagger-1">
                 <div>
                   <div className="flex items-center justify-between pb-3 border-b border-[#F3F4F6]">
@@ -625,46 +638,10 @@ export default function HireMeApp() {
               </div>
             </div>
 
-            {/* SECTION 2: RECRUITMENT PIPELINE */}
-            <div className="bg-white rounded-lg border border-[#E5E7EB] p-6 shadow-2xs motion-fade-up stagger-2">
-              <div className="text-xs font-bold uppercase tracking-wider text-[#6B7280] mb-4">
-                Recruitment Pipeline
-              </div>
+            {/* 3. CONNECTED RECRUITMENT PIPELINE WITH TRAVELING PULSE */}
+            <RecruitmentPipelineFlow shortlistedCount={shortlistedIds.size + 7} />
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-[#F3F4F6]">
-                <div className="sm:pr-3">
-                  <span className="text-xs text-[#6B7280] block">New Applicants</span>
-                  <div className="text-xl font-bold text-[#202124] font-mono mt-1">42</div>
-                </div>
-
-                <div className="pt-2 sm:pt-0 sm:px-3">
-                  <span className="text-xs text-[#6B7280] block">Screening</span>
-                  <div className="text-xl font-bold text-[#202124] font-mono mt-1">28</div>
-                </div>
-
-                <div className="pt-2 sm:pt-0 sm:px-3 bg-[#EEF2FF]/60 p-2 rounded">
-                  <span className="text-xs text-[#6366F1] font-semibold block">AI Matched</span>
-                  <div className="text-xl font-bold text-[#6366F1] font-mono mt-1">31</div>
-                </div>
-
-                <div className="pt-2 sm:pt-0 sm:px-3">
-                  <span className="text-xs text-[#6B7280] block">Interview</span>
-                  <div className="text-xl font-bold text-[#202124] font-mono mt-1">15</div>
-                </div>
-
-                <div className="pt-2 sm:pt-0 sm:px-3">
-                  <span className="text-xs text-[#6B7280] block">Shortlisted</span>
-                  <div className="text-xl font-bold text-[#202124] font-mono mt-1">{shortlistedIds.size + 7}</div>
-                </div>
-
-                <div className="pt-2 sm:pt-0 sm:pl-3 bg-emerald-50/60 p-2 rounded">
-                  <span className="text-xs text-emerald-800 font-semibold block">Hired</span>
-                  <div className="text-xl font-bold text-emerald-800 font-mono mt-1">4</div>
-                </div>
-              </div>
-            </div>
-
-            {/* SECTION 3: ACTIVE JOB OPENINGS */}
+            {/* 4. ACTIVE JOB OPENINGS TABLE */}
             <div className="bg-white rounded-lg border border-[#E5E7EB] overflow-hidden shadow-2xs motion-fade-up stagger-3">
               <div className="p-6 border-b border-[#E5E7EB] flex items-center justify-between">
                 <div>

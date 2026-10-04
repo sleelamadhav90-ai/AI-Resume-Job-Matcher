@@ -310,6 +310,21 @@ export function validateCandidateProfile(parsed: any, id: string, fileName: stri
         .filter((item: ResumeClaim) => item.claim.length > 0)
     : [];
 
+  // QUALITY GATE: Check for minimal resume data
+  const hasName = !!name;
+  const hasSkills = skills.length > 0;
+  const hasExperience = experience.length > 0;
+  const hasSummary = summary.length > 20;
+  
+  // A "valid" resume must have at least one of these major components.
+  const isQualityResume = hasName || hasSkills || hasExperience || hasSummary;
+  let qualityReason: string | null = null;
+  if (!isQualityResume) {
+    qualityReason = 'Insufficient Resume Data: Document lacks identifiable candidate name, professional skills, or work history.';
+  } else if (!hasSkills && !hasExperience) {
+    qualityReason = 'Insufficient Information: Document contains very limited candidate data.';
+  }
+
   return {
     id,
     fileName,
@@ -324,6 +339,8 @@ export function validateCandidateProfile(parsed: any, id: string, fileName: stri
     totalExperienceYears,
     summary,
     claimsToVerify,
+    isQualityResume,
+    qualityReason,
   };
 }
 

@@ -64,6 +64,16 @@ export const ATSWorkspaceShell: React.FC<ATSWorkspaceShellProps> = ({
     ? Math.round(candidates.reduce((sum, c) => sum + c.match.totalScore, 0) / totalEvaluated)
     : 0;
 
+  const avgRequiredSkills = totalEvaluated > 0
+    ? Math.round(candidates.reduce((sum, c) => sum + (c.match.requiredSkillScore / 30 * 100), 0) / totalEvaluated)
+    : 0;
+  const avgExperienceFit = totalEvaluated > 0
+    ? Math.round(candidates.reduce((sum, c) => sum + (c.match.experienceScore / 25 * 100), 0) / totalEvaluated)
+    : 0;
+  const avgProjectRelevance = totalEvaluated > 0
+    ? Math.round(candidates.reduce((sum, c) => sum + (c.match.projectScore / 10 * 100), 0) / totalEvaluated)
+    : 0;
+
   const filteredCandidates = candidates
     .filter((c) => {
       // Sidebar Tab Filters
@@ -355,7 +365,7 @@ export const ATSWorkspaceShell: React.FC<ATSWorkspaceShellProps> = ({
               <div className="grid grid-cols-3 gap-3 md:col-span-3">
                 <div className="bg-white p-3.5 rounded-xl border border-[#DDDCD6] flex flex-col items-center justify-center space-y-1.5 shadow-2xs">
                   <AnimatedCircularProgressBar
-                    value={92}
+                    value={avgRequiredSkills}
                     size={52}
                     gaugePrimaryColor="#28745D"
                     gaugeSecondaryColor="rgba(0, 0, 0, 0.08)"
@@ -365,7 +375,7 @@ export const ATSWorkspaceShell: React.FC<ATSWorkspaceShellProps> = ({
 
                 <div className="bg-white p-3.5 rounded-xl border border-[#DDDCD6] flex flex-col items-center justify-center space-y-1.5 shadow-2xs">
                   <AnimatedCircularProgressBar
-                    value={84}
+                    value={avgExperienceFit}
                     size={52}
                     gaugePrimaryColor="#174C4A"
                     gaugeSecondaryColor="rgba(0, 0, 0, 0.08)"
@@ -375,7 +385,7 @@ export const ATSWorkspaceShell: React.FC<ATSWorkspaceShellProps> = ({
 
                 <div className="bg-white p-3.5 rounded-xl border border-[#DDDCD6] flex flex-col items-center justify-center space-y-1.5 shadow-2xs">
                   <AnimatedCircularProgressBar
-                    value={89}
+                    value={avgProjectRelevance}
                     size={52}
                     gaugePrimaryColor="#174C4A"
                     gaugeSecondaryColor="rgba(0, 0, 0, 0.08)"

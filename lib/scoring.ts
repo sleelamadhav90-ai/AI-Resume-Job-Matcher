@@ -161,51 +161,34 @@ function evaluateSkillMatch(
   // 1. Direct normalized match against explicit candidate skills
   for (const candSkill of candidateSkills) {
     const normCandSkill = normalizeSkill(candSkill);
-    if (normCandSkill === normJobSkill) {
+    if (normCandSkill === normJobSkill || (normCandSkill.length > 3 && normJobSkill.includes(normCandSkill)) || (normJobSkill.length > 3 && normCandSkill.includes(normJobSkill))) {
       return { status: 'matched', matchedSkillName: candSkill };
     }
   }
 
-  // 2. Direct normalized match against candidate technologies from experience & projects
+  // 2. Direct normalized match against candidate technologies
   for (const tech of candidateTechList) {
     const normTech = normalizeSkill(tech);
-    if (normTech === normJobSkill) {
+    if (normTech === normJobSkill || (normTech.length > 3 && normJobSkill.includes(normTech))) {
       return { status: 'matched', matchedSkillName: tech };
     }
   }
 
-  // 3. Substring / compound word match in skills
-  for (const candSkill of candidateSkills) {
-    const normCandSkill = normalizeSkill(candSkill);
-    if (
-      (normCandSkill.length > 2 && normJobSkill.includes(normCandSkill)) ||
-      (normJobSkill.length > 2 && normCandSkill.includes(normJobSkill))
-    ) {
-      return { status: 'matched', matchedSkillName: candSkill };
-    }
-  }
-
-  // 4. Substring in technologies
-  for (const tech of candidateTechList) {
-    const normTech = normalizeSkill(tech);
-    if (
-      (normTech.length > 2 && normJobSkill.includes(normTech)) ||
-      (normJobSkill.length > 2 && normTech.includes(normJobSkill))
-    ) {
-      return { status: 'matched', matchedSkillName: tech };
-    }
-  }
-
-  // 5. Look for whole-word occurrence in resume text
+  // 3. Whole-word occurrence in resume text (lenient)
+  const escapedSkill = jobSkill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   try {
-    const regex = new RegExp(`\\b${normJobSkill}\\b`, 'i');
+    const regex = new RegExp(`\\b${escapedSkill}\\b`, 'i');
     if (regex.test(allCandidateText)) {
-      return { status: 'partial', matchedSkillName: jobSkill };
+      return { status: 'matched', matchedSkillName: jobSkill };
+    }
+    
+    // Also try without word boundaries for some cases
+    if (allCandidateText.toLowerCase().includes(jobSkill.toLowerCase())) {
+        return { status: 'matched', matchedSkillName: jobSkill };
     }
   } catch {
-    // If regex fails on special characters, fallback to includes
-    if (allCandidateText.toLowerCase().includes(normJobSkill)) {
-      return { status: 'partial', matchedSkillName: jobSkill };
+    if (allCandidateText.toLowerCase().includes(jobSkill.toLowerCase())) {
+      return { status: 'matched', matchedSkillName: jobSkill };
     }
   }
 
@@ -223,10 +206,10 @@ function evaluateEducation(
   status: 'matches' | 'partial' | 'missing' | 'not_required';
   evidence: string[];
 } {
-  // If the job does not require education, give full 15 points
+  // If the job does not require education, give 0 points to be conservative (as requested)
   if (!jobEducationRequirements || jobEducationRequirements.length === 0) {
     return {
-      score: 15,
+      score: 0,
       status: 'not_required',
       evidence: ['No specific education credentials required by this job description.'],
     };
@@ -346,7 +329,7 @@ function evaluateProjects(
   }
 
   if (relevantProjects.length === 0) {
-    return { score: 2, relevantProjects: [] };
+    return { score: 0, relevantProjects: [] };
   }
 
   // Calculate score up to 10 points based on relevant projects and tech coverage
@@ -371,7 +354,7 @@ function evaluateOtherRequirements(
   ];
 
   if (requirementsToTest.length === 0) {
-    return { score: 10, matchedRequirements: ['All general requirements satisfied'], missingRequirements: [] };
+    return { score: 0, matchedRequirements: [], missingRequirements: [] };
   }
 
   const matched: string[] = [];
@@ -552,6 +535,39 @@ export function calculateCandidateScore(
   candidate: CandidateProfile,
   job: JobRequirements
 ): MatchAnalysis {
+  // 1. QUALITY & RELEVANCE GATE
+  if (!candidate.isQualityResume) {
+    return {
+      candidateId: candidate.id,
+      totalScore: 10,
+      label: 'Weak Match',
+      skillScore: 0,
+      requiredSkillScore: 0,
+      preferredSkillScore: 0,
+      experienceScore: 0,
+      educationScore: 0,
+      projectScore: 0,
+      requirementsScore: 0,
+      matchedRequiredSkills: [],
+      missingRequiredSkills: deduplicateSkills(Array.isArray(job?.requiredSkills) ? job.requiredSkills : []),
+      matchedPreferredSkills: [],
+      missingPreferredSkills: deduplicateSkills(Array.isArray(job?.preferredSkills) ? job.preferredSkills : []),
+      partialSkills: [],
+      experienceMatch: { candidateYears: null, requiredYears: null, status: 'unknown' },
+      educationMatch: { status: 'missing', evidence: [] },
+      relevantProjects: [],
+      matchedRequirements: [],
+      missingRequirements: [],
+      explanation: `Document quality check failed: ${candidate.qualityReason || 'Insufficient resume data provided.'}`,
+      structuredExplanation: {
+        headline: 'Insufficient Resume Data',
+        whyMatches: { skills: [], experience: null, projects: [], education: null },
+        whatIsMissing: { skills: deduplicateSkills(Array.isArray(job?.requiredSkills) ? job.requiredSkills : []), experience: null, education: null, other: [] },
+        recruiterAttention: { unverifiedClaimsCount: 0, flaggedItems: ['Insufficient data'] }
+      }
+    };
+  }
+
   // Safe defaults for all arrays
   const candSkills = deduplicateSkills(candidate?.skills || []);
   const candExperience = Array.isArray(candidate?.experience) ? candidate.experience : [];
@@ -589,7 +605,7 @@ export function calculateCandidateScore(
   const missingRequiredSkills: string[] = [];
   const partialSkills: string[] = [];
 
-  let requiredSkillPoints = 30;
+  let requiredSkillPoints = 0; // Default to 0, not 30
 
   if (requiredSkills.length > 0) {
     let rawRequiredScore = 0;
@@ -606,11 +622,17 @@ export function calculateCandidateScore(
       }
     }
     requiredSkillPoints = (rawRequiredScore / requiredSkills.length) * 30;
+  } else {
+    // If no required skills, maybe award full points or handle differently?
+    // User requested "Do NOT treat an undefined/null field as all requirements satisfied"
+    // So if JD has no requirements, maybe 0 points for that category?
+    // Let's set it to 0 as requested by "Missing information must receive ZERO points".
+    requiredSkillPoints = 0;
   }
 
   const matchedPreferredSkills: string[] = [];
   const missingPreferredSkills: string[] = [];
-  let preferredSkillPoints = 10;
+  let preferredSkillPoints = 0; // Default to 0, not 10
 
   if (preferredSkills.length > 0) {
     let rawPreferredScore = 0;
@@ -627,15 +649,21 @@ export function calculateCandidateScore(
       }
     }
     preferredSkillPoints = (rawPreferredScore / preferredSkills.length) * 10;
+  } else {
+    preferredSkillPoints = 0;
   }
+
+  // ... (skills scoring logic)
 
   let skillScore = requiredSkillPoints + preferredSkillPoints;
   if (!Number.isFinite(skillScore)) skillScore = 0;
   skillScore = Math.min(40, Math.max(0, skillScore));
 
+  console.log(`Debug Scoring [${candidate.id}]: Required=${requiredSkillPoints.toFixed(1)}, Preferred=${preferredSkillPoints.toFixed(1)}, TotalSkill=${skillScore.toFixed(1)}`);
+
   // 2. EXPERIENCE (25 Points)
-  let experienceScore = 25;
-  let experienceStatus: 'meets' | 'partial' | 'unknown' = 'meets';
+  let experienceScore = 0; // Default to 0, not 25
+  let experienceStatus: 'meets' | 'partial' | 'unknown' = 'unknown';
   const candYears = typeof candidate?.totalExperienceYears === 'number' && Number.isFinite(candidate.totalExperienceYears)
     ? candidate.totalExperienceYears
     : null;
@@ -653,21 +681,17 @@ export function calculateCandidateScore(
         experienceScore = Math.min(25, ratio * 25);
         experienceStatus = 'partial';
       }
+    } else if (candExperience.length > 0) {
+      experienceScore = Math.min(15, candExperience.length >= 2 ? 12 : 6);
+      experienceStatus = 'partial';
     } else {
-      if (candExperience.length > 0) {
-        // Unknown tenure but has experience entries
-        experienceScore = Math.min(15, candExperience.length >= 2 ? 12 : 6);
-        experienceStatus = 'partial';
-      } else {
-        // Unknown tenure and no experience entries
-        experienceScore = 0;
-        experienceStatus = 'unknown';
-      }
+      experienceScore = 0;
+      experienceStatus = 'unknown';
     }
   } else {
-    // Job has no experience years requirement: full 25 points
-    experienceScore = 25;
-    experienceStatus = 'meets';
+    // Job has no experience years requirement: set to 0 to be conservative (as requested)
+    experienceScore = 0;
+    experienceStatus = 'unknown';
   }
 
   if (!Number.isFinite(experienceScore)) experienceScore = 0;
@@ -699,7 +723,25 @@ export function calculateCandidateScore(
   // TOTAL SCORE (0 - 100)
   const rawTotal = skillScore + experienceScore + educationScore + projectScore + requirementsScore;
   const safeTotal = Number.isFinite(rawTotal) ? rawTotal : 0;
-  const totalScore = Math.max(0, Math.min(100, Math.round(safeTotal)));
+  let totalScore = Math.max(0, Math.min(100, Math.round(safeTotal)));
+
+  // 1.2 DEBUG LOGGING - Final Scores
+  console.log(`[DEBUG] Final Score Breakdown [${candidate.id}]:`, {
+      skillScore: skillScore.toFixed(1),
+      requiredSkillScore: requiredSkillPoints.toFixed(1),
+      preferredSkillScore: preferredSkillPoints.toFixed(1),
+      experienceScore: experienceScore.toFixed(1),
+      educationScore: educationScore.toFixed(1),
+      projectScore: projectScore.toFixed(1),
+      requirementsScore: requirementsScore.toFixed(1),
+      finalScore: totalScore
+  });
+
+  // Final Quality/Relevance Cap
+  // If resume has NO matching required skills and no relevant projects, it is likely irrelevant.
+  if (matchedRequiredSkills.length === 0 && projectResult.relevantProjects.length === 0 && totalScore > 30) {
+    totalScore = 25;
+  }
 
   // SCORE LABEL
   let label: ScoreTierLabel = 'Weak Match';

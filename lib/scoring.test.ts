@@ -59,6 +59,8 @@ function createMockCandidate(overrides: Partial<CandidateProfile> = {}): Candida
         explanation: 'Needs verification — insufficient supporting evidence in the resume.',
       },
     ],
+    isQualityResume: true,
+    qualityReason: null,
     ...overrides,
   };
 }
@@ -154,7 +156,7 @@ function runTests() {
   console.log('\n[Test 7] No experience requirement in job');
   const noExpJob = createMockJob({ requiredExperienceYears: null });
   const score7 = calculateCandidateScore(expBelow, noExpJob);
-  console.assert(score7.experienceScore === 25, `Expected 25, got ${score7.experienceScore}`);
+  console.assert(score7.experienceScore === 0, `Expected 0, got ${score7.experienceScore}`);
 
   // Test 8: React vs React.js normalization
   console.log('\n[Test 8] React vs React.js normalization');
@@ -171,7 +173,7 @@ function runTests() {
   const noEduJob = createMockJob({ educationRequirements: [] });
   const noEduCandidate = createMockCandidate({ education: [] });
   const score10 = calculateCandidateScore(noEduCandidate, noEduJob);
-  console.assert(score10.educationScore === 15, `Expected 15, got ${score10.educationScore}`);
+  console.assert(score10.educationScore === 0, `Expected 0, got ${score10.educationScore}`);
 
   // Test 11: Missing candidate education when required
   console.log('\n[Test 11] Missing candidate education when required');
@@ -204,6 +206,8 @@ function runTests() {
     totalExperienceYears: null,
     summary: '',
     claimsToVerify: [],
+    isQualityResume: false,
+    qualityReason: 'Insufficient data'
   };
   const score13 = calculateCandidateScore(emptyCandidate, standardJob);
   console.assert(Number.isFinite(score13.totalScore), 'Score must be finite');

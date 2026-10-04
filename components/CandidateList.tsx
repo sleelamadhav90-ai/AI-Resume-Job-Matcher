@@ -281,11 +281,11 @@ export const CandidateList: React.FC<CandidateListProps> = ({
 
       {/* Ranked Candidate Table */}
       <div className="bg-white rounded-2xl border border-[#E5E2DC] overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left enterprise-table">
+        <div className="overflow-x-auto no-scrollbar">
+          <table className="w-full text-left enterprise-table table-fixed min-w-[900px]">
             <thead>
               <tr>
-                <th className="w-10 text-center">
+                <th className="w-12 text-center">
                   <input
                     type="checkbox"
                     checked={
@@ -296,13 +296,13 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                     className="accent-[#0D3834] rounded cursor-pointer"
                   />
                 </th>
-                <th className="w-14 text-center">Rank</th>
-                <th>Candidate & Experience</th>
-                <th>Verified Skill Chips</th>
-                <th>Match Score</th>
-                <th>Skill Gap / Notes</th>
-                <th>Recommendation</th>
-                <th className="text-right">Action</th>
+                <th className="w-16 text-center">Rank</th>
+                <th className="w-[280px]">Candidate & Experience</th>
+                <th className="w-[200px]">Verified Skill Chips</th>
+                <th className="w-[120px]">Match Score</th>
+                <th className="w-[140px]">Skill Gap / Notes</th>
+                <th className="w-[150px]">Recommendation</th>
+                <th className="w-[180px] text-right">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -353,17 +353,19 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                           <div className={`w-9 h-9 rounded-full flex items-center justify-center font-black text-xs shrink-0 font-mono shadow-2xs ${avatarColor}`}>
                             {initials}
                           </div>
-                          <div>
+                          <div className="min-w-0">
                             <div className="font-extrabold text-[#18181B] text-[14px] flex items-center gap-1.5 font-heading">
-                              <span className="hover:text-[#174C4A] transition-colors">{name}</span>
+                              <span className="hover:text-[#174C4A] transition-colors truncate block" title={name}>{name}</span>
                               {isShortlisted && (
-                                <BookmarkCheck className="w-3.5 h-3.5 text-[#00A86B]" />
+                                <BookmarkCheck className="w-3.5 h-3.5 text-[#00A86B] shrink-0" />
                               )}
                             </div>
-                            <div className="text-xs text-[#525866] flex items-center gap-2 mt-0.5 font-sans">
-                              <span>{cand.profile?.experience?.[0]?.role || 'Software Engineer'}</span>
-                              <span>·</span>
-                              <span className="font-bold text-[#18181B] font-mono">
+                            <div className="text-xs text-[#525866] flex items-center gap-1.5 mt-0.5 font-sans whitespace-nowrap">
+                              <span className="truncate max-w-[130px]" title={cand.profile?.experience?.[0]?.role || 'Software Engineer'}>
+                                {cand.profile?.experience?.[0]?.role || 'Software Engineer'}
+                              </span>
+                              <span className="text-[#DDDCD6] font-normal">·</span>
+                              <span className="font-bold text-[#18181B] font-mono shrink-0">
                                 {expYears !== null && expYears !== undefined ? `${expYears} yrs` : 'Tenure n/a'}
                               </span>
                             </div>

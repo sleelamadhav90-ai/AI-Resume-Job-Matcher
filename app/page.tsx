@@ -41,13 +41,15 @@ import {
   Phone,
   Mic,
   Volume2,
-  Settings
+  Settings,
+  ExternalLink
 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { JobDescriptionInput } from '../components/JobDescriptionInput';
 import { ResumeUploader } from '../components/ResumeUploader';
 import { CandidateList, getCandidateInitials, getAvatarColorClass } from '../components/CandidateList';
 import { MatchDetails } from '../components/MatchDetails';
+import { generateHighFidelityClientFallback } from '../lib/clientFallback';
 import { HeroSection } from '../components/redesign/HeroSection';
 import { AICandidateMatchingSection } from '../components/redesign/AICandidateMatchingSection';
 import { AutomationSection } from '../components/redesign/AutomationSection';
@@ -218,6 +220,8 @@ const INITIAL_DEMO_CANDIDATES: RankedCandidate[] = [
           explanation: 'Kubernetes listed as a skill without explicit project or infrastructure tenure detail.',
         },
       ],
+      isQualityResume: true,
+      qualityReason: null,
     },
     match: {
       candidateId: 'cand-1',
@@ -292,6 +296,8 @@ const INITIAL_DEMO_CANDIDATES: RankedCandidate[] = [
           explanation: 'Supported by Apex Cloud Systems employment record.',
         },
       ],
+      isQualityResume: true,
+      qualityReason: null,
     },
     match: {
       candidateId: 'cand-2',
@@ -352,6 +358,8 @@ const INITIAL_DEMO_CANDIDATES: RankedCandidate[] = [
       totalExperienceYears: 2.2,
       summary: 'Full stack engineer with 2.2 years experience developing Java web services on AWS.',
       claimsToVerify: [],
+      isQualityResume: true,
+      qualityReason: null,
     },
     match: {
       candidateId: 'cand-3',
@@ -413,7 +421,7 @@ export default function HireMeApp() {
   const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
   const [shortlistedIds, setShortlistedIds] = useState<Set<string>>(new Set());
   const [candidateSearch, setCandidateSearch] = useState<string>('');
-  const [errorBanner, setErrorBanner] = useState<string | null>(null);
+  const [errorBanner, setErrorBanner] = useState<React.ReactNode | null>(null);
 
   // Interactive Modals & Drawers State
   const [isSignInOpen, setIsSignInOpen] = useState(false);
@@ -501,8 +509,32 @@ export default function HireMeApp() {
         body: formData,
       });
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
+      const responseText = await res.text();
+      let data;
+      try {
+        data = JSON.parse(responseText);
+        console.log("ANALYSIS RESPONSE", JSON.stringify(data, null, 2));
+      } catch (e) {
+        console.error('Failed to parse API response as JSON:', responseText);
+        setErrorBanner(
+          <div className="p-4 bg-red-50 text-red-800 rounded-xl border border-red-200">
+            <strong>Analysis Error:</strong> Server returned invalid JSON. 
+            Status: {res.status}. 
+            Body Preview: {responseText.substring(0, 50)}...
+          </div>
+        );
+        setIsAnalyzing(false);
+        return;
+      }
+
+      if (!res.ok) {
+        if (res.status === 429) {
+            throw new Error('Gemini API quota exceeded. Please try again later.');
+        }
+        throw new Error(data.error || 'Failed to complete resume analysis.');
+      }
+      
+      if (!data.success) {
         throw new Error(data.error || 'Failed to complete resume analysis.');
       }
 
@@ -698,18 +730,26 @@ export default function HireMeApp() {
 
       {/* Error Banner */}
       {errorBanner && (
-        <div className="bg-red-50 border-b border-red-200 px-6 py-3 text-xs text-red-900 flex items-center justify-between max-w-[1400px] mx-auto w-full">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
-            <span className="font-semibold">{errorBanner}</span>
+        <div className="bg-red-50 border-y border-red-200 py-3.5 px-6 sm:px-10 shadow-inner">
+          <div className="max-w-[1400px] mx-auto w-full flex items-start justify-between gap-6 text-xs text-red-900">
+            <div className="flex items-start gap-3 flex-1 min-w-0">
+              <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+              <div className="min-w-0 flex-1">
+                {typeof errorBanner === 'string' ? (
+                  <span className="font-semibold block leading-relaxed">{errorBanner}</span>
+                ) : (
+                  errorBanner
+                )}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setErrorBanner(null)}
+              className="text-red-800 hover:text-black font-extrabold uppercase text-[11px] tracking-wider cursor-pointer underline shrink-0 mt-0.5"
+            >
+              Dismiss
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => setErrorBanner(null)}
-            className="text-red-800 hover:text-black font-bold cursor-pointer underline"
-          >
-            Dismiss
-          </button>
         </div>
       )}
 

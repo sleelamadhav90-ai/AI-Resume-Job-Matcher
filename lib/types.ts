@@ -48,6 +48,9 @@ export interface CandidateProfile {
   totalExperienceYears: number | null;
   summary: string;
   claimsToVerify: ResumeClaim[];
+  // NEW FIELDS FOR QUALITY GATE
+  isQualityResume: boolean;
+  qualityReason: string | null;
 }
 
 export interface JobRequirements {

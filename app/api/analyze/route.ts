@@ -6,6 +6,7 @@
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import { extractTextFromResume, PdfExtractionResult } from '../../../lib/parser';
 import { extractCandidateFromResume, extractJobRequirements } from '../../../lib/ai';
+import { extractCandidateWithFallback, extractJobRequirementsWithFallback } from '../../../lib/fallback';
 import { rankCandidates } from '../../../lib/scoring';
 import {
   AnalyzeStage5Response,
@@ -19,18 +20,30 @@ import {
 const MAX_FILES = 10;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
-/**
- * Core business workflow for Stage 5 analysis:
- * 1. Extract raw text from PDF & DOCX resumes and filter valid files
- * 2. Verify Gemini API configuration
- * 3. Extract structured job requirements via Gemini (1 call)
- * 4. Extract structured candidate profiles via Gemini (1 call per valid resume)
- * 5. Deterministically score & rank candidates using lib/scoring.ts
- */
+// Simple retry utility
+async function withRetry<T>(fn: () => Promise<T>, retries = 3, delay = 1000): Promise<T> {
+  try {
+    return await fn();
+  } catch (err: any) {
+    // If it's a 429 (Quota Exceeded), do not retry
+    if (err.status === 429 || err.message?.includes('429') || err.message?.includes('Quota exceeded')) {
+      const quotaErr = new Error('GEMINI_QUOTA_EXCEEDED');
+      (quotaErr as any).status = 429;
+      throw quotaErr;
+    }
+
+    if (retries <= 0) throw err;
+    console.warn(`Transient error, retrying... (${retries} attempts left). Error: ${err.message}`);
+    await new Promise(resolve => setTimeout(resolve, delay));
+    return withRetry(fn, retries - 1, delay * 2);
+  }
+}
+
 async function processAnalyzeWorkflow(
   jobDescription: string,
   resumeFiles: Array<{ name: string; buffer: Buffer }>
 ): Promise<{ statusCode: number; data: AnalyzeStage5Response }> {
+  console.log('--- Starting processAnalyzeWorkflow ---');
   // 1. Validate inputs
   if (!jobDescription || typeof jobDescription !== 'string' || !jobDescription.trim()) {
     return {
@@ -166,42 +179,82 @@ async function processAnalyzeWorkflow(
   // 4. Extract Structured Job Requirements (1 Gemini request)
   let jobRequirements: JobRequirements;
   try {
-    jobRequirements = await extractJobRequirements(jobDescription);
+    jobRequirements = await withRetry(() => extractJobRequirements(jobDescription));
   } catch (err: any) {
-    console.error('Job requirements extraction failed:', err);
-    return {
-      statusCode: 502,
-      data: {
-        success: false,
-        message: 'Job analysis error',
-        error: `AI extraction for job description failed: ${err.message || 'Please try again.'}`,
-        candidates: [],
-        failedCandidates: [],
-        unprocessedResumes,
-      },
-    };
+    if (err.message === 'GEMINI_QUOTA_EXCEEDED') {
+      console.warn('Gemini quota exceeded. Falling back to deterministic job requirement extraction.');
+      try {
+        jobRequirements = extractJobRequirementsWithFallback(jobDescription);
+      } catch (fallbackErr) {
+        console.error('Fallback extraction failed:', fallbackErr);
+        return {
+          statusCode: 502,
+          data: {
+            success: false,
+            message: 'Fallback extraction failed',
+            error: 'AI extraction quota exceeded and fallback extraction also failed.',
+            candidates: [],
+            failedCandidates: [],
+            unprocessedResumes,
+          },
+        };
+      }
+    } else {
+        console.error('Job requirements extraction failed (non-quota):', err);
+        return {
+          statusCode: 502,
+          data: {
+            success: false,
+            message: 'Job analysis error',
+            error: `AI extraction failed: ${err.message || 'Please try again.'}`,
+            candidates: [],
+            failedCandidates: [],
+            unprocessedResumes,
+          },
+        };
+    }
   }
 
-  // 5. Extract Structured Candidate Profiles (1 Gemini request per valid resume)
+  // 5. Extract Structured Candidate Profiles Concurrently
+  const extractionPromises = textExtractionResults.map(async (item, i) => {
+    const candidateId = `candidate-${i + 1}-${Date.now().toString(36)}`;
+    try {
+      const profile = await withRetry(() => extractCandidateFromResume(item.text, item.name, candidateId));
+      return { success: true, profile };
+    } catch (err: any) {
+      if (err.message === 'GEMINI_QUOTA_EXCEEDED') {
+        console.warn(`Gemini quota exceeded for ${item.name}. Falling back to deterministic candidate extraction.`);
+        try {
+            const profile = extractCandidateWithFallback(item.text, item.name, candidateId);
+            return { success: true, profile };
+        } catch (fallbackErr) {
+            console.error(`Fallback extraction failed for ${item.name}:`, fallbackErr);
+        }
+      }
+      
+      console.error(`AI extraction failed for ${item.name}:`, err);
+      return {
+        success: false,
+        failedItem: {
+          id: candidateId,
+          fileName: item.name,
+          status: 'failed' as const,
+          reason: 'AI_EXTRACTION_FAILED' as const,
+          message: 'AI extraction temporarily failed.',
+        }
+      };
+    }
+  });
+
+  const extractionResults = await Promise.all(extractionPromises);
   const successfulProfiles: CandidateProfile[] = [];
   const failedCandidates: FailedCandidateItem[] = [];
 
-  for (let i = 0; i < textExtractionResults.length; i++) {
-    const item = textExtractionResults[i];
-    const candidateId = `candidate-${i + 1}-${Date.now().toString(36)}`;
-
-    try {
-      const profile = await extractCandidateFromResume(item.text, item.name, candidateId);
-      successfulProfiles.push(profile);
-    } catch (err: any) {
-      console.error(`AI extraction failed for ${item.name}:`, err);
-      failedCandidates.push({
-        id: candidateId,
-        fileName: item.name,
-        status: 'failed',
-        reason: 'AI_EXTRACTION_FAILED',
-        message: err.message || 'AI extraction temporarily failed for this resume.',
-      });
+  for (const res of extractionResults) {
+    if (res.success && res.profile) {
+      successfulProfiles.push(res.profile);
+    } else if (!res.success && res.failedItem) {
+      failedCandidates.push(res.failedItem);
     }
   }
 
@@ -277,9 +330,14 @@ export async function POST(request: Request): Promise<Response> {
  * Express Route Handler (Node.js server.ts compatible)
  */
 export async function handleAnalyzeExpress(req: ExpressRequest, res: ExpressResponse) {
+  console.log('--- Entering handleAnalyzeExpress ---');
   try {
     const jobDescription = req.body?.jobDescription;
     const files = (req.files as Express.Multer.File[]) || [];
+
+    if (!jobDescription) {
+      return res.status(400).json({ success: false, error: 'No job description' });
+    }
 
     const resumeFiles: Array<{ name: string; buffer: Buffer }> = files.map((f) => ({
       name: f.originalname,

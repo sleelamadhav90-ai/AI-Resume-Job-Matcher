@@ -39,6 +39,8 @@ function createCandidate(id: string, name: string, skills: string[], experienceY
     totalExperienceYears: experienceYears,
     summary: `${name} is a software engineer with ${experienceYears} years of experience in ${skills.join(', ')}.`,
     claimsToVerify: claims,
+    isQualityResume: true,
+    qualityReason: null,
   };
 }
 
@@ -85,6 +87,8 @@ const emptyCand: CandidateProfile = {
   totalExperienceYears: null,
   summary: '',
   claimsToVerify: [],
+  isQualityResume: false,
+  qualityReason: 'Insufficient data'
 };
 const emptyScore = calculateCandidateScore(emptyCand, emptyJob);
 if (isNaN(emptyScore.totalScore) || emptyScore.totalScore < 0) {

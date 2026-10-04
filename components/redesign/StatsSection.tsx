@@ -1,75 +1,49 @@
 import React from 'react';
-import { useCountUp } from '../../lib/useCountUp';
 
 export const StatsSection: React.FC = () => {
-  const stat1 = useCountUp(2, 600, true);
-  const stat2 = useCountUp(3, 600, true);
-  const stat3 = useCountUp(7, 600, true);
-  const stat4 = useCountUp(92, 700, true);
-
   return (
-    <section className="py-24 sm:py-32 bg-[#131416] text-white overflow-hidden">
-      <div className="max-w-[1400px] mx-auto px-6 sm:px-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+    <section className="py-20 sm:py-28 bg-[#171817] text-white border-t border-white/10">
+      <div className="max-w-[1300px] mx-auto px-6 sm:px-10">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
           
-          {/* LEFT 45%: Heading */}
-          <div className="lg:col-span-5 space-y-4">
-            <h2 className="text-4xl sm:text-6xl font-extrabold font-heading text-white tracking-tight leading-[1.08]">
-              Holistic hiring<br />
-              experience
-            </h2>
-            <p className="text-base sm:text-lg text-[#9CA3AF] leading-relaxed max-w-md pt-2">
-              Transform your talent pipeline from manual resume screening to an automated, evidence-grounded hiring operation.
-            </p>
+          {/* STAT 1: 100 POINT MATCHING */}
+          <div className="p-6 bg-white/5 rounded-2xl border border-white/10 space-y-2">
+            <div className="text-4xl sm:text-5xl font-black font-mono text-white tracking-tight">
+              100
+            </div>
+            <div className="text-xs font-mono font-bold uppercase text-[#7FAEA7] tracking-wider">
+              POINT MATCHING
+            </div>
           </div>
 
-          {/* RIGHT 55%: Massive Metric Cards with Soft Warm Glows (Recreating Screenshot 1) */}
-          <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-4 gap-6">
-            
-            {/* STAT 1: 100-Point Match Rubric */}
-            <div className="bg-[#1C1D20] rounded-2xl p-6 sm:p-8 border border-white/10 relative overflow-hidden flex flex-col justify-end space-y-2 group hover:border-emerald-500/40 transition-all">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-emerald-500/20 via-teal-500/10 to-transparent rounded-full blur-xl pointer-events-none" />
-              <div className="text-4xl sm:text-5xl font-black font-mono text-emerald-400 tracking-tighter">
-                100-PT
-              </div>
-              <p className="text-xs text-[#9CA3AF] font-medium leading-tight">
-                Deterministic Match Rubric
-              </p>
+          {/* STAT 2: 4 CLAIM VERIFICATION STATES */}
+          <div className="p-6 bg-white/5 rounded-2xl border border-white/10 space-y-2">
+            <div className="text-4xl sm:text-5xl font-black font-mono text-white tracking-tight">
+              4
             </div>
-
-            {/* STAT 2: 4-Tier Claims Audit */}
-            <div className="bg-[#1C1D20] rounded-2xl p-6 sm:p-8 border border-white/10 relative overflow-hidden flex flex-col justify-end space-y-2 group hover:border-amber-500/40 transition-all">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-amber-500/20 via-orange-500/10 to-transparent rounded-full blur-xl pointer-events-none" />
-              <div className="text-4xl sm:text-5xl font-black font-mono text-amber-400 tracking-tighter">
-                4-TIER
-              </div>
-              <p className="text-xs text-[#9CA3AF] font-medium leading-tight">
-                Claims Verification Audit
-              </p>
+            <div className="text-xs font-mono font-bold uppercase text-[#7FAEA7] tracking-wider">
+              CLAIM VERIFICATION STATES
             </div>
+          </div>
 
-            {/* STAT 3: 100% Verbatim Evidence */}
-            <div className="bg-[#1C1D20] rounded-2xl p-6 sm:p-8 border border-white/10 relative overflow-hidden flex flex-col justify-end space-y-2 group hover:border-emerald-500/40 transition-all">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-teal-500/20 via-emerald-500/10 to-transparent rounded-full blur-xl pointer-events-none" />
-              <div className="text-4xl sm:text-5xl font-black font-mono text-white tracking-tighter">
-                100%
-              </div>
-              <p className="text-xs text-[#9CA3AF] font-medium leading-tight">
-                Verbatim Resume Evidence
-              </p>
+          {/* STAT 3: MULTIPLE RESUME ANALYSIS */}
+          <div className="p-6 bg-white/5 rounded-2xl border border-white/10 space-y-2">
+            <div className="text-3xl sm:text-4xl font-black font-mono text-white tracking-tight pt-1">
+              MULTIPLE
             </div>
-
-            {/* STAT 4: Multi-Resume Batch Analysis */}
-            <div className="bg-[#1C1D20] rounded-2xl p-6 sm:p-8 border border-white/10 relative overflow-hidden flex flex-col justify-end space-y-2 group hover:border-emerald-500/40 transition-all">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-emerald-500/20 via-teal-500/10 to-transparent rounded-full blur-xl pointer-events-none" />
-              <div className="text-4xl sm:text-5xl font-black font-mono text-emerald-300 tracking-tighter">
-                MULTI
-              </div>
-              <p className="text-xs text-[#9CA3AF] font-medium leading-tight">
-                Resume Batch Parsing
-              </p>
+            <div className="text-xs font-mono font-bold uppercase text-[#7FAEA7] tracking-wider">
+              RESUME ANALYSIS
             </div>
+          </div>
 
+          {/* STAT 4: EVIDENCE BACKED RESULTS */}
+          <div className="p-6 bg-white/5 rounded-2xl border border-white/10 space-y-2">
+            <div className="text-3xl sm:text-4xl font-black font-mono text-white tracking-tight pt-1">
+              EVIDENCE
+            </div>
+            <div className="text-xs font-mono font-bold uppercase text-[#7FAEA7] tracking-wider">
+              BACKED RESULTS
+            </div>
           </div>
 
         </div>

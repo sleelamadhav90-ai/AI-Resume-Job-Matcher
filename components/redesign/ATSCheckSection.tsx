@@ -1,81 +1,90 @@
 import React from 'react';
-import { FileText, Check, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Check } from 'lucide-react';
 
 export const ATSCheckSection: React.FC = () => {
   return (
-    <section className="py-20 sm:py-28 bg-[#F8FAFC] text-[#111318] border-t border-[#E2E8F0]">
-      <div className="max-w-[1400px] mx-auto px-6 sm:px-10 space-y-24">
+    <section className="py-20 sm:py-28 bg-[#F5F3EE] text-[#171817] border-t border-[#DDDCD6]">
+      <div className="max-w-[1300px] mx-auto px-6 sm:px-10">
         
-        {/* ROW 1: ATS UNDERSTANDING CHECK */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           
-          {/* LEFT: Layered Resume Paper Sheets with Pill Overlays (Recreating Screenshot 1) */}
-          <div className="lg:col-span-6 relative min-h-[420px] sm:min-h-[460px] flex items-center justify-center">
-            <div className="relative w-full max-w-[460px] h-[400px]">
+          {/* LEFT: EDITORIAL RESUME SHEET WITH ANNOTATIONS */}
+          <div className="lg:col-span-6 flex items-center justify-center">
+            <div className="relative w-full max-w-[460px]">
               
-              {/* Back Sheet */}
-              <div className="absolute top-4 left-4 sm:left-8 w-[320px] sm:w-[380px] h-[380px] bg-white rounded-2xl border border-[#CBD5E1] shadow-lg transform -rotate-6 p-6 opacity-70">
-                <div className="font-mono text-[10px] text-slate-400 border-b border-slate-100 pb-2 font-bold">
-                  JASMINE BELL · RESUME.PDF
-                </div>
-                <div className="space-y-2 pt-3 text-[10px] text-slate-500 font-mono">
-                  <p>PORTFOLIO: lead-design.com/portfolio</p>
-                  <p>EXPERIENCE: Associate Producer & Lead Engineer</p>
-                </div>
-              </div>
-
-              {/* Front Main Sheet */}
-              <div className="absolute top-0 left-8 sm:left-14 w-[320px] sm:w-[380px] bg-white rounded-2xl border border-[#CBD5E1] shadow-2xl transform rotate-2 p-7 space-y-4">
-                <div className="flex justify-between items-start border-b border-slate-100 pb-3">
-                  <div>
-                    <h3 className="font-extrabold text-sm text-slate-900">JASMINE BELL</h3>
-                    <p className="text-[11px] text-slate-500">Video Editor & Full Stack Engineer</p>
+              {/* Layered Resume Sheet */}
+              <div className="bg-white rounded-2xl border border-[#DDDCD6] shadow-xl p-7 space-y-5">
+                
+                {/* CONTACT INFORMATION Annotation */}
+                <div className="border-b border-[#DDDCD6] pb-4 space-y-1">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-extrabold text-base text-[#171817]">SARAH KIM</h3>
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#174C4A] bg-[#DCEAE6] px-2 py-0.5 rounded border border-[#174C4A]/20">
+                      CONTACT INFORMATION
+                    </span>
                   </div>
-                  <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center">
-                    JB
-                  </div>
+                  <p className="text-xs text-[#686A66] font-mono">sarah.kim@example.com · github.com/sarahkim</p>
                 </div>
 
-                <div className="space-y-3 text-[11px] text-slate-600">
-                  <div>
-                    <span className="font-bold text-[10px] uppercase font-mono text-slate-400 block">Experience</span>
-                    <p className="font-medium text-slate-800">10+ years experience producing video & software</p>
-                  </div>
-
-                  <div>
-                    <span className="font-bold text-[10px] uppercase font-mono text-slate-400 block">Education</span>
-                    <p className="text-slate-800">B.S. Computer Science, Animation Technical Track</p>
-                  </div>
+                {/* SKILLS Annotation */}
+                <div className="space-y-1">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#174C4A] bg-[#DCEAE6] px-2 py-0.5 rounded border border-[#174C4A]/20 inline-block">
+                    SKILLS
+                  </span>
+                  <p className="text-xs text-[#171817] font-semibold">
+                    Java, Spring Boot, AWS, PostgreSQL, REST APIs, Docker, Kubernetes
+                  </p>
                 </div>
-              </div>
 
-              {/* Floating Pill Tag 1 (Contact Information) */}
-              <div className="absolute bottom-16 -left-2 sm:left-2 bg-amber-100 text-amber-900 border border-amber-300 px-3.5 py-1.5 rounded-full text-xs font-bold shadow-md z-30 animate-pulse">
-                Contact information ✓
-              </div>
+                {/* EXPERIENCE Annotation */}
+                <div className="space-y-1">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#174C4A] bg-[#DCEAE6] px-2 py-0.5 rounded border border-[#174C4A]/20 inline-block">
+                    EXPERIENCE
+                  </span>
+                  <p className="text-xs text-[#171817]">
+                    Senior Backend Engineer @ CloudSystems (2020 – Present) · Led 6-person team building microservices.
+                  </p>
+                </div>
 
-              {/* Floating Pill Tag 2 (Skills) */}
-              <div className="absolute bottom-8 right-8 sm:right-16 bg-purple-100 text-purple-900 border border-purple-300 px-4 py-1.5 rounded-full text-xs font-bold shadow-md z-30">
-                Skills Verified ✓
+                {/* EDUCATION Annotation */}
+                <div className="space-y-1">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#174C4A] bg-[#DCEAE6] px-2 py-0.5 rounded border border-[#174C4A]/20 inline-block">
+                    EDUCATION
+                  </span>
+                  <p className="text-xs text-[#171817]">
+                    B.S. Computer Science & Engineering
+                  </p>
+                </div>
+
               </div>
 
             </div>
           </div>
 
-          {/* RIGHT: Copy */}
-          <div className="lg:col-span-6 space-y-6">
-            <h2 className="text-3xl sm:text-5xl font-extrabold font-heading text-[#0F172A] tracking-tight leading-[1.08]">
-              Get an ATS<br />
-              understanding check
+          {/* RIGHT: Editorial Copy */}
+          <div className="lg:col-span-6 space-y-5">
+            <h2 className="text-3xl sm:text-5xl font-black font-heading text-[#171817] tracking-tight uppercase leading-tight">
+              PRECISION<br />FACT EXTRACTION.
             </h2>
 
-            <p className="text-base sm:text-lg text-[#475569] leading-relaxed">
-              Part of the candidate match score we assign is based on the parsability rate of the resume. We've reverse-engineered the most popular applicant tracking systems currently used, such as BambooHR, Greenhouse, Lever, SAP SuccessFactors, and Workday, and we look for explicit signs of ATS compatibility.
+            <p className="text-base sm:text-lg text-[#686A66] leading-relaxed">
+              HireMe AI evaluates contact information, structured skills, tenure length, education credentials, and candidate claim statements across any PDF resume layout.
             </p>
 
-            <p className="text-sm text-[#64748B] leading-relaxed">
-              For each resume uploaded, HireMe AI evaluates skills and keywords connected to the job, readable contact information, date formatting, links, file type, and tenure length.
-            </p>
+            <div className="space-y-2 pt-2 text-xs font-semibold text-[#171817]">
+              <div className="flex items-center gap-2.5">
+                <Check className="w-4 h-4 text-[#28745D]" />
+                <span>Deterministic ATS parsability analysis</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <Check className="w-4 h-4 text-[#28745D]" />
+                <span>4-tier candidate claim verification taxonomy</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <Check className="w-4 h-4 text-[#28745D]" />
+                <span>Zero hallucination verbatim evidence grounding</span>
+              </div>
+            </div>
           </div>
 
         </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 interface LandingCTAProps {
   onStartMatching: () => void;
@@ -7,35 +7,30 @@ interface LandingCTAProps {
 
 export const LandingCTA: React.FC<LandingCTAProps> = ({ onStartMatching }) => {
   return (
-    <section className="py-24 sm:py-32 bg-[#0D3834] text-white relative overflow-hidden text-center">
-      
-      {/* Ambient Radial Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-
+    <section className="py-24 sm:py-32 bg-[#171817] text-white relative overflow-hidden text-center">
       <div className="max-w-4xl mx-auto px-6 sm:px-10 relative z-10 space-y-8">
         
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-950/80 text-emerald-300 text-xs font-semibold tracking-wider uppercase border border-emerald-500/30">
-          <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Intelligent Candidate Matching</span>
-        </div>
+        <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#7FAEA7] bg-white/5 px-3.5 py-1 rounded-full border border-white/10 inline-block">
+          HIREME AI MATCHING WORKSPACE
+        </span>
 
-        <h2 className="text-4xl sm:text-6xl font-extrabold font-heading tracking-tight leading-[1.08] text-white">
-          STOP SCREENING<br />
-          RESUMES BLINDLY.
+        <h2 className="text-4xl sm:text-6xl font-black font-heading tracking-tight leading-[1.08] text-white uppercase">
+          FIND THE RIGHT TALENT.<br />
+          UNDERSTAND WHY.
         </h2>
 
-        <p className="text-base sm:text-xl text-emerald-100/80 leading-relaxed max-w-xl mx-auto font-sans">
-          Upload a job description. Upload candidate resumes. Understand who actually matches with verbatim evidence.
+        <p className="text-base sm:text-lg text-[#DDDCD6] leading-relaxed max-w-xl mx-auto font-sans">
+          Upload candidate resumes, evaluate against 100-point rubrics, and inspect verbatim evidence in seconds.
         </p>
 
-        <div className="pt-4 flex items-center justify-center">
+        <div className="pt-2 flex items-center justify-center">
           <button
             type="button"
             onClick={onStartMatching}
-            className="px-9 py-4 rounded-xl bg-white hover:bg-slate-100 text-[#0D3834] font-extrabold text-sm inline-flex items-center gap-3 shadow-2xl transition-all cursor-pointer hover:scale-105"
+            className="px-9 py-4 rounded-xl bg-[#174C4A] hover:bg-[#123B39] text-white font-black text-sm inline-flex items-center gap-3 shadow-xl transition-all cursor-pointer group"
           >
-            <span>START MATCHING WORKSPACE</span>
-            <ArrowRight className="w-4 h-4 text-[#0D3834]" />
+            <span>TRY HIREME AI NOW</span>
+            <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
 

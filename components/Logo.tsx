@@ -18,15 +18,15 @@ export const LogoSymbol: React.FC<{ size?: number; className?: string }> = ({ si
       aria-label="HireMe AI Symbol"
     >
       {/* Crisp enterprise square with subtle radius */}
-      <rect width="24" height="24" rx="5" fill="#202124" />
+      <rect width="24" height="24" rx="5" fill="#171817" />
       
       {/* Clean talent lens node + matching checkmark */}
       <rect x="5.5" y="6" width="2.5" height="12" rx="1" fill="#FFFFFF" />
       <rect x="16" y="6" width="2.5" height="12" rx="1" fill="#FFFFFF" />
-      <circle cx="12" cy="8.5" r="1.5" fill="#E83E8C" />
+      <circle cx="12" cy="8.5" r="1.5" fill="#174C4A" />
       <path
         d="M7 12.5H11L13 14.5L17 10.5"
-        stroke="#E83E8C"
+        stroke="#174C4A"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -52,15 +52,15 @@ export const Logo: React.FC<LogoProps> = ({
       <div className="flex flex-col">
         {/* HireMe AI wordmark in Manrope SemiBold */}
         <div
-          className={`font-brand font-semibold tracking-tight ${textSizes[size]} text-[#202124] leading-none flex items-baseline gap-1`}
+          className={`font-brand font-semibold tracking-tight ${textSizes[size]} text-[#171817] leading-none flex items-baseline gap-1`}
           style={{ fontFamily: "'Manrope', 'Inter', sans-serif", fontWeight: 600 }}
         >
           <span>HireMe</span>
-          <span className="text-[#E83E8C] font-bold">AI</span>
+          <span className="text-[#174C4A] font-bold">AI</span>
         </div>
         {showTagline && (
           <span
-            className="text-[10px] text-[#6B7280] font-normal tracking-tight mt-0.5"
+            className="text-[10px] text-[#686A66] font-normal tracking-tight mt-0.5"
             style={{ fontFamily: "'Inter', sans-serif" }}
           >
             Find the right talent. Understand why.

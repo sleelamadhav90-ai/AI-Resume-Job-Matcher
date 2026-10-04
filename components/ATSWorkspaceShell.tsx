@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   Sparkles,
   Search,
-  Filter,
   ArrowUpDown,
   ArrowRight,
   Bookmark,
@@ -11,22 +10,12 @@ import {
   AlertTriangle,
   FileText,
   UploadCloud,
-  Check,
-  ChevronRight,
   ShieldCheck,
-  Award,
   Layers,
   Activity,
-  Briefcase,
-  Users,
-  BarChart2,
-  SlidersHorizontal,
-  Clock,
-  Compass,
-  FolderCheck,
-  HelpCircle
+  Users
 } from 'lucide-react';
-import { RankedCandidate, JobRequirements, AnalyzeStage5Response } from '../lib/types';
+import { RankedCandidate, AnalyzeStage5Response } from '../lib/types';
 import { getCandidateInitials, getAvatarColorClass } from './CandidateList';
 import { MagicCard } from './magicui/MagicCard';
 import { NumberTicker } from './magicui/NumberTicker';
@@ -101,43 +90,32 @@ export const ATSWorkspaceShell: React.FC<ATSWorkspaceShellProps> = ({
     });
 
   return (
-    <div className="bg-[#F8FAFC] p-4 sm:p-6 lg:p-8 rounded-2xl border border-[#E2E8F0] shadow-sm space-y-6 font-sans text-[#111827]">
+    <div className="bg-[#F5F3EE] min-h-screen p-4 sm:p-6 lg:p-8 space-y-6 font-sans text-[#171817]">
       
       {/* ========================================================================= */}
-      {/* 1. HEADER & COMMAND BAR */}
+      {/* 1. HEADER */}
       {/* ========================================================================= */}
-      <div className="bg-white p-5 sm:p-6 rounded-xl border border-[#E2E8F0] shadow-2xs space-y-4">
-        
-        {/* Breadcrumb / Session Indicator */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-xs font-mono text-[#64748B]">
-            <span>Workspace</span>
-            <span className="text-[#CBD5E1]">/</span>
-            <span>Active Session</span>
-            <span className="text-[#CBD5E1]">/</span>
-            <span className="font-bold text-[#111827] uppercase tracking-wider">Live Talent Operations</span>
-          </div>
-
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/80 text-xs font-semibold shadow-2xs">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-mono text-[11px] font-bold">ACTIVE RECRUITER SESSION</span>
-          </div>
-        </div>
-
-        {/* Title, Skill Chips & Action Buttons */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 pt-1">
-          <div className="space-y-2 max-w-2xl">
-            <h3 className="text-2xl sm:text-3xl font-extrabold font-heading text-[#111827] tracking-tight leading-tight">
-              {jobTitle}
-            </h3>
+      <div className="bg-white p-5 sm:p-6 rounded-xl border border-[#DDDCD6] shadow-2xs space-y-3">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="space-y-1.5 max-w-2xl">
+            <h2 className="text-xl sm:text-2xl font-black uppercase tracking-wider text-[#171817] font-mono">
+              LIVE TALENT OPERATIONS
+            </h2>
+            <p className="text-xs text-[#686A66]">
+              Real-time candidate evaluation powered by the 100-point rubric.
+            </p>
+            <div className="pt-1">
+              <h3 className="text-lg sm:text-xl font-bold text-[#174C4A]">
+                {jobTitle}
+              </h3>
+            </div>
 
             {/* Compact Skill Chips */}
             <div className="flex flex-wrap items-center gap-1.5 pt-1">
-              <span className="text-xs text-[#64748B] font-medium mr-1">Required Criteria:</span>
               {requiredSkills.map((skill, sIdx) => (
                 <span
                   key={sIdx}
-                  className="px-2.5 py-0.5 rounded-md bg-[#F1F5F9] text-[#334155] text-xs font-semibold border border-[#E2E8F0]"
+                  className="px-2.5 py-0.5 rounded-md bg-[#F5F3EE] text-[#171817] text-xs font-semibold border border-[#DDDCD6]"
                 >
                   {skill}
                 </span>
@@ -146,42 +124,41 @@ export const ATSWorkspaceShell: React.FC<ATSWorkspaceShellProps> = ({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-3 shrink-0 self-start lg:self-center">
+          <div className="flex items-center gap-2.5 shrink-0 self-start lg:self-center">
             <button
               type="button"
               onClick={onOpenMatching}
-              className="px-4 py-2.5 bg-white hover:bg-slate-50 text-[#111827] border border-[#CBD5E1] rounded-xl text-xs font-bold inline-flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-xs transition-all"
+              className="px-4 py-2 bg-white hover:bg-[#F0EEE8] text-[#171817] border border-[#DDDCD6] rounded-xl text-xs font-bold inline-flex items-center gap-2 cursor-pointer shadow-2xs transition-all"
             >
-              <UploadCloud className="w-4 h-4 text-[#475569]" />
+              <UploadCloud className="w-4 h-4 text-[#686A66]" />
               <span>Upload Resumes</span>
             </button>
 
             <button
               type="button"
               onClick={onOpenMatching}
-              className="px-5 py-2.5 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-xl text-xs font-extrabold inline-flex items-center gap-2 cursor-pointer shadow-sm hover:shadow-md transition-all group"
+              className="px-4 py-2 bg-[#174C4A] hover:bg-[#123B39] text-white rounded-xl text-xs font-extrabold inline-flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-xs transition-all group"
             >
               <span>Matching Console</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </button>
           </div>
         </div>
-
       </div>
 
       {/* ========================================================================= */}
-      {/* 2. MAIN ATS APPLICATION SHELL (SIDEBAR + WORKSPACE CANVAS) */}
+      {/* 2. MAIN LAYOUT: SIDEBAR + WORKSPACE */}
       {/* ========================================================================= */}
-      <div className="bg-white rounded-xl border border-[#E2E8F0] shadow-sm overflow-hidden flex flex-col md:flex-row">
+      <div className="bg-white rounded-xl border border-[#DDDCD6] shadow-2xs overflow-hidden flex flex-col md:flex-row">
         
-        {/* LEFT SIDEBAR NAVIGATION (220px) */}
-        <div className="w-full md:w-56 bg-[#F8FAFC] border-r border-[#E2E8F0] p-4 flex flex-col justify-between shrink-0 space-y-6">
+        {/* SIDEBAR */}
+        <div className="w-full md:w-52 bg-[#F5F3EE] border-r border-[#DDDCD6] p-4 flex flex-col justify-between shrink-0 space-y-6">
           <div className="space-y-6">
             
-            {/* Group 1: Matching Workspace */}
+            {/* MATCHING WORKSPACE */}
             <div>
-              <span className="text-[10px] font-mono uppercase font-bold text-[#94A3B8] tracking-wider block mb-2.5 px-2">
-                Matching Workspace
+              <span className="text-[10px] font-mono uppercase font-bold text-[#686A66] tracking-wider block mb-2 px-2">
+                MATCHING WORKSPACE
               </span>
               <nav className="space-y-1">
                 <button
@@ -189,17 +166,14 @@ export const ATSWorkspaceShell: React.FC<ATSWorkspaceShellProps> = ({
                   onClick={() => setActiveTab('overview')}
                   className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between cursor-pointer transition-all ${
                     activeTab === 'overview'
-                      ? 'bg-[#111827] text-white shadow-xs'
-                      : 'text-[#475569] hover:bg-[#F1F5F9] hover:text-[#111827]'
+                      ? 'bg-[#171817] text-white shadow-2xs'
+                      : 'text-[#686A66] hover:bg-white hover:text-[#171817]'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <Layers className="w-4 h-4 text-slate-400" />
+                    <Layers className="w-4 h-4" />
                     <span>Overview</span>
                   </div>
-                  <span className={`text-[10px] font-mono font-bold ${activeTab === 'overview' ? 'text-indigo-300' : 'text-[#94A3B8]'}`}>
-                    {totalEvaluated}
-                  </span>
                 </button>
 
                 <button
@@ -207,17 +181,14 @@ export const ATSWorkspaceShell: React.FC<ATSWorkspaceShellProps> = ({
                   onClick={() => setActiveTab('candidates')}
                   className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between cursor-pointer transition-all ${
                     activeTab === 'candidates'
-                      ? 'bg-[#111827] text-white shadow-xs'
-                      : 'text-[#475569] hover:bg-[#F1F5F9] hover:text-[#111827]'
+                      ? 'bg-[#171817] text-white shadow-2xs'
+                      : 'text-[#686A66] hover:bg-white hover:text-[#171817]'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <Users className="w-4 h-4 text-slate-400" />
+                    <Users className="w-4 h-4" />
                     <span>Talent Pool</span>
                   </div>
-                  <span className={`text-[10px] font-mono font-bold ${activeTab === 'candidates' ? 'text-indigo-300' : 'text-[#94A3B8]'}`}>
-                    {totalEvaluated}
-                  </span>
                 </button>
 
                 <button
@@ -225,25 +196,22 @@ export const ATSWorkspaceShell: React.FC<ATSWorkspaceShellProps> = ({
                   onClick={() => setActiveTab('shortlisted')}
                   className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between cursor-pointer transition-all ${
                     activeTab === 'shortlisted'
-                      ? 'bg-[#111827] text-white shadow-xs'
-                      : 'text-[#475569] hover:bg-[#F1F5F9] hover:text-[#111827]'
+                      ? 'bg-[#171817] text-white shadow-2xs'
+                      : 'text-[#686A66] hover:bg-white hover:text-[#171817]'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <BookmarkCheck className={`w-4 h-4 ${activeTab === 'shortlisted' ? 'text-pink-400' : 'text-[#E83E8C]'}`} />
+                    <BookmarkCheck className={`w-4 h-4 ${activeTab === 'shortlisted' ? 'text-[#7FAEA7]' : 'text-[#174C4A]'}`} />
                     <span>Shortlisted</span>
                   </div>
-                  <span className={`text-[10px] font-mono font-bold ${activeTab === 'shortlisted' ? 'text-indigo-300' : 'text-[#94A3B8]'}`}>
-                    {shortlistedIds.size}
-                  </span>
                 </button>
               </nav>
             </div>
 
-            {/* Group 2: Audit & Reason */}
+            {/* AUDIT & REASON */}
             <div>
-              <span className="text-[10px] font-mono uppercase font-bold text-[#94A3B8] tracking-wider block mb-2.5 px-2">
-                Audit & Reason
+              <span className="text-[10px] font-mono uppercase font-bold text-[#686A66] tracking-wider block mb-2 px-2">
+                AUDIT & REASON
               </span>
               <nav className="space-y-1">
                 <button
@@ -251,15 +219,14 @@ export const ATSWorkspaceShell: React.FC<ATSWorkspaceShellProps> = ({
                   onClick={() => setActiveTab('health')}
                   className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between cursor-pointer transition-all ${
                     activeTab === 'health'
-                      ? 'bg-[#111827] text-white shadow-xs'
-                      : 'text-[#475569] hover:bg-[#F1F5F9] hover:text-[#111827]'
+                      ? 'bg-[#171817] text-white shadow-2xs'
+                      : 'text-[#686A66] hover:bg-white hover:text-[#171817]'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <Activity className={`w-4 h-4 ${activeTab === 'health' ? 'text-indigo-300' : 'text-[#6366F1]'}`} />
+                    <Activity className={`w-4 h-4 ${activeTab === 'health' ? 'text-[#7FAEA7]' : 'text-[#174C4A]'}`} />
                     <span>AI Match Health</span>
                   </div>
-                  <span className="text-[10px] font-mono text-emerald-600 font-extrabold">{avgMatch}%</span>
                 </button>
 
                 <button
@@ -267,197 +234,202 @@ export const ATSWorkspaceShell: React.FC<ATSWorkspaceShellProps> = ({
                   onClick={() => setActiveTab('evidence')}
                   className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between cursor-pointer transition-all ${
                     activeTab === 'evidence'
-                      ? 'bg-[#111827] text-white shadow-xs'
-                      : 'text-[#475569] hover:bg-[#F1F5F9] hover:text-[#111827]'
+                      ? 'bg-[#171817] text-white shadow-2xs'
+                      : 'text-[#686A66] hover:bg-white hover:text-[#171817]'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <ShieldCheck className={`w-4 h-4 ${activeTab === 'evidence' ? 'text-emerald-300' : 'text-emerald-600'}`} />
+                    <ShieldCheck className={`w-4 h-4 ${activeTab === 'evidence' ? 'text-[#7FAEA7]' : 'text-[#28745D]'}`} />
                     <span>Evidence Dossiers</span>
                   </div>
-                  <span className={`text-[10px] font-mono font-bold ${activeTab === 'evidence' ? 'text-indigo-300' : 'text-[#94A3B8]'}`}>
-                    {totalEvaluated}
-                  </span>
                 </button>
               </nav>
             </div>
 
           </div>
-
-          {/* Footer Metadata */}
-          <div className="pt-4 border-t border-[#E2E8F0] space-y-1.5 text-[11px] text-[#64748B]">
-            <div className="flex items-center justify-between font-mono">
-              <span>Rubric Weight:</span>
-              <span className="font-extrabold text-[#111827]">100 pts</span>
-            </div>
-            <div className="flex items-center justify-between font-mono">
-              <span>Precision:</span>
-              <span className="font-extrabold text-emerald-700">Deterministic</span>
-            </div>
-          </div>
-
         </div>
 
-        {/* RIGHT WORKSPACE CANVAS (~80%) */}
+        {/* WORKSPACE CANVAS */}
         <div className="flex-1 p-5 sm:p-7 space-y-6 min-w-0 bg-white">
           
           {/* ========================================================================= */}
-          {/* 3. TOP METRICS CARDS WITH MAGIC CARD & NUMBER TICKER */}
+          {/* 3. 4 KPI CARDS */}
           {/* ========================================================================= */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 pb-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 pb-1">
             
-            <MagicCard gradientColor="#6366F1" gradientOpacity={0.08} className="p-4 space-y-1">
-              <div className="flex items-center justify-between text-[#64748B]">
-                <span className="text-[10px] font-mono uppercase font-bold tracking-wider">Evaluated Dossiers</span>
-                <FileText className="w-3.5 h-3.5 text-[#64748B]" />
-              </div>
-              <div className="text-2xl sm:text-3xl font-black font-mono text-[#111827]">
+            {/* KPI 1: Evaluated Dossiers */}
+            <MagicCard glowFrom="#174C4A" glowTo="#DCEAE6" gradientOpacity={0.10} className="p-4 bg-white border-[#DDDCD6] shadow-2xs space-y-1">
+              <span className="text-[10px] font-mono uppercase font-bold tracking-wider text-[#686A66] block">
+                EVALUATED DOSSIERS
+              </span>
+              <div className="text-3xl font-black font-mono text-[#171817]">
                 <NumberTicker value={totalEvaluated} />
               </div>
+              <span className="text-[11px] font-medium text-[#686A66] block">
+                Candidates analyzed
+              </span>
             </MagicCard>
 
-            <MagicCard gradientColor="#10B981" gradientOpacity={0.12} className="p-4 space-y-1 bg-emerald-50/30">
-              <div className="flex items-center justify-between text-emerald-800">
-                <span className="text-[10px] font-mono uppercase font-bold tracking-wider">Strong Matches</span>
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-              </div>
-              <div className="text-2xl sm:text-3xl font-black font-mono text-emerald-700">
+            {/* KPI 2: Strong Matches */}
+            <MagicCard glowFrom="#28745D" glowTo="#DCEAE6" gradientOpacity={0.12} className="p-4 bg-[#DCEAE6]/20 border-[#28745D]/30 shadow-2xs space-y-1">
+              <span className="text-[10px] font-mono uppercase font-bold tracking-wider text-[#28745D] block">
+                STRONG MATCHES
+              </span>
+              <div className="text-3xl font-black font-mono text-[#28745D]">
                 <NumberTicker value={strongMatches.length} />
               </div>
+              <span className="text-[11px] font-medium text-[#28745D] block">
+                85%+ fit
+              </span>
             </MagicCard>
 
-            <MagicCard gradientColor="#6366F1" gradientOpacity={0.12} className="p-4 space-y-1 bg-indigo-50/30">
-              <div className="flex items-center justify-between text-indigo-800">
-                <span className="text-[10px] font-mono uppercase font-bold tracking-wider">Average Match</span>
-                <Activity className="w-3.5 h-3.5 text-indigo-600" />
-              </div>
-              <div className="text-2xl sm:text-3xl font-black font-mono text-indigo-600">
+            {/* KPI 3: Average Match */}
+            <MagicCard glowFrom="#174C4A" glowTo="#DCEAE6" gradientOpacity={0.12} className="p-4 bg-[#DCEAE6]/20 border-[#174C4A]/30 shadow-2xs space-y-1">
+              <span className="text-[10px] font-mono uppercase font-bold tracking-wider text-[#174C4A] block">
+                AVERAGE MATCH
+              </span>
+              <div className="text-3xl font-black font-mono text-[#174C4A]">
                 <NumberTicker value={avgMatch} suffix="%" />
               </div>
+              <span className="text-[11px] font-medium text-[#174C4A] block">
+                Across evaluated candidates
+              </span>
             </MagicCard>
 
-            <MagicCard gradientColor="#F59E0B" gradientOpacity={0.12} className="p-4 space-y-1 bg-amber-50/30">
-              <div className="flex items-center justify-between text-amber-900">
-                <span className="text-[10px] font-mono uppercase font-bold tracking-wider">Requires Review</span>
-                <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-              </div>
-              <div className="text-2xl sm:text-3xl font-black font-mono text-amber-700">
+            {/* KPI 4: Requires Review */}
+            <MagicCard glowFrom="#B77928" glowTo="#FBF4EC" gradientOpacity={0.12} className="p-4 bg-[#FBF4EC] border-[#B77928]/30 shadow-2xs space-y-1">
+              <span className="text-[10px] font-mono uppercase font-bold tracking-wider text-[#B77928] block">
+                REQUIRES REVIEW
+              </span>
+              <div className="text-3xl font-black font-mono text-[#B77928]">
                 <NumberTicker value={reviewRequired.length} />
               </div>
+              <span className="text-[11px] font-medium text-[#B77928] block">
+                Needs recruiter attention
+              </span>
             </MagicCard>
 
           </div>
 
           {/* ========================================================================= */}
-          {/* 4. AI MATCH HEALTH & RUBRIC PRECISION (MAGIC CARD + BORDER BEAM + CIRCULAR PROGRESS) */}
+          {/* 4. AI MATCH HEALTH */}
           {/* ========================================================================= */}
-          <MagicCard gradientColor="#6366F1" gradientOpacity={0.15} className="p-5 sm:p-6 bg-indigo-50/40 relative border-indigo-200/80">
-            <BorderBeam size={220} duration={10} colorFrom="#6366F1" colorTo="#10B981" />
+          <MagicCard glowFrom="#174C4A" glowTo="#28745D" gradientOpacity={0.12} className="p-5 sm:p-6 bg-[#DCEAE6]/20 relative border-[#174C4A]/30 shadow-2xs space-y-4">
+            <BorderBeam size={240} duration={14} colorFrom="#174C4A" colorTo="#28745D" />
 
-            <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-indigo-100">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-indigo-600 shrink-0" />
-                    <span className="font-extrabold text-xs uppercase tracking-wider text-indigo-900 font-mono">
-                      AI Match Health & Rubric Precision
-                    </span>
-                  </div>
-                  <p className="text-xs text-[#64748B] mt-0.5">
-                    AI-powered alignment analysis across skills, experience, and project relevance
-                  </p>
+            <div className="pb-2 border-b border-[#DDDCD6]">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-[#174C4A] shrink-0" />
+                <span className="font-extrabold text-xs uppercase tracking-wider text-[#174C4A] font-mono">
+                  AI MATCH HEALTH
+                </span>
+              </div>
+              <p className="text-xs text-[#686A66] mt-0.5">
+                Candidate-to-role alignment analysis
+              </p>
+            </div>
+
+            {/* Primary Hero Score + Supporting Indicators */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+              
+              {/* Left/Hero Primary Circular Progress */}
+              <div className="bg-white p-4 rounded-xl border border-[#DDDCD6] flex flex-col items-center justify-center space-y-2 shadow-2xs md:col-span-1">
+                <AnimatedCircularProgressBar
+                  value={avgMatch}
+                  size={68}
+                  gaugePrimaryColor="#174C4A"
+                  gaugeSecondaryColor="rgba(0, 0, 0, 0.08)"
+                />
+                <span className="text-xs font-bold text-[#171817]">Overall Alignment</span>
+              </div>
+
+              {/* Supporting Indicators */}
+              <div className="grid grid-cols-3 gap-3 md:col-span-3">
+                <div className="bg-white p-3.5 rounded-xl border border-[#DDDCD6] flex flex-col items-center justify-center space-y-1.5 shadow-2xs">
+                  <AnimatedCircularProgressBar
+                    value={92}
+                    size={52}
+                    gaugePrimaryColor="#28745D"
+                    gaugeSecondaryColor="rgba(0, 0, 0, 0.08)"
+                  />
+                  <span className="text-[11px] font-bold text-[#171817]">Required Skills</span>
                 </div>
 
-                <div className="flex items-center gap-3 bg-white px-3.5 py-1.5 rounded-xl border border-indigo-200/90 shadow-2xs self-start sm:self-auto">
-                  <div className="text-right">
-                    <span className="text-[10px] font-mono font-bold text-[#64748B] uppercase block">Overall Alignment</span>
-                    <span className="text-sm font-black font-mono text-indigo-700">
-                      <NumberTicker value={avgMatch} suffix="%" />
-                    </span>
-                  </div>
+                <div className="bg-white p-3.5 rounded-xl border border-[#DDDCD6] flex flex-col items-center justify-center space-y-1.5 shadow-2xs">
+                  <AnimatedCircularProgressBar
+                    value={84}
+                    size={52}
+                    gaugePrimaryColor="#174C4A"
+                    gaugeSecondaryColor="rgba(0, 0, 0, 0.08)"
+                  />
+                  <span className="text-[11px] font-bold text-[#171817]">Experience Fit</span>
+                </div>
+
+                <div className="bg-white p-3.5 rounded-xl border border-[#DDDCD6] flex flex-col items-center justify-center space-y-1.5 shadow-2xs">
+                  <AnimatedCircularProgressBar
+                    value={89}
+                    size={52}
+                    gaugePrimaryColor="#174C4A"
+                    gaugeSecondaryColor="rgba(0, 0, 0, 0.08)"
+                  />
+                  <span className="text-[11px] font-bold text-[#171817]">Project Relevance</span>
                 </div>
               </div>
 
-              {/* Animated Circular Progress Bars */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-1">
-                
-                <div className="bg-white p-3.5 rounded-xl border border-indigo-100 flex flex-col items-center justify-center text-center space-y-2 shadow-2xs">
-                  <AnimatedCircularProgressBar value={avgMatch} size={64} gaugePrimaryColor="#6366F1" />
-                  <span className="text-[11px] font-bold text-slate-800">Overall Alignment</span>
-                </div>
-
-                <div className="bg-white p-3.5 rounded-xl border border-indigo-100 flex flex-col items-center justify-center text-center space-y-2 shadow-2xs">
-                  <AnimatedCircularProgressBar value={92} size={64} gaugePrimaryColor="#10B981" />
-                  <span className="text-[11px] font-bold text-slate-800">Required Skills</span>
-                </div>
-
-                <div className="bg-white p-3.5 rounded-xl border border-indigo-100 flex flex-col items-center justify-center text-center space-y-2 shadow-2xs">
-                  <AnimatedCircularProgressBar value={84} size={64} gaugePrimaryColor="#6366F1" />
-                  <span className="text-[11px] font-bold text-slate-800">Experience Fit</span>
-                </div>
-
-                <div className="bg-white p-3.5 rounded-xl border border-indigo-100 flex flex-col items-center justify-center text-center space-y-2 shadow-2xs">
-                  <AnimatedCircularProgressBar value={89} size={64} gaugePrimaryColor="#3B82F6" />
-                  <span className="text-[11px] font-bold text-slate-800">Project Relevance</span>
-                </div>
-
-              </div>
             </div>
           </MagicCard>
 
           {/* ========================================================================= */}
-          {/* 5. RANKED CANDIDATES & CONTROLS */}
+          {/* 5. RANKED CANDIDATES */}
           {/* ========================================================================= */}
           <div className="space-y-4 pt-1">
             
-            {/* Controls Bar */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E2E8F0]">
+            {/* Header & Controls Bar */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#DDDCD6]">
               <div>
-                <h4 className="font-extrabold text-base sm:text-lg text-[#111827] tracking-tight">
-                  Ranked Candidates ({filteredCandidates.length})
+                <h4 className="font-extrabold text-base sm:text-lg text-[#171817] tracking-tight uppercase font-mono">
+                  RANKED CANDIDATES
                 </h4>
-                <p className="text-xs text-[#64748B]">
-                  Evaluated against 100-point rubric with verbatim evidence grounding
+                <p className="text-xs text-[#686A66]">
+                  {filteredCandidates.length} candidates evaluated against the 100-point rubric
                 </p>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
                 <div className="relative">
-                  <Search className="w-3.5 h-3.5 text-[#94A3B8] absolute left-2.5 top-1/2 -translate-y-1/2" />
+                  <Search className="w-3.5 h-3.5 text-[#686A66] absolute left-2.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={candidateSearch}
                     onChange={(e) => setCandidateSearch(e.target.value)}
-                    placeholder="Search candidate or skill..."
-                    className="pl-8 pr-3 py-1.5 bg-[#F8FAFC] border border-[#CBD5E1] rounded-lg text-xs w-40 sm:w-48 focus:bg-white focus:outline-none focus:border-[#4F46E5] transition-all"
+                    placeholder="Search candidates..."
+                    className="pl-8 pr-3 py-1.5 bg-[#F5F3EE] border border-[#DDDCD6] rounded-lg text-xs w-40 sm:w-48 focus:bg-white focus:outline-none focus:border-[#174C4A] transition-all"
                   />
                 </div>
 
                 <select
                   value={tierFilter}
                   onChange={(e) => setTierFilter(e.target.value)}
-                  className="px-2.5 py-1.5 bg-[#F8FAFC] border border-[#CBD5E1] rounded-lg text-xs text-[#334155] focus:bg-white focus:outline-none focus:border-[#4F46E5] cursor-pointer"
+                  className="px-2.5 py-1.5 bg-[#F5F3EE] border border-[#DDDCD6] rounded-lg text-xs text-[#171817] focus:bg-white focus:outline-none focus:border-[#174C4A] cursor-pointer font-medium"
                 >
                   <option value="all">All Tiers</option>
                   <option value="strong">Strong Match (≥85%)</option>
-                  <option value="good">Good Match (70-84%)</option>
+                  <option value="good">Good Match (70–84%)</option>
                   <option value="review">Needs Review (&lt;70%)</option>
                 </select>
 
                 <button
                   type="button"
                   onClick={() => setSortBy(sortBy === 'match' ? 'tenure' : 'match')}
-                  className="px-2.5 py-1.5 bg-[#F8FAFC] border border-[#CBD5E1] rounded-lg text-xs font-semibold text-[#334155] hover:text-[#111827] hover:bg-white inline-flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
+                  className="px-2.5 py-1.5 bg-[#F5F3EE] border border-[#DDDCD6] rounded-lg text-xs font-semibold text-[#171817] hover:bg-white inline-flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
                 >
-                  <ArrowUpDown className="w-3.5 h-3.5 text-[#64748B]" />
+                  <ArrowUpDown className="w-3.5 h-3.5 text-[#686A66]" />
                   <span>{sortBy === 'match' ? 'Best Match' : 'Tenure'}</span>
                 </button>
               </div>
             </div>
 
-            {/* ========================================================================= */}
-            {/* 6. CANDIDATE CARDS (USING MAGIC CARD + SHIMMER BUTTON + NUMBER TICKER) */}
-            {/* ========================================================================= */}
+            {/* Candidate Cards Grid */}
             {filteredCandidates.length > 0 ? (
               <div className="space-y-3">
                 {filteredCandidates.map((c, idx) => {
@@ -465,84 +437,88 @@ export const ATSWorkspaceShell: React.FC<ATSWorkspaceShellProps> = ({
                   const initials = getCandidateInitials(name, `C${idx + 1}`);
                   const avatarColor = getAvatarColorClass(name);
 
-                  // Left edge accent rail
+                  // Left edge accent rail + dot color
                   const railClass =
                     c.match.totalScore >= 85
-                      ? 'border-l-4 border-l-emerald-500'
+                      ? 'border-l-4 border-l-[#28745D]'
                       : c.match.totalScore >= 70
-                      ? 'border-l-4 border-l-indigo-500'
-                      : 'border-l-4 border-l-amber-500';
+                      ? 'border-l-4 border-l-[#174C4A]'
+                      : 'border-l-4 border-l-[#B77928]';
 
-                  const scoreBarClass =
+                  const statusDotClass =
                     c.match.totalScore >= 85
-                      ? 'bg-emerald-600'
+                      ? 'text-[#28745D]'
                       : c.match.totalScore >= 70
-                      ? 'bg-indigo-600'
-                      : 'bg-amber-500';
+                      ? 'text-[#174C4A]'
+                      : 'text-[#B77928]';
+
+                  const statusBadgeClass =
+                    c.match.totalScore >= 85
+                      ? 'bg-[#DCEAE6] text-[#28745D] border-[#28745D]/30'
+                      : c.match.totalScore >= 70
+                      ? 'bg-[#DCEAE6] text-[#174C4A] border-[#174C4A]/30'
+                      : 'bg-[#FBF4EC] text-[#B77928] border-[#B77928]/30';
 
                   const isShortlisted = shortlistedIds.has(c.profile?.id || c.id);
 
                   return (
                     <MagicCard
                       key={c.profile?.id || c.id}
-                      gradientColor={c.match.totalScore >= 85 ? '#10B981' : '#6366F1'}
+                      glowFrom={c.match.totalScore >= 85 ? '#28745D' : '#174C4A'}
+                      glowTo="#DCEAE6"
                       gradientOpacity={0.08}
                       className={`p-4 ${railClass} shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-150 group flex flex-col lg:flex-row lg:items-center justify-between gap-4`}
                     >
-                      {/* Left: Avatar + Name + File/Email */}
+                      {/* Left: Dot + Avatar + Name + Resume / Email */}
                       <div className="flex items-center gap-3.5 lg:w-[38%] shrink-0">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs shrink-0 font-mono shadow-2xs ${avatarColor}`}>
+                        <span className={`text-xs ${statusDotClass}`}>●</span>
+                        <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs shrink-0 font-mono shadow-2xs ${avatarColor}`}>
                           {initials}
                         </div>
                         <div>
-                          <div className="font-bold text-sm sm:text-base text-[#111827] group-hover:text-indigo-600 transition-colors leading-tight">
+                          <div className="font-bold text-sm sm:text-base text-[#171817] group-hover:text-[#174C4A] transition-colors leading-tight">
                             {name}
                           </div>
-                          <div className="text-xs text-[#64748B] mt-0.5 flex items-center gap-1.5 font-sans">
+                          <div className="text-xs text-[#686A66] mt-0.5 flex items-center gap-1.5 font-sans">
                             <span className="truncate max-w-[140px] font-medium">{c.profile?.fileName || 'Resume.pdf'}</span>
-                            <span className="text-[#CBD5E1]">·</span>
-                            <span className="font-mono text-[11px] truncate max-w-[160px] text-[#94A3B8]">{c.profile?.email || 'No email provided'}</span>
+                            <span className="text-[#DDDCD6]">·</span>
+                            <span className="font-mono text-[11px] truncate max-w-[160px] text-[#686A66]">{c.profile?.email || 'No email provided'}</span>
                           </div>
                         </div>
                       </div>
 
-                      {/* Center: Tenure + Skill Chips */}
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 lg:w-[32%] pl-13 lg:pl-0">
-                        <span className="font-mono text-xs font-bold text-[#111827] shrink-0 bg-[#F1F5F9] px-2.5 py-1 rounded-md border border-[#E2E8F0]">
-                          {c.profile?.totalExperienceYears ? `${c.profile.totalExperienceYears} yrs` : 'Tenure N/A'}
+                      {/* Middle: Experience + Skill Chips + Status Badge */}
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 lg:w-[34%] pl-13 lg:pl-0">
+                        <span className="font-mono text-xs font-semibold text-[#171817] shrink-0 bg-[#F5F3EE] px-2.5 py-0.5 rounded-md border border-[#DDDCD6]">
+                          {c.profile?.totalExperienceYears ? `${c.profile.totalExperienceYears} years experience` : 'Tenure N/A'}
                         </span>
 
                         <div className="flex flex-wrap items-center gap-1.5">
                           {(c.profile?.skills || []).slice(0, 3).map((s, sIdx) => (
                             <span
                               key={sIdx}
-                              className="px-2.5 py-0.5 rounded bg-[#F8FAFC] text-[#334155] text-[11px] font-semibold border border-[#E2E8F0] hover:bg-slate-100 transition-colors"
+                              className="px-2 py-0.5 rounded bg-white text-[#171817] text-[11px] font-semibold border border-[#DDDCD6]"
                             >
                               {s}
                             </span>
                           ))}
                           {(c.profile?.skills || []).length > 3 && (
-                            <span className="text-[10px] text-[#64748B] font-mono px-1 font-semibold">
+                            <span className="text-[10px] text-[#686A66] font-mono px-1 font-semibold">
                               +{(c.profile?.skills || []).length - 3}
                             </span>
                           )}
                         </div>
+
+                        <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md border ${statusBadgeClass} shrink-0`}>
+                          {c.match.label}
+                        </span>
                       </div>
 
                       {/* Right: Prominent Score + WHY + Actions */}
-                      <div className="flex items-center justify-between lg:justify-end gap-4 lg:w-[30%] self-stretch sm:self-auto pl-13 lg:pl-0">
-                        <div className="text-right min-w-[95px]">
-                          <span className="font-mono font-black text-lg text-[#111827] block leading-none">
+                      <div className="flex items-center justify-between lg:justify-end gap-3 lg:w-[28%] self-stretch sm:self-auto pl-13 lg:pl-0">
+                        <div className="text-right shrink-0">
+                          <span className="font-mono font-black text-2xl text-[#174C4A] block leading-none">
                             <NumberTicker value={c.match.totalScore} suffix="%" />
-                          </span>
-                          <div className="w-full h-1.5 bg-[#E2E8F0] rounded-full overflow-hidden my-1">
-                            <div
-                              className={`h-full rounded-full ${scoreBarClass}`}
-                              style={{ width: `${c.match.totalScore}%` }}
-                            />
-                          </div>
-                          <span className="text-[9px] font-mono font-bold text-[#64748B] uppercase tracking-wider block">
-                            {c.match.label}
                           </span>
                         </div>
 
@@ -553,8 +529,8 @@ export const ATSWorkspaceShell: React.FC<ATSWorkspaceShellProps> = ({
                             onClick={() => setWhyCandidateId(whyCandidateId === (c.profile?.id || c.id) ? null : (c.profile?.id || c.id))}
                             title="Inspect AI Match Reason"
                           >
-                            <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-                            <span>WHY?</span>
+                            <Sparkles className="w-3.5 h-3.5 text-[#174C4A]" />
+                            <span>WHY</span>
                           </ShimmerButton>
 
                           {/* Bookmark Button */}
@@ -563,23 +539,23 @@ export const ATSWorkspaceShell: React.FC<ATSWorkspaceShellProps> = ({
                             onClick={() => onToggleShortlist(c.profile?.id || c.id)}
                             className={`p-1.5 rounded-lg border cursor-pointer transition-colors ${
                               isShortlisted
-                                ? 'bg-pink-50 text-[#E83E8C] border-pink-200'
-                                : 'bg-white text-[#64748B] border-[#CBD5E1] hover:text-[#111827] hover:bg-slate-50'
+                                ? 'bg-[#DCEAE6] text-[#174C4A] border-[#174C4A]/30'
+                                : 'bg-white text-[#686A66] border-[#DDDCD6] hover:text-[#171817] hover:bg-[#F5F3EE]'
                             }`}
                             title={isShortlisted ? 'Shortlisted' : 'Add to Shortlist'}
                           >
                             {isShortlisted ? (
-                              <BookmarkCheck className="w-4 h-4 text-[#E83E8C]" />
+                              <BookmarkCheck className="w-4 h-4 text-[#174C4A]" />
                             ) : (
                               <Bookmark className="w-4 h-4" />
                             )}
                           </button>
 
-                          {/* Dossier Secondary Button */}
+                          {/* Secondary Dossier Button */}
                           <button
                             type="button"
                             onClick={() => onSelectCandidate(c.profile?.id || c.id)}
-                            className="px-3.5 py-1.5 bg-[#111827] hover:bg-black text-white rounded-lg text-xs font-bold inline-flex items-center gap-1 cursor-pointer transition-all shadow-2xs hover:shadow-xs group"
+                            className="px-3.5 py-1.5 bg-[#171817] hover:bg-black text-white rounded-lg text-xs font-bold inline-flex items-center gap-1 cursor-pointer transition-all shadow-2xs hover:shadow-xs group"
                           >
                             <span>Dossier</span>
                             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
@@ -591,29 +567,27 @@ export const ATSWorkspaceShell: React.FC<ATSWorkspaceShellProps> = ({
                 })}
               </div>
             ) : (
-              <div className="p-10 text-center bg-[#F8FAFC] rounded-xl border border-[#E2E8F0] space-y-2">
-                <UploadCloud className="w-8 h-8 text-[#94A3B8] mx-auto" />
-                <h4 className="font-bold text-sm text-[#111827]">No Candidates Found</h4>
-                <p className="text-xs text-[#64748B]">Try adjusting your search query or tier filter.</p>
+              <div className="p-10 text-center bg-[#F5F3EE] rounded-xl border border-[#DDDCD6] space-y-2">
+                <UploadCloud className="w-8 h-8 text-[#686A66] mx-auto" />
+                <h4 className="font-bold text-sm text-[#171817]">No Candidates Found</h4>
+                <p className="text-xs text-[#686A66]">Try adjusting your search query or tier filter.</p>
               </div>
             )}
 
-            {/* ========================================================================= */}
-            {/* 7. WHY MICRO-INTERACTION OVERLAY DRAWER */}
-            {/* ========================================================================= */}
+            {/* WHY Overlay Drawer */}
             {whyCandidateId && (
-              <div className="p-4 rounded-xl bg-indigo-50 border border-indigo-200 text-xs text-[#111827] flex items-center justify-between shadow-2xs transition-all">
+              <div className="p-4 rounded-xl bg-[#DCEAE6]/40 border border-[#174C4A]/30 text-xs text-[#171817] flex items-center justify-between shadow-2xs transition-all">
                 <div className="flex items-center gap-2.5">
-                  <Sparkles className="w-4 h-4 text-indigo-600 shrink-0" />
+                  <Sparkles className="w-4 h-4 text-[#174C4A] shrink-0" />
                   <span>
-                    <strong className="text-indigo-900 font-extrabold">Rubric Match Reasoning:</strong>{' '}
+                    <strong className="text-[#174C4A] font-extrabold">Rubric Match Reasoning:</strong>{' '}
                     {candidates.find((c) => (c.profile?.id || c.id) === whyCandidateId)?.match.explanation}
                   </span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setWhyCandidateId(null)}
-                  className="text-xs font-bold text-indigo-700 hover:text-black cursor-pointer ml-4 shrink-0"
+                  className="text-xs font-bold text-[#174C4A] hover:text-black cursor-pointer ml-4 shrink-0"
                 >
                   Dismiss
                 </button>

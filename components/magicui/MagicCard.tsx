@@ -4,20 +4,28 @@ interface MagicCardProps {
   children: React.ReactNode;
   className?: string;
   gradientColor?: string;
+  glowFrom?: string;
+  glowTo?: string;
   gradientSize?: number;
   gradientOpacity?: number;
+  mode?: 'spotlight' | 'orb';
 }
 
 export const MagicCard: React.FC<MagicCardProps> = ({
   children,
   className = '',
-  gradientColor = '#6366F1',
-  gradientSize = 250,
+  gradientColor,
+  glowFrom = '#6366F1',
+  glowTo = '#10B981',
+  gradientSize = 260,
   gradientOpacity = 0.12,
+  mode = 'spotlight',
 }) => {
   const [position, setPosition] = useState<{ x: number; y: number }>({ x: -1000, y: -1000 });
   const [opacity, setOpacity] = useState<number>(0);
   const cardRef = useRef<HTMLDivElement>(null);
+
+  const primaryGlow = gradientColor || glowFrom;
 
   const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
@@ -40,12 +48,12 @@ export const MagicCard: React.FC<MagicCardProps> = ({
       onMouseLeave={handleMouseLeave}
       className={`relative rounded-xl border border-[#E2E8F0] bg-white overflow-hidden transition-all duration-200 ${className}`}
     >
-      {/* Radial Spotlight Glow Overlay */}
+      {/* Radial Glow Overlay */}
       <div
         className="pointer-events-none absolute inset-0 transition-opacity duration-300 z-10"
         style={{
           opacity,
-          background: `radial-gradient(${gradientSize}px circle at ${position.x}px ${position.y}px, ${gradientColor}, transparent 80%)`,
+          background: `radial-gradient(${gradientSize}px circle at ${position.x}px ${position.y}px, ${primaryGlow}, ${glowTo}, transparent 80%)`,
         }}
       />
       

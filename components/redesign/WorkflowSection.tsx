@@ -1,110 +1,79 @@
 import React from 'react';
-import { Sparkles, FileText, Cpu, CheckCircle2, Award, Users, ArrowRight } from 'lucide-react';
 
 export const WorkflowSection: React.FC = () => {
   return (
-    <section className="py-20 sm:py-28 bg-white border-t border-[#E2E8F0]">
-      <div className="max-w-[1400px] mx-auto px-6 sm:px-10 space-y-12">
+    <section className="py-20 sm:py-28 bg-white border-t border-[#DDDCD6]">
+      <div className="max-w-[1300px] mx-auto px-6 sm:px-10 space-y-12">
         
         {/* Header */}
-        <div className="max-w-3xl mx-auto text-center space-y-3">
-          <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#0D3834] bg-emerald-50 px-3.5 py-1 rounded-full border border-emerald-200/80 inline-block">
-            CONNECTED WORKFLOW
+        <div className="max-w-2xl space-y-3">
+          <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#174C4A] bg-[#DCEAE6] px-3.5 py-1 rounded-full border border-[#174C4A]/20 inline-block">
+            SYSTEM WORKFLOW
           </span>
 
-          <h2 className="text-3xl sm:text-5xl font-extrabold font-heading text-[#0F172A] tracking-tight leading-[1.08]">
-            End-To-End Intelligent Pipeline
+          <h2 className="text-3xl sm:text-5xl font-black font-heading text-[#171817] tracking-tight uppercase leading-tight">
+            TRANSPARENT.<br />EXPLAINABLE PIPELINE.
           </h2>
 
-          <p className="text-base sm:text-lg text-[#64748B]">
-            From raw resume PDF upload to verified evidence dossier and hiring decision.
+          <p className="text-sm sm:text-base text-[#686A66]">
+            Every candidate flows through a 6-stage deterministic verification process.
           </p>
         </div>
 
-        {/* Visual Workflow Steps / Animated Path */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 relative">
+        {/* 6 Clean Connected Steps */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 relative">
           
-          {/* STEP 1 */}
-          <div className="bg-[#F8FAFC] rounded-2xl border border-[#E2E8F0] p-5 text-center space-y-3 hover:border-[#0D3834] transition-all relative group">
-            <div className="w-12 h-12 rounded-2xl bg-[#0D3834] text-white flex items-center justify-center mx-auto shadow-sm group-hover:scale-105 transition-transform">
-              <FileText className="w-6 h-6 text-emerald-300" />
-            </div>
-            <div>
-              <span className="text-[10px] font-mono font-bold text-slate-400 block uppercase">01 / Ingestion</span>
-              <h4 className="font-bold text-sm text-[#0F172A] mt-0.5">Resume PDF</h4>
-            </div>
-            <p className="text-[11px] text-slate-500 leading-snug">
-              Batch parsing of unformatted resumes
+          {/* 01 Resume Upload */}
+          <div className="bg-[#F5F3EE] rounded-2xl border border-[#DDDCD6] p-5 space-y-3 relative">
+            <span className="text-xs font-mono font-extrabold text-[#174C4A] block">01</span>
+            <h4 className="font-extrabold text-sm text-[#171817]">Resume Upload</h4>
+            <p className="text-xs text-[#686A66] leading-normal">
+              Batch processing of unformatted PDF resumes.
             </p>
           </div>
 
-          {/* STEP 2 */}
-          <div className="bg-[#F8FAFC] rounded-2xl border border-[#E2E8F0] p-5 text-center space-y-3 hover:border-[#0D3834] transition-all relative group">
-            <div className="w-12 h-12 rounded-2xl bg-[#0D3834] text-white flex items-center justify-center mx-auto shadow-sm group-hover:scale-105 transition-transform">
-              <Cpu className="w-6 h-6 text-emerald-300" />
-            </div>
-            <div>
-              <span className="text-[10px] font-mono font-bold text-slate-400 block uppercase">02 / Fact Extraction</span>
-              <h4 className="font-bold text-sm text-[#0F172A] mt-0.5">AI Fact Extraction</h4>
-            </div>
-            <p className="text-[11px] text-slate-500 leading-snug">
-              Google Gemini schema extraction
+          {/* 02 AI Fact Extraction */}
+          <div className="bg-[#F5F3EE] rounded-2xl border border-[#DDDCD6] p-5 space-y-3 relative">
+            <span className="text-xs font-mono font-extrabold text-[#174C4A] block">02</span>
+            <h4 className="font-extrabold text-sm text-[#171817]">AI Fact Extraction</h4>
+            <p className="text-xs text-[#686A66] leading-normal">
+              Gemini schema extraction of skills, tenure & claims.
             </p>
           </div>
 
-          {/* STEP 3 */}
-          <div className="bg-[#F8FAFC] rounded-2xl border border-[#E2E8F0] p-5 text-center space-y-3 hover:border-[#0D3834] transition-all relative group">
-            <div className="w-12 h-12 rounded-2xl bg-[#0D3834] text-white flex items-center justify-center mx-auto shadow-sm group-hover:scale-105 transition-transform">
-              <Sparkles className="w-6 h-6 text-emerald-300" />
-            </div>
-            <div>
-              <span className="text-[10px] font-mono font-bold text-slate-400 block uppercase">03 / Skill Mapping</span>
-              <h4 className="font-bold text-sm text-[#0F172A] mt-0.5">Skill Analysis</h4>
-            </div>
-            <p className="text-[11px] text-slate-500 leading-snug">
-              Normalization & tenure verification
+          {/* 03 Requirement Matching */}
+          <div className="bg-[#F5F3EE] rounded-2xl border border-[#DDDCD6] p-5 space-y-3 relative">
+            <span className="text-xs font-mono font-extrabold text-[#174C4A] block">03</span>
+            <h4 className="font-extrabold text-sm text-[#171817]">Requirement Matching</h4>
+            <p className="text-xs text-[#686A66] leading-normal">
+              Skill normalization and job requirement mapping.
             </p>
           </div>
 
-          {/* STEP 4 */}
-          <div className="bg-[#F8FAFC] rounded-2xl border border-[#E2E8F0] p-5 text-center space-y-3 hover:border-[#0D3834] transition-all relative group">
-            <div className="w-12 h-12 rounded-2xl bg-[#0D3834] text-white flex items-center justify-center mx-auto shadow-sm group-hover:scale-105 transition-transform">
-              <CheckCircle2 className="w-6 h-6 text-emerald-300" />
-            </div>
-            <div>
-              <span className="text-[10px] font-mono font-bold text-slate-400 block uppercase">04 / Evaluation</span>
-              <h4 className="font-bold text-sm text-[#0F172A] mt-0.5">100-Pt Rubric</h4>
-            </div>
-            <p className="text-[11px] text-slate-500 leading-snug">
-              Deterministic 100-pt fit score
+          {/* 04 100-Point Scoring */}
+          <div className="bg-[#F5F3EE] rounded-2xl border border-[#DDDCD6] p-5 space-y-3 relative">
+            <span className="text-xs font-mono font-extrabold text-[#174C4A] block">04</span>
+            <h4 className="font-extrabold text-sm text-[#171817]">100-Point Scoring</h4>
+            <p className="text-xs text-[#686A66] leading-normal">
+              Deterministic rubric scoring (Skills, Exp, Edu).
             </p>
           </div>
 
-          {/* STEP 5 */}
-          <div className="bg-[#F8FAFC] rounded-2xl border border-[#E2E8F0] p-5 text-center space-y-3 hover:border-[#0D3834] transition-all relative group">
-            <div className="w-12 h-12 rounded-2xl bg-[#0D3834] text-white flex items-center justify-center mx-auto shadow-sm group-hover:scale-105 transition-transform">
-              <Users className="w-6 h-6 text-emerald-300" />
-            </div>
-            <div>
-              <span className="text-[10px] font-mono font-bold text-slate-400 block uppercase">05 / Autopilot</span>
-              <h4 className="font-bold text-sm text-[#0F172A] mt-0.5">Interview Sync</h4>
-            </div>
-            <p className="text-[11px] text-slate-500 leading-snug">
-              Auto-agenda & panel invites
+          {/* 05 Candidate Ranking */}
+          <div className="bg-[#F5F3EE] rounded-2xl border border-[#DDDCD6] p-5 space-y-3 relative">
+            <span className="text-xs font-mono font-extrabold text-[#174C4A] block">05</span>
+            <h4 className="font-extrabold text-sm text-[#171817]">Candidate Ranking</h4>
+            <p className="text-xs text-[#686A66] leading-normal">
+              Tier classification & real-time sorting.
             </p>
           </div>
 
-          {/* STEP 6 */}
-          <div className="bg-[#F8FAFC] rounded-2xl border border-[#E2E8F0] p-5 text-center space-y-3 hover:border-[#0D3834] transition-all relative group">
-            <div className="w-12 h-12 rounded-2xl bg-[#0D3834] text-white flex items-center justify-center mx-auto shadow-sm group-hover:scale-105 transition-transform">
-              <Award className="w-6 h-6 text-emerald-300" />
-            </div>
-            <div>
-              <span className="text-[10px] font-mono font-bold text-slate-400 block uppercase">06 / Decision</span>
-              <h4 className="font-bold text-sm text-[#0F172A] mt-0.5">Hiring Dossier</h4>
-            </div>
-            <p className="text-[11px] text-slate-500 leading-snug">
-              Verbatim evidence & shortlist
+          {/* 06 Evidence Review */}
+          <div className="bg-[#F5F3EE] rounded-2xl border border-[#DDDCD6] p-5 space-y-3 relative">
+            <span className="text-xs font-mono font-extrabold text-[#174C4A] block">06</span>
+            <h4 className="font-extrabold text-sm text-[#171817]">Evidence Review</h4>
+            <p className="text-xs text-[#686A66] leading-normal">
+              Verbatim quote verification for every candidate claim.
             </p>
           </div>
 

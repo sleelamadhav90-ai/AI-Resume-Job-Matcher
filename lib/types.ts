@@ -70,10 +70,27 @@ export interface CandidateMatchResult {
   claimsToVerify: ClaimToVerify[];
 }
 
-export interface AnalysisState {
-  jobDescription: string;
-  uploadedFiles: File[];
-  isAnalyzing: boolean;
-  results: CandidateMatchResult[];
-  selectedCandidateId: string | null;
+// Stage 3: Extracted resume item
+export interface ExtractedResumeItem {
+  fileName: string;
+  status: 'processed' | 'failed';
+  characterCount?: number;
+  wordCount?: number;
+  pageCount?: number;
+  textPreview?: string;
+  isTruncated?: boolean;
+  reason?: 'NO_TEXT_FOUND' | 'CORRUPTED' | 'INVALID_FILE' | 'UNKNOWN';
+  message?: string;
+}
+
+// Stage 3: API response
+export interface AnalyzeStage3Response {
+  success: boolean;
+  message: string;
+  jobDescriptionLength: number;
+  resumeCount: number;
+  processedCount: number;
+  failedCount: number;
+  resumes: ExtractedResumeItem[];
+  error?: string;
 }

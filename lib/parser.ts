@@ -1,10 +1,11 @@
 /**
- * Real PDF text extraction module
- * Converts PDF Buffer to cleaned, structured text.
- * Handles normal text PDFs, scanned/image-only PDFs, and corrupted files gracefully.
+ * Real PDF & DOCX text extraction module
+ * Converts PDF / DOCX Buffer to cleaned, structured text.
+ * Handles normal text PDFs, DOCX documents, scanned/empty files, and corrupted files gracefully.
  */
 
 import { PDFParse } from 'pdf-parse';
+import mammoth from 'mammoth';
 
 export interface PdfExtractionResult {
   success: boolean;
@@ -21,11 +22,11 @@ export interface PdfExtractionResult {
 }
 
 const MAX_EXTRACTED_CHARACTERS = 100000; // 100k character limit per resume
-const MIN_MEANINGFUL_CHAR_LENGTH = 30;   // Threshold to detect scanned / empty PDFs
+const MIN_MEANINGFUL_CHAR_LENGTH = 30;   // Threshold to detect scanned / empty resumes
 const MIN_MEANINGFUL_WORD_COUNT = 5;
 
 /**
- * Safely cleans raw extracted PDF text:
+ * Safely cleans raw extracted text:
  * - Normalizes excessive inline whitespace
  * - Normalizes repeated blank lines (preserves paragraph breaks)
  * - Strips page footers/markers (e.g. "-- 1 of 2 --", "Page 1 of 3")
@@ -132,7 +133,6 @@ export async function extractTextFromPdf(
       message: 'Text extracted successfully',
     };
   } catch (err: any) {
-    // Graceful handling of corrupted/malformed PDFs
     return {
       success: false,
       fileName,
@@ -148,4 +148,84 @@ export async function extractTextFromPdf(
       }
     }
   }
+}
+
+/**
+ * Extracts and cleans text from a DOCX Buffer using mammoth.
+ */
+export async function extractTextFromDocx(
+  buffer: Buffer,
+  fileName: string = 'resume.docx'
+): Promise<PdfExtractionResult> {
+  try {
+    if (!buffer || buffer.length === 0) {
+      return {
+        success: false,
+        fileName,
+        reason: 'INVALID_FILE',
+        message: `No data found in "${fileName}". The file is empty.`,
+      };
+    }
+
+    const result = await mammoth.extractRawText({ buffer });
+    const rawText = result.value || '';
+    let cleanedText = cleanExtractedText(rawText);
+
+    let isTruncated = false;
+    if (cleanedText.length > MAX_EXTRACTED_CHARACTERS) {
+      cleanedText =
+        cleanedText.slice(0, MAX_EXTRACTED_CHARACTERS) +
+        '\n\n[Extracted text truncated at 100,000 characters]';
+      isTruncated = true;
+    }
+
+    const words = cleanedText.trim() ? cleanedText.trim().split(/\s+/).filter(Boolean) : [];
+    const characterCount = cleanedText.length;
+    const wordCount = words.length;
+
+    if (characterCount < MIN_MEANINGFUL_CHAR_LENGTH || wordCount < MIN_MEANINGFUL_WORD_COUNT) {
+      return {
+        success: false,
+        fileName,
+        characterCount,
+        wordCount,
+        reason: 'NO_TEXT_FOUND',
+        message: `"${fileName}" contains no extractable text.`,
+      };
+    }
+
+    return {
+      success: true,
+      fileName,
+      rawText,
+      cleanedText,
+      textPreview: generateTextPreview(cleanedText),
+      characterCount,
+      wordCount,
+      pageCount: 1,
+      isTruncated,
+      message: 'Text extracted successfully',
+    };
+  } catch (err: any) {
+    return {
+      success: false,
+      fileName,
+      reason: 'CORRUPTED',
+      message: `Could not read "${fileName}". The file may be corrupted or invalid.`,
+    };
+  }
+}
+
+/**
+ * Automatically routes PDF or DOCX file to the appropriate text extractor.
+ */
+export async function extractTextFromResume(
+  buffer: Buffer,
+  fileName: string
+): Promise<PdfExtractionResult> {
+  const lower = fileName.toLowerCase();
+  if (lower.endsWith('.docx') || lower.endsWith('.doc')) {
+    return extractTextFromDocx(buffer, fileName);
+  }
+  return extractTextFromPdf(buffer, fileName);
 }

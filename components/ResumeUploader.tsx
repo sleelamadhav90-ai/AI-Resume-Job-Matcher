@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { UploadCloud, FileText, X, AlertCircle, Check } from 'lucide-react';
+import { UploadCloud, FileText, X, AlertCircle, Check, RefreshCw } from 'lucide-react';
 
 interface ResumeUploaderProps {
   files: File[];
@@ -50,16 +50,22 @@ export const ResumeUploader: React.FC<ResumeUploaderProps> = ({
         break;
       }
 
-      if (
-        file.type !== 'application/pdf' &&
-        !file.name.toLowerCase().endsWith('.pdf')
-      ) {
-        localError = `"${file.name}" is not a PDF. Only PDF resumes are accepted.`;
+      const lowerName = file.name.toLowerCase();
+      const isPdf = lowerName.endsWith('.pdf');
+      const isDocx = lowerName.endsWith('.docx') || lowerName.endsWith('.doc');
+
+      if (!isPdf && !isDocx) {
+        localError = `"${file.name}" is not supported. Please upload a PDF or DOCX resume.`;
+        continue;
+      }
+
+      if (file.size === 0) {
+        localError = `"${file.name}" is empty (0 bytes). Please upload a valid resume.`;
         continue;
       }
 
       if (file.size > maxSizeBytes) {
-        localError = `"${file.name}" exceeds 5 MB limit.`;
+        localError = `"${file.name}" exceeds the 5 MB size limit.`;
         continue;
       }
 
@@ -68,7 +74,7 @@ export const ResumeUploader: React.FC<ResumeUploaderProps> = ({
         validFiles.some((f) => f.name === file.name && f.size === file.size);
 
       if (isDuplicate) {
-        localError = `"${file.name}" has already been added.`;
+        localError = `"${file.name}" has already been selected.`;
         continue;
       }
 
@@ -98,6 +104,7 @@ export const ResumeUploader: React.FC<ResumeUploaderProps> = ({
     e.stopPropagation();
     setIsDragOver(false);
     if (disabled) return;
+
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       validateAndAddFiles(e.dataTransfer.files);
     }
@@ -120,95 +127,120 @@ export const ResumeUploader: React.FC<ResumeUploaderProps> = ({
   const activeError = fileError || error;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {/* Upload Zone */}
       <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => !disabled && fileInputRef.current?.click()}
-        className={`border-2 border-dashed rounded p-6 text-center cursor-pointer transition-all ${
+        className={`border-2 border-dashed rounded-xl p-6 sm:p-8 text-center cursor-pointer transition-all ${
           disabled
-            ? 'border-[#E5E7EB] bg-[#F9FAFB] cursor-not-allowed'
+            ? 'border-[#DDDCD6] bg-[#F5F3EE] cursor-not-allowed opacity-60'
             : isDragOver
-            ? 'border-[#202124] bg-[#F3F4F6]'
-            : 'border-[#D1D5DB] bg-[#FAFBFC] hover:border-[#202124] hover:bg-white'
+            ? 'border-[#174C4A] bg-[#DCEAE6]/30 shadow-sm'
+            : 'border-[#DDDCD6] bg-[#F5F3EE]/50 hover:border-[#174C4A] hover:bg-white'
         }`}
       >
         <input
           ref={fileInputRef}
           type="file"
-          accept=".pdf,application/pdf"
+          accept=".pdf,.docx,.doc,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword"
           multiple
           disabled={disabled}
           onChange={handleFileInputChange}
           className="hidden"
         />
 
-        <div className="flex flex-col items-center justify-center space-y-2">
-          <div className="w-10 h-10 rounded-full bg-white border border-[#E5E7EB] flex items-center justify-center text-[#202124] shadow-2xs">
-            <UploadCloud className="w-5 h-5 text-[#202124]" />
+        <div className="flex flex-col items-center justify-center space-y-3">
+          <div className="w-12 h-12 rounded-full bg-white border border-[#DDDCD6] flex items-center justify-center text-[#174C4A] shadow-2xs">
+            <UploadCloud className="w-6 h-6 text-[#174C4A]" />
           </div>
-          <div>
-            <span className="font-semibold text-xs text-[#202124] block">
-              Click to browse or drop candidate resumes
+          <div className="space-y-1">
+            <span className="font-extrabold text-sm text-[#171817] block">
+              Click to upload or drag & drop resume files
             </span>
-            <span className="text-[11px] text-[#6B7280] block mt-0.5">
-              PDF only · Up to 10 files · Max 5 MB per file
+            <span className="text-xs text-[#686A66] block">
+              Supports <strong className="text-[#171817]">PDF</strong> and <strong className="text-[#171817]">DOCX</strong> formats · Max 5 MB per file
             </span>
           </div>
         </div>
       </div>
 
+      {/* Error Alert */}
       {activeError && (
-        <div className="p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700 flex items-center gap-1.5">
-          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700 flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
           <span>{activeError}</span>
         </div>
       )}
 
       {/* Selected File List */}
       {files.length > 0 && (
-        <div className="space-y-1.5 pt-1">
-          <div className="flex items-center justify-between text-xs text-[#6B7280]">
-            <span className="font-medium">Uploaded resumes ({files.length}/{maxFiles}):</span>
-            <button
-              type="button"
-              disabled={disabled}
-              onClick={() => onFilesChange([])}
-              className="text-[11px] text-[#6B7280] hover:text-[#202124] underline cursor-pointer"
-            >
-              Clear all
-            </button>
+        <div className="space-y-2 pt-1">
+          <div className="flex items-center justify-between text-xs text-[#686A66]">
+            <span className="font-bold text-[#171817]">
+              Selected Resumes ({files.length}/{maxFiles}):
+            </span>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                disabled={disabled}
+                onClick={() => !disabled && fileInputRef.current?.click()}
+                className="text-xs text-[#174C4A] font-bold hover:underline inline-flex items-center gap-1 cursor-pointer"
+              >
+                <RefreshCw className="w-3 h-3" />
+                <span>Change / Add More</span>
+              </button>
+              <button
+                type="button"
+                disabled={disabled}
+                onClick={() => onFilesChange([])}
+                className="text-xs text-[#686A66] hover:text-[#171817] underline cursor-pointer"
+              >
+                Clear all
+              </button>
+            </div>
           </div>
 
-          <div className="max-h-44 overflow-y-auto space-y-1 pr-1">
-            {files.map((file, idx) => (
-              <div
-                key={`${file.name}-${idx}`}
-                className="flex items-center justify-between p-2 bg-white border border-[#E5E7EB] rounded text-xs"
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <FileText className="w-3.5 h-3.5 text-[#6B7280] shrink-0" />
-                  <span className="truncate text-[#202124] font-medium">{file.name}</span>
-                  <span className="text-[11px] text-[#9CA3AF] shrink-0 font-mono">
-                    ({formatFileSize(file.size)})
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  disabled={disabled}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRemoveFile(idx);
-                  }}
-                  className="p-1 text-[#9CA3AF] hover:text-[#202124] rounded cursor-pointer"
-                  title="Remove file"
+          <div className="max-h-56 overflow-y-auto space-y-2 pr-1">
+            {files.map((file, idx) => {
+              const isDocx = file.name.toLowerCase().endsWith('.docx') || file.name.toLowerCase().endsWith('.doc');
+
+              return (
+                <div
+                  key={`${file.name}-${idx}`}
+                  className="flex items-center justify-between p-3 bg-white border border-[#DDDCD6] rounded-lg text-xs shadow-2xs group hover:border-[#174C4A] transition-colors"
                 >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ))}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-7 h-7 rounded bg-[#DCEAE6] text-[#174C4A] flex items-center justify-center shrink-0 font-mono text-[10px] font-extrabold uppercase">
+                      {isDocx ? 'DOCX' : 'PDF'}
+                    </div>
+                    <div className="min-w-0">
+                      <span className="truncate text-[#171817] font-bold block leading-tight">
+                        {file.name}
+                      </span>
+                      <span className="text-[11px] text-[#686A66] font-mono block">
+                        {formatFileSize(file.size)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={disabled}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveFile(idx);
+                    }}
+                    className="p-1.5 text-[#686A66] hover:text-red-600 rounded cursor-pointer transition-colors"
+                    title="Remove resume"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

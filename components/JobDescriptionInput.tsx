@@ -1,5 +1,4 @@
 import React from 'react';
-import { Briefcase, Sparkles, FileText, Check } from 'lucide-react';
 
 interface JobDescriptionInputProps {
   value: string;
@@ -56,7 +55,7 @@ export const JobDescriptionInput: React.FC<JobDescriptionInputProps> = ({
     <div className="space-y-3">
       {/* Template Selector */}
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-        <span className="text-[#6B7280] font-medium">Quick load requisition criteria:</span>
+        <span className="text-[#686A66] font-medium">Quick load requisition criteria:</span>
         <div className="flex flex-wrap gap-1.5">
           {SAMPLE_TEMPLATES.map((tmpl) => (
             <button
@@ -67,7 +66,7 @@ export const JobDescriptionInput: React.FC<JobDescriptionInputProps> = ({
                 onChange(tmpl.desc);
                 if (onClearError) onClearError();
               }}
-              className="px-2.5 py-1 text-xs bg-white hover:bg-[#F3F4F6] text-[#202124] border border-[#E5E7EB] rounded font-medium cursor-pointer transition-colors"
+              className="px-2.5 py-1 text-xs bg-white hover:bg-[#F5F3EE] text-[#171817] border border-[#DDDCD6] rounded-md font-semibold cursor-pointer transition-colors"
             >
               {tmpl.title}
             </button>
@@ -85,17 +84,17 @@ export const JobDescriptionInput: React.FC<JobDescriptionInputProps> = ({
           }}
           disabled={disabled}
           placeholder="Paste full job description with required skills, minimum years of experience, and education criteria..."
-          rows={10}
-          className="w-full p-3.5 bg-white border border-[#E5E7EB] rounded text-[13.5px] text-[#202124] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#202124] focus:ring-1 focus:ring-[#202124] transition-all resize-y leading-relaxed font-sans"
+          rows={9}
+          className="w-full p-3.5 bg-white border border-[#DDDCD6] rounded-xl text-xs text-[#171817] placeholder:text-[#686A66] focus:outline-none focus:border-[#174C4A] focus:ring-1 focus:ring-[#174C4A] transition-all resize-y leading-relaxed font-sans"
         />
         {error && (
           <p className="text-xs text-red-600 mt-1">{error}</p>
         )}
       </div>
 
-      <div className="flex items-center justify-between text-xs text-[#6B7280]">
-        <span>Explicit tokens, experience duration & degree criteria are analyzed.</span>
-        <span className="font-mono">{wordCount} words</span>
+      <div className="flex items-center justify-between text-xs text-[#686A66]">
+        <span>Required skills, experience duration & degree criteria are evaluated.</span>
+        <span className="font-mono text-[11px] font-bold">{wordCount} words</span>
       </div>
     </div>
   );

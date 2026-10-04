@@ -1,10 +1,10 @@
 /**
  * /api/analyze route handler
- * Stage 5: Real PDF text extraction + Gemini AI extraction + Deterministic Scoring & Ranking
+ * Stage 5: Real PDF & DOCX text extraction + Gemini AI extraction + Deterministic Scoring & Ranking
  */
 
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
-import { extractTextFromPdf, PdfExtractionResult } from '../../../lib/parser';
+import { extractTextFromResume, PdfExtractionResult } from '../../../lib/parser';
 import { extractCandidateFromResume, extractJobRequirements } from '../../../lib/ai';
 import { rankCandidates } from '../../../lib/scoring';
 import {
@@ -21,7 +21,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
 /**
  * Core business workflow for Stage 5 analysis:
- * 1. Extract raw PDF text and filter valid resumes
+ * 1. Extract raw text from PDF & DOCX resumes and filter valid files
  * 2. Verify Gemini API configuration
  * 3. Extract structured job requirements via Gemini (1 call)
  * 4. Extract structured candidate profiles via Gemini (1 call per valid resume)
@@ -29,7 +29,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
  */
 async function processAnalyzeWorkflow(
   jobDescription: string,
-  pdfFiles: Array<{ name: string; buffer: Buffer }>
+  resumeFiles: Array<{ name: string; buffer: Buffer }>
 ): Promise<{ statusCode: number; data: AnalyzeStage5Response }> {
   // 1. Validate inputs
   if (!jobDescription || typeof jobDescription !== 'string' || !jobDescription.trim()) {
@@ -46,13 +46,13 @@ async function processAnalyzeWorkflow(
     };
   }
 
-  if (!pdfFiles || pdfFiles.length === 0) {
+  if (!resumeFiles || resumeFiles.length === 0) {
     return {
       statusCode: 400,
       data: {
         success: false,
         message: 'Validation failed',
-        error: 'Please upload at least one resume.',
+        error: 'Please upload at least one resume (PDF or DOCX).',
         candidates: [],
         failedCandidates: [],
         unprocessedResumes: [],
@@ -60,13 +60,13 @@ async function processAnalyzeWorkflow(
     };
   }
 
-  if (pdfFiles.length > MAX_FILES) {
+  if (resumeFiles.length > MAX_FILES) {
     return {
       statusCode: 400,
       data: {
         success: false,
         message: 'Validation failed',
-        error: `Maximum ${MAX_FILES} resumes allowed.`,
+        error: `Maximum ${MAX_FILES} resumes allowed per analysis run.`,
         candidates: [],
         failedCandidates: [],
         unprocessedResumes: [],
@@ -74,7 +74,7 @@ async function processAnalyzeWorkflow(
     };
   }
 
-  // 2. Stage 3: PDF Text Extraction
+  // 2. Stage 3: PDF / DOCX Text Extraction
   const textExtractionResults: Array<{
     name: string;
     text: string;
@@ -82,14 +82,16 @@ async function processAnalyzeWorkflow(
   }> = [];
   const unprocessedResumes: ExtractedResumeItem[] = [];
 
-  for (const file of pdfFiles) {
-    const isPdf = file.name.toLowerCase().endsWith('.pdf');
-    if (!isPdf) {
+  for (const file of resumeFiles) {
+    const lowerName = file.name.toLowerCase();
+    const isSupportedFormat = lowerName.endsWith('.pdf') || lowerName.endsWith('.docx') || lowerName.endsWith('.doc');
+
+    if (!isSupportedFormat) {
       unprocessedResumes.push({
         fileName: file.name,
         status: 'failed',
         reason: 'INVALID_FILE',
-        message: 'Only PDF files are supported.',
+        message: 'Only PDF and DOCX resume files are supported.',
       });
       continue;
     }
@@ -105,7 +107,7 @@ async function processAnalyzeWorkflow(
     }
 
     try {
-      const extraction = await extractTextFromPdf(file.buffer, file.name);
+      const extraction = await extractTextFromResume(file.buffer, file.name);
       if (extraction.success && extraction.cleanedText) {
         textExtractionResults.push({
           name: file.name,
@@ -125,7 +127,7 @@ async function processAnalyzeWorkflow(
         fileName: file.name,
         status: 'failed',
         reason: 'CORRUPTED',
-        message: `Could not read "${file.name}". The PDF may be corrupted or invalid.`,
+        message: `Could not read "${file.name}". The file may be corrupted or unreadable.`,
       });
     }
   }
@@ -243,18 +245,18 @@ export async function POST(request: Request): Promise<Response> {
     const jobDescription = formData.get('jobDescription') as string;
     const rawResumes = formData.getAll('resumes');
 
-    const pdfFiles: Array<{ name: string; buffer: Buffer }> = [];
+    const resumeFiles: Array<{ name: string; buffer: Buffer }> = [];
     for (const item of rawResumes) {
       if (item instanceof File) {
         const arrayBuffer = await item.arrayBuffer();
-        pdfFiles.push({
+        resumeFiles.push({
           name: item.name,
           buffer: Buffer.from(arrayBuffer),
         });
       }
     }
 
-    const { statusCode, data } = await processAnalyzeWorkflow(jobDescription, pdfFiles);
+    const { statusCode, data } = await processAnalyzeWorkflow(jobDescription, resumeFiles);
     return Response.json(data, { status: statusCode });
   } catch (err: any) {
     return Response.json(
@@ -279,12 +281,12 @@ export async function handleAnalyzeExpress(req: ExpressRequest, res: ExpressResp
     const jobDescription = req.body?.jobDescription;
     const files = (req.files as Express.Multer.File[]) || [];
 
-    const pdfFiles: Array<{ name: string; buffer: Buffer }> = files.map((f) => ({
+    const resumeFiles: Array<{ name: string; buffer: Buffer }> = files.map((f) => ({
       name: f.originalname,
       buffer: f.buffer,
     }));
 
-    const { statusCode, data } = await processAnalyzeWorkflow(jobDescription, pdfFiles);
+    const { statusCode, data } = await processAnalyzeWorkflow(jobDescription, resumeFiles);
     return res.status(statusCode).json(data);
   } catch (err: any) {
     console.error('Server error in handleAnalyzeExpress:', err);

@@ -255,109 +255,66 @@ export const ATSWorkspaceShell: React.FC<ATSWorkspaceShellProps> = ({
           {/* ========================================================================= */}
           {/* 3. 4 KPI CARDS */}
           {/* ========================================================================= */}
-          {/* ========================================================================= */}
-          {/* 3. 4 KPI CARDS */}
-          {/* ========================================================================= */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pb-1 ATSWorkspaceShell-metrics-container">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pb-1 ATSWorkspaceShell-metrics-container bg-[#171817] p-5 rounded-2xl border border-white/10">
             
-            {/* KPI 1: Evaluated Dossiers */}
+            {/* KPI 1: 100 Point Matching */}
             <MagicCard 
-              glowFrom="#6366F1" 
-              glowTo="#8B5CF6" 
-              gradientOpacity={0.15} 
-              className="p-5 bg-white border-[#E5E2DC] hover:border-[#6366F1]/30 transition-all shadow-xs space-y-3"
+              glowFrom="#00A86B" 
+              glowTo="#174C4A" 
+              gradientOpacity={0.20} 
+              className="p-6 bg-[#242524] border-white/5 hover:border-[#00A86B]/30 transition-all shadow-xl space-y-2 flex flex-col justify-center text-center"
             >
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono uppercase font-black tracking-wider text-[#525866]">
-                  Evaluated Dossiers
-                </span>
-                <div className="w-7 h-7 rounded-lg bg-[#6366F1]/10 flex items-center justify-center text-[#6366F1]">
-                  <FileText className="w-4 h-4" />
-                </div>
+              <div className="text-4xl font-extrabold font-mono text-white tracking-tight">
+                <NumberTicker value={100} />
               </div>
-              <div className="space-y-0.5">
-                <div className="text-3xl font-black font-mono text-[#18181B] tracking-tight">
-                  <NumberTicker value={totalEvaluated} />
-                </div>
-                <span className="text-[11px] font-bold text-[#525866] block">
-                  Resumes fully analyzed
-                </span>
-              </div>
+              <span className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-[#7FAEA7] font-black block">
+                POINT MATCHING
+              </span>
             </MagicCard>
 
-            {/* KPI 2: Strong Matches */}
+            {/* KPI 2: 4 Claim Verification */}
             <MagicCard 
-              glowFrom="#6366F1" 
-              glowTo="#8B5CF6" 
-              gradientOpacity={0.15} 
-              className="p-5 bg-white border-[#E5E2DC] hover:border-[#6366F1]/30 transition-all shadow-xs space-y-3"
+              glowFrom="#00A86B" 
+              glowTo="#174C4A" 
+              gradientOpacity={0.20} 
+              className="p-6 bg-[#242524] border-white/5 hover:border-[#00A86B]/30 transition-all shadow-xl space-y-2 flex flex-col justify-center text-center"
             >
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono uppercase font-black tracking-wider text-[#525866]">
-                  Strong Matches
-                </span>
-                <div className="w-7 h-7 rounded-lg bg-[#8B5CF6]/10 flex items-center justify-center text-[#8B5CF6]">
-                  <Sparkles className="w-4 h-4" />
-                </div>
+              <div className="text-4xl font-extrabold font-mono text-white tracking-tight">
+                <NumberTicker value={4} />
               </div>
-              <div className="space-y-0.5">
-                <div className="text-3xl font-black font-mono text-[#0D3834] tracking-tight">
-                  <NumberTicker value={strongMatches.length} />
-                </div>
-                <span className="text-[11px] font-bold text-[#525866] block">
-                  Scored 85%+ overall fit
-                </span>
-              </div>
+              <span className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-[#7FAEA7] font-black block">
+                CLAIM VERIFICATION STATES
+              </span>
             </MagicCard>
 
-            {/* KPI 3: Average Match */}
+            {/* KPI 3: Multiple Resume Analysis */}
             <MagicCard 
-              glowFrom="#6366F1" 
-              glowTo="#8B5CF6" 
-              gradientOpacity={0.15} 
-              className="p-5 bg-white border-[#E5E2DC] hover:border-[#6366F1]/30 transition-all shadow-xs space-y-3"
+              glowFrom="#00A86B" 
+              glowTo="#174C4A" 
+              gradientOpacity={0.20} 
+              className="p-6 bg-[#242524] border-white/5 hover:border-[#00A86B]/30 transition-all shadow-xl space-y-2 flex flex-col justify-center text-center"
             >
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono uppercase font-black tracking-wider text-[#525866]">
-                  Average Match
-                </span>
-                <div className="w-7 h-7 rounded-lg bg-[#6366F1]/10 flex items-center justify-center text-[#6366F1]">
-                  <Activity className="w-4 h-4" />
-                </div>
+              <div className="text-3xl font-black font-sans text-white tracking-tight uppercase py-1">
+                {totalEvaluated > 1 ? 'MULTIPLE' : 'ACTIVE'}
               </div>
-              <div className="space-y-0.5">
-                <div className="text-3xl font-black font-mono text-[#0D3834] tracking-tight">
-                  <NumberTicker value={avgMatch} suffix="%" />
-                </div>
-                <span className="text-[11px] font-bold text-[#525866] block">
-                  Active session average
-                </span>
-              </div>
+              <span className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-[#7FAEA7] font-black block">
+                RESUME ANALYSIS ({totalEvaluated} Live)
+              </span>
             </MagicCard>
 
-            {/* KPI 4: Requires Review */}
+            {/* KPI 4: Evidence Backed Results */}
             <MagicCard 
-              glowFrom="#6366F1" 
-              glowTo="#8B5CF6" 
-              gradientOpacity={0.15} 
-              className="p-5 bg-white border-[#E5E2DC] hover:border-[#6366F1]/30 transition-all shadow-xs space-y-3"
+              glowFrom="#00A86B" 
+              glowTo="#174C4A" 
+              gradientOpacity={0.20} 
+              className="p-6 bg-[#242524] border-white/5 hover:border-[#00A86B]/30 transition-all shadow-xl space-y-2 flex flex-col justify-center text-center"
             >
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono uppercase font-black tracking-wider text-[#525866]">
-                  Needs Review
-                </span>
-                <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-600">
-                  <AlertTriangle className="w-4 h-4" />
-                </div>
+              <div className="text-3xl font-black font-sans text-[#E8F0E6] tracking-tight uppercase py-1">
+                EVIDENCE
               </div>
-              <div className="space-y-0.5">
-                <div className="text-3xl font-black font-mono text-[#DC2626] tracking-tight">
-                  <NumberTicker value={reviewRequired.length} />
-                </div>
-                <span className="text-[11px] font-bold text-[#525866] block">
-                  Flagged claim issues
-                </span>
-              </div>
+              <span className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-[#7FAEA7] font-black block">
+                BACKED RESULTS ({avgMatch}% avg)
+              </span>
             </MagicCard>
 
           </div>

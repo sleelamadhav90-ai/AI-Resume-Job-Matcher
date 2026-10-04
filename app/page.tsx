@@ -36,13 +36,15 @@ import { JobDescriptionInput } from '../components/JobDescriptionInput';
 import { ResumeUploader } from '../components/ResumeUploader';
 import { CandidateList, getCandidateInitials, getAvatarColorClass } from '../components/CandidateList';
 import { MatchDetails } from '../components/MatchDetails';
-import { ScrollStoryHero } from '../components/ScrollStoryHero';
-import { EvidenceMatchingStory } from '../components/EvidenceMatchingStory';
+import { HeroSection } from '../components/redesign/HeroSection';
+import { AICandidateMatchingSection } from '../components/redesign/AICandidateMatchingSection';
+import { AutomationSection } from '../components/redesign/AutomationSection';
+import { WorkflowSection } from '../components/redesign/WorkflowSection';
+import { StatsSection } from '../components/redesign/StatsSection';
+import { IntegrationsSection } from '../components/redesign/IntegrationsSection';
+import { ATSCheckSection } from '../components/redesign/ATSCheckSection';
+import { LandingCTA } from '../components/redesign/LandingCTA';
 import { HiringSignalsMarquee } from '../components/HiringSignalsMarquee';
-import { CandidateCardStackSection } from '../components/CandidateCardStackSection';
-import { ScoreExplanationSection } from '../components/ScoreExplanationSection';
-import { AsymmetricBentoGrid } from '../components/AsymmetricBentoGrid';
-import { LandingCTA } from '../components/LandingCTA';
 import { ATSWorkspaceShell } from '../components/ATSWorkspaceShell';
 import { Footer } from '../components/Footer';
 import { AnalyzeStage5Response, RankedCandidate, JobRequirements } from '../lib/types';
@@ -635,29 +637,44 @@ export default function HireMeApp() {
         {activeNav === 'home' && (
           <div className="space-y-4">
             
-            {/* 1. HERO */}
-            <ScrollStoryHero onStartMatching={() => setActiveNav('matching')} />
+            {/* 1. HERO SECTION */}
+            <HeroSection
+              onStartMatching={() => setActiveNav('matching')}
+              onSeeHowItWorks={() => {
+                const el = document.getElementById('insights-section');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+                else setActiveNav('matching');
+              }}
+            />
 
-            {/* 2. SIGNAL MARQUEE */}
+            {/* 2. MARQUEE */}
             <HiringSignalsMarquee />
 
-            {/* 3. STICKY SCROLL REVEAL FEATURE STORY */}
-            <EvidenceMatchingStory />
+            {/* 3. AI CANDIDATE MATCHING (More Clarity, Less Guesswork - Recreating Screenshot 2) */}
+            <div id="insights-section">
+              <AICandidateMatchingSection />
+            </div>
 
-            {/* 4. CANDIDATE CARD STACK */}
-            <CandidateCardStackSection />
+            {/* 4. AUTOMATION SECTION (Get Your Time Back - Recreating Screenshot 2 Dark Teal) */}
+            <AutomationSection />
 
-            {/* 5. SCORE EXPLANATION SECTION */}
-            <ScoreExplanationSection />
+            {/* 5. CONNECTED HIRING WORKFLOW */}
+            <WorkflowSection />
 
-            {/* 6. ASYMMETRIC BENTO GRID */}
-            <AsymmetricBentoGrid />
+            {/* 6. STATS SECTION (Holistic Hiring Experience - Recreating Screenshot 1) */}
+            <StatsSection />
 
-            {/* 7. LANDING CTA */}
+            {/* 7. INTEGRATIONS SECTION (We like building teams together - Recreating Screenshot 1) */}
+            <IntegrationsSection />
+
+            {/* 8. ATS CHECK & RESUME TAILORING (Get an ATS understanding check - Recreating Screenshot 1) */}
+            <ATSCheckSection />
+
+            {/* 9. FINAL LANDING CTA */}
             <LandingCTA onStartMatching={() => setActiveNav('matching')} />
 
             {/* ===================================================================== */}
-            {/* 8. LIVE FUNCTIONAL RECRUITER WORKSPACE (Real Application Shell) */}
+            {/* 10. LIVE FUNCTIONAL RECRUITER WORKSPACE (Real Application Shell) */}
             {/* ===================================================================== */}
             <section className="py-16 sm:py-24 border-t border-[#E5E7EB] space-y-6">
               

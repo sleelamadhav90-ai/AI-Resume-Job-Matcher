@@ -126,3 +126,23 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Infinite Marquee Loop System */
+@keyframes infinite-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-infinite-marquee {
+  display: flex;
+  width: max-content;
+  animation: infinite-marquee 30s linear infinite;
+}
+
+.animate-infinite-marquee:hover {
+  animation-play-state: paused;
+}

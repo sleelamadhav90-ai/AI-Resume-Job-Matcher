@@ -388,12 +388,12 @@ export default function HireMeApp() {
   const [analysisStep, setAnalysisStep] = useState<number>(0);
   
   // Track if current candidates list is demo data or real uploaded data
-  const [isDemoSession, setIsDemoSession] = useState<boolean>(true);
+  const [isDemoSession, setIsDemoSession] = useState<boolean>(false);
 
   // LIVE SESSION STATE
   const [stage5Result, setStage5Result] = useState<AnalyzeStage5Response | null>({
     success: true,
-    message: 'Analysis complete',
+    message: 'Awaiting resumes',
     jobRequirements: {
       jobTitle: SAMPLE_JOBS[0].title,
       requiredSkills: SAMPLE_JOBS[0].requiredSkills,
@@ -405,12 +405,12 @@ export default function HireMeApp() {
       domainRequirements: ['High-throughput systems'],
       summary: SAMPLE_JOBS[0].jdText,
     },
-    candidates: INITIAL_DEMO_CANDIDATES,
+    candidates: [],
     failedCandidates: [],
     unprocessedResumes: [],
   });
 
-  const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(INITIAL_DEMO_CANDIDATES[0].id);
+  const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
   const [shortlistedIds, setShortlistedIds] = useState<Set<string>>(new Set());
   const [candidateSearch, setCandidateSearch] = useState<string>('');
   const [errorBanner, setErrorBanner] = useState<string | null>(null);

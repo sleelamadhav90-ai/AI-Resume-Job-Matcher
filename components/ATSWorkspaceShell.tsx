@@ -166,8 +166,8 @@ export const ATSWorkspaceShell: React.FC<ATSWorkspaceShellProps> = ({
                   onClick={() => setActiveTab('overview')}
                   className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between cursor-pointer transition-all ${
                     activeTab === 'overview'
-                      ? 'bg-[#171817] text-white shadow-2xs'
-                      : 'text-[#686A66] hover:bg-white hover:text-[#171817]'
+                      ? 'bg-[#174C4A] text-white shadow-2xs'
+                      : 'text-[#686A66] hover:bg-white hover:text-[#174C4A]'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
@@ -181,8 +181,8 @@ export const ATSWorkspaceShell: React.FC<ATSWorkspaceShellProps> = ({
                   onClick={() => setActiveTab('candidates')}
                   className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between cursor-pointer transition-all ${
                     activeTab === 'candidates'
-                      ? 'bg-[#171817] text-white shadow-2xs'
-                      : 'text-[#686A66] hover:bg-white hover:text-[#171817]'
+                      ? 'bg-[#174C4A] text-white shadow-2xs'
+                      : 'text-[#686A66] hover:bg-white hover:text-[#174C4A]'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
@@ -196,12 +196,12 @@ export const ATSWorkspaceShell: React.FC<ATSWorkspaceShellProps> = ({
                   onClick={() => setActiveTab('shortlisted')}
                   className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between cursor-pointer transition-all ${
                     activeTab === 'shortlisted'
-                      ? 'bg-[#171817] text-white shadow-2xs'
-                      : 'text-[#686A66] hover:bg-white hover:text-[#171817]'
+                      ? 'bg-[#174C4A] text-white shadow-2xs'
+                      : 'text-[#686A66] hover:bg-white hover:text-[#174C4A]'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <BookmarkCheck className={`w-4 h-4 ${activeTab === 'shortlisted' ? 'text-[#7FAEA7]' : 'text-[#174C4A]'}`} />
+                    <BookmarkCheck className={`w-4 h-4 ${activeTab === 'shortlisted' ? 'text-white' : 'text-[#174C4A]'}`} />
                     <span>Shortlisted</span>
                   </div>
                 </button>
@@ -219,12 +219,12 @@ export const ATSWorkspaceShell: React.FC<ATSWorkspaceShellProps> = ({
                   onClick={() => setActiveTab('health')}
                   className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between cursor-pointer transition-all ${
                     activeTab === 'health'
-                      ? 'bg-[#171817] text-white shadow-2xs'
-                      : 'text-[#686A66] hover:bg-white hover:text-[#171817]'
+                      ? 'bg-[#174C4A] text-white shadow-2xs'
+                      : 'text-[#686A66] hover:bg-white hover:text-[#174C4A]'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <Activity className={`w-4 h-4 ${activeTab === 'health' ? 'text-[#7FAEA7]' : 'text-[#174C4A]'}`} />
+                    <Activity className={`w-4 h-4 ${activeTab === 'health' ? 'text-white' : 'text-[#174C4A]'}`} />
                     <span>AI Match Health</span>
                   </div>
                 </button>
@@ -234,12 +234,12 @@ export const ATSWorkspaceShell: React.FC<ATSWorkspaceShellProps> = ({
                   onClick={() => setActiveTab('evidence')}
                   className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between cursor-pointer transition-all ${
                     activeTab === 'evidence'
-                      ? 'bg-[#171817] text-white shadow-2xs'
-                      : 'text-[#686A66] hover:bg-white hover:text-[#171817]'
+                      ? 'bg-[#174C4A] text-white shadow-2xs'
+                      : 'text-[#686A66] hover:bg-white hover:text-[#174C4A]'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <ShieldCheck className={`w-4 h-4 ${activeTab === 'evidence' ? 'text-[#7FAEA7]' : 'text-[#28745D]'}`} />
+                    <ShieldCheck className={`w-4 h-4 ${activeTab === 'evidence' ? 'text-white' : 'text-[#28745D]'}`} />
                     <span>Evidence Dossiers</span>
                   </div>
                 </button>

@@ -1,97 +1,295 @@
 import React, { useState } from 'react';
 import {
+  Home,
+  Users,
   Briefcase,
+  BarChart2,
+  BookmarkCheck,
+  Calendar,
+  PieChart,
+  Settings,
+  Search,
+  Plus,
+  Bell,
+  ChevronRight,
+  Filter,
+  ArrowUpDown,
+  Download,
   UploadCloud,
-  Cpu,
-  BarChart3,
+  CheckCircle2,
+  AlertCircle,
+  AlertTriangle,
+  Sparkles,
+  MapPin,
+  Clock,
+  MoreHorizontal,
+  Bookmark,
+  FileText,
+  UserCheck,
+  Loader2,
+  SlidersHorizontal,
+  Layers,
   ArrowRight,
   ShieldCheck,
-  FileCheck2,
-  Sparkles,
-  AlertCircle,
-  CheckCircle2,
-  Loader2,
-  FileText,
-  AlertTriangle,
+  Building,
   RotateCcw
 } from 'lucide-react';
+import { Logo } from '../components/Logo';
 import { JobDescriptionInput } from '../components/JobDescriptionInput';
 import { ResumeUploader } from '../components/ResumeUploader';
 import { CandidateList } from '../components/CandidateList';
 import { MatchDetails } from '../components/MatchDetails';
 import { AnalyzeStage5Response, RankedCandidate } from '../lib/types';
 
-export default function LandingPage() {
-  const [jobDescription, setJobDescription] = useState<string>('');
+type NavigationTab =
+  | 'home'
+  | 'candidates'
+  | 'jobs'
+  | 'job_detail'
+  | 'matching'
+  | 'shortlisted'
+  | 'interviews'
+  | 'reports'
+  | 'settings';
+
+interface JobOpening {
+  id: string;
+  title: string;
+  department: string;
+  location: string;
+  type: string;
+  candidatesCount: number;
+  topMatch: number;
+  status: 'Active' | 'Draft' | 'Closed';
+  updated: string;
+  requiredSkills: string[];
+  preferredSkills: string[];
+  experience: string;
+  education: string;
+  jdText: string;
+}
+
+interface GeneralCandidate {
+  id: string;
+  name: string;
+  role: string;
+  experience: string;
+  skills: string[];
+  matchScore: number;
+  stage: 'New' | 'Screening' | 'Matched' | 'Interview' | 'Shortlisted' | 'Hired';
+  appliedFor: string;
+  email: string;
+}
+
+const SAMPLE_JOBS: JobOpening[] = [
+  {
+    id: 'job-1',
+    title: 'Software Engineer',
+    department: 'Engineering',
+    location: 'Hyderabad, India',
+    type: 'Full Time',
+    candidatesCount: 42,
+    topMatch: 94,
+    status: 'Active',
+    updated: 'Today',
+    requiredSkills: ['Java', 'Spring Boot', 'AWS', 'PostgreSQL', 'REST APIs'],
+    preferredSkills: ['Kubernetes', 'Docker', 'Kafka', 'CI/CD'],
+    experience: '3+ years',
+    education: "Bachelor's in Computer Science or related STEM field",
+    jdText: `Role: Software Engineer
+Requirements:
+- 3+ years experience with Java, Spring Boot, and AWS cloud infrastructure.
+- Solid understanding of PostgreSQL database design, REST APIs, and microservices.
+- Bachelor's degree in Computer Science, Information Technology, or equivalent.
+Preferred:
+- Kubernetes, Docker, and CI/CD pipelines (Jenkins / GitHub Actions).
+- Experience in high-throughput transaction systems.`,
+  },
+  {
+    id: 'job-2',
+    title: 'Frontend Developer',
+    department: 'Engineering',
+    location: 'Bangalore, India',
+    type: 'Full Time',
+    candidatesCount: 31,
+    topMatch: 89,
+    status: 'Active',
+    updated: 'Yesterday',
+    requiredSkills: ['React', 'TypeScript', 'JavaScript', 'HTML5/CSS3'],
+    preferredSkills: ['Next.js', 'Tailwind CSS', 'Vite', 'Jest'],
+    experience: '3+ years',
+    education: "Bachelor's degree in Computer Science or Software Engineering",
+    jdText: `Role: Frontend Developer
+Requirements:
+- 3+ years hands-on experience with React, TypeScript, and modern JavaScript (ES6+).
+- Strong command of HTML5, CSS3, responsive UI design, and state management.
+- Degree in Computer Science, Software Engineering, or related discipline.
+Preferred:
+- Next.js, Tailwind CSS, Webpack/Vite, and unit testing.`,
+  },
+  {
+    id: 'job-3',
+    title: 'Data Analyst',
+    department: 'Analytics',
+    location: 'Remote',
+    type: 'Full Time',
+    candidatesCount: 27,
+    topMatch: 86,
+    status: 'Active',
+    updated: '3 days ago',
+    requiredSkills: ['SQL', 'Python', 'Tableau', 'Data Modeling'],
+    preferredSkills: ['Snowflake', 'dbt', 'R', 'ETL'],
+    experience: '2+ years',
+    education: "Bachelor's degree in Statistics, Mathematics, or Computer Science",
+    jdText: `Role: Data Analyst
+Requirements:
+- 2+ years of professional experience in data analysis, SQL querying, and Python.
+- Proven dashboard design in Tableau or PowerBI.
+- Bachelor's degree in quantitative field.
+Preferred:
+- Snowflake, dbt, ETL workflows, and statistical modeling.`,
+  },
+  {
+    id: 'job-4',
+    title: 'DevOps Engineer',
+    department: 'Platform',
+    location: 'Pune, India',
+    type: 'Full Time',
+    candidatesCount: 18,
+    topMatch: 82,
+    status: 'Active',
+    updated: '4 days ago',
+    requiredSkills: ['AWS', 'Docker', 'Kubernetes', 'Terraform', 'CI/CD'],
+    preferredSkills: ['Prometheus', 'Grafana', 'Go', 'Linux Kernel'],
+    experience: '4+ years',
+    education: 'Bachelor of Engineering in CS/IT',
+    jdText: `Role: DevOps Engineer
+Requirements:
+- 4+ years managing AWS cloud infrastructure, Kubernetes clusters, and Terraform.
+- Automated CI/CD pipeline development.
+Preferred:
+- Prometheus monitoring and Go scripting.`,
+  },
+];
+
+const INITIAL_CANDIDATES: GeneralCandidate[] = [
+  {
+    id: 'cand-1',
+    name: 'Arjun Sharma',
+    role: 'Software Engineer',
+    experience: '3.2 yrs',
+    skills: ['Java', 'Spring Boot', 'AWS', 'PostgreSQL'],
+    matchScore: 94,
+    stage: 'Shortlisted',
+    appliedFor: 'Software Engineer',
+    email: 'arjun.sharma@example.com',
+  },
+  {
+    id: 'cand-2',
+    name: 'Rahul Kumar',
+    role: 'Backend Developer',
+    experience: '2.8 yrs',
+    skills: ['Java', 'SQL', 'Docker', 'AWS'],
+    matchScore: 87,
+    stage: 'Matched',
+    appliedFor: 'Software Engineer',
+    email: 'rahul.kumar@example.com',
+  },
+  {
+    id: 'cand-3',
+    name: 'Priya Reddy',
+    role: 'Software Engineer',
+    experience: '2.4 yrs',
+    skills: ['React', 'Node.js', 'AWS', 'JavaScript'],
+    matchScore: 81,
+    stage: 'Screening',
+    appliedFor: 'Frontend Developer',
+    email: 'priya.reddy@example.com',
+  },
+  {
+    id: 'cand-4',
+    name: 'Vikram Patel',
+    role: 'Full Stack Engineer',
+    experience: '4.5 yrs',
+    skills: ['Java', 'React', 'Spring Boot', 'PostgreSQL'],
+    matchScore: 92,
+    stage: 'Interview',
+    appliedFor: 'Software Engineer',
+    email: 'vikram.patel@example.com',
+  },
+  {
+    id: 'cand-5',
+    name: 'Neha Gupta',
+    role: 'Frontend Engineer',
+    experience: '3.0 yrs',
+    skills: ['React', 'TypeScript', 'Tailwind CSS', 'Redux'],
+    matchScore: 89,
+    stage: 'Shortlisted',
+    appliedFor: 'Frontend Developer',
+    email: 'neha.gupta@example.com',
+  },
+  {
+    id: 'cand-6',
+    name: 'Ananya Sen',
+    role: 'Data Analyst',
+    experience: '2.5 yrs',
+    skills: ['SQL', 'Python', 'Tableau', 'PowerBI'],
+    matchScore: 86,
+    stage: 'Matched',
+    appliedFor: 'Data Analyst',
+    email: 'ananya.sen@example.com',
+  },
+];
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState<NavigationTab>('home');
+  const [selectedJob, setSelectedJob] = useState<JobOpening>(SAMPLE_JOBS[0]);
+  const [globalSearch, setGlobalSearch] = useState('');
+  const [jobFilterTab, setJobFilterTab] = useState<'All' | 'Active' | 'Draft' | 'Closed'>('All');
+
+  // Real AI Matching Engine State
+  const [jobDescription, setJobDescription] = useState<string>(SAMPLE_JOBS[0].jdText);
   const [resumes, setResumes] = useState<File[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [stage5Result, setStage5Result] = useState<AnalyzeStage5Response | null>(null);
   const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
 
-  const workflowSteps = [
-    {
-      step: '01',
-      title: 'Job Description',
-      desc: 'Define role requirements, required & preferred skills, and experience criteria.',
-      icon: Briefcase,
-    },
-    {
-      step: '02',
-      title: 'Upload Resumes',
-      desc: 'Batch upload candidate resumes in standard PDF format (up to 10 resumes, 5 MB max).',
-      icon: UploadCloud,
-    },
-    {
-      step: '03',
-      title: 'AI Fact Extraction',
-      desc: 'Gemini extracts factual skills, timeline, education, and claims without hallucinations.',
-      icon: Cpu,
-    },
-    {
-      step: '04',
-      title: 'Deterministic Ranking',
-      desc: 'Deterministic mathematical weighted scoring (100 pts) with transparent explanations.',
-      icon: BarChart3,
-    },
-  ];
+  // Shortlist State
+  const [shortlistedIds, setShortlistedIds] = useState<Set<string>>(new Set(['cand-1', 'cand-5']));
 
-  const scoringModelWeights = [
-    { label: 'Skills', weight: '40 pts', desc: '30 pts Required + 10 pts Preferred coverage' },
-    { label: 'Experience', weight: '25 pts', desc: 'Tenure ratio vs required years (min(cand/req, 1))' },
-    { label: 'Education', weight: '15 pts', desc: 'Degree level and relevant discipline' },
-    { label: 'Projects', weight: '10 pts', desc: 'Demonstrated skills in project descriptions' },
-    { label: 'Requirements', weight: '10 pts', desc: 'Domain keywords & core responsibilities' },
-  ];
+  const handleToggleShortlist = (candidateId: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setShortlistedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(candidateId)) next.delete(candidateId);
+      else next.add(candidateId);
+      return next;
+    });
+  };
 
+  // Run Real Deterministic Candidate Matching Pipeline
   const handleAnalyzeClick = async () => {
-    // 1. Validation: Job description must be provided
     if (!jobDescription.trim()) {
-      setError('No job description provided. Please enter or paste a job description first.');
+      setError('No job description provided. Please enter or select a job requisition.');
       return;
     }
 
-    // 2. Validation: At least one resume must be selected
     if (resumes.length === 0) {
-      setError('Please upload at least one resume (PDF format, max 5 MB).');
+      setError('Please upload at least one PDF resume to evaluate.');
       return;
     }
 
-    // Clear previous errors & previous results
     setError('');
-    setStage5Result(null);
-    setSelectedCandidateId(null);
     setIsAnalyzing(true);
 
     try {
-      // 3. Prepare FormData payload
       const formData = new FormData();
       formData.append('jobDescription', jobDescription);
       resumes.forEach((resume) => {
         formData.append('resumes', resume);
       });
 
-      // 4. Send POST request to /api/analyze
       const response = await fetch('/api/analyze', {
         method: 'POST',
         body: formData,
@@ -103,391 +301,912 @@ export default function LandingPage() {
         if (data.candidates && data.candidates.length > 0) {
           setStage5Result(data as AnalyzeStage5Response);
         }
-        throw new Error(data.error || 'Something went wrong during candidate matching. Please try again.');
+        throw new Error(data.error || 'Matching process encountered an issue. Please check the uploaded files.');
       }
 
       setStage5Result(data as AnalyzeStage5Response);
+      setActiveTab('matching');
     } catch (err: any) {
-      console.error('Stage 5 analysis error:', err);
-      setError(
-        err.message || 'Something went wrong while processing the resumes. Please try again.'
-      );
+      console.error('HireMe AI Matching Error:', err);
+      setError(err.message || 'Failed to analyze candidate resumes. Please try again.');
     } finally {
       setIsAnalyzing(false);
     }
   };
 
-  const selectedCandidate: RankedCandidate | undefined = stage5Result?.candidates.find(
+  const handleOpenJobDetail = (job: JobOpening) => {
+    setSelectedJob(job);
+    setJobDescription(job.jdText);
+    setActiveTab('job_detail');
+  };
+
+  const handleStartMatchingForJob = (job: JobOpening) => {
+    setSelectedJob(job);
+    setJobDescription(job.jdText);
+    setActiveTab('matching');
+  };
+
+  const selectedMatchedCandidate = stage5Result?.candidates.find(
     (c) => c.profile.id === selectedCandidateId
   );
 
   return (
-    <div className="min-h-screen bg-slate-50/50 text-slate-900 flex flex-col font-sans">
-      {/* Top Navbar */}
-      <header className="border-b border-slate-200/80 bg-white/90 backdrop-blur-md sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold shadow-xs">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <div>
-              <span className="font-semibold text-slate-900 tracking-tight text-base block leading-tight">
-                AI Resume & Job Matcher
-              </span>
-              <span className="text-[11px] text-slate-500 font-medium">
-                Recruitment Intelligence System
-              </span>
-            </div>
-          </div>
+    <div className="min-h-screen bg-[#F7F8FA] text-[#202124] flex flex-col md:flex-row antialiased">
+      {/* LEFT SIDEBAR (Zoho Recruit Style - Compact, Light, Professional) */}
+      <aside className="w-full md:w-56 bg-white border-r border-[#E5E7EB] flex flex-col shrink-0 z-30">
+        {/* Brand Header */}
+        <div className="h-14 px-4 flex items-center border-b border-[#E5E7EB]">
+          <Logo size="sm" showTagline />
+        </div>
 
-          <div className="flex items-center gap-4 text-xs">
-            <span className="text-slate-500 hidden sm:inline-flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              Deterministic 100-Point Scoring
+        {/* Navigation Items */}
+        <nav className="p-2 space-y-0.5 flex-1 text-xs">
+          <button
+            type="button"
+            onClick={() => setActiveTab('home')}
+            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded font-medium transition-colors cursor-pointer ${
+              activeTab === 'home'
+                ? 'bg-[#FDF2F7] text-[#E83E8C] font-bold'
+                : 'text-[#4B5563] hover:text-[#202124] hover:bg-[#F3F4F6]'
+            }`}
+          >
+            <Home className="w-4 h-4" />
+            <span>Home</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('candidates')}
+            className={`w-full flex items-center justify-between px-3 py-2 rounded font-medium transition-colors cursor-pointer ${
+              activeTab === 'candidates'
+                ? 'bg-[#FDF2F7] text-[#E83E8C] font-bold'
+                : 'text-[#4B5563] hover:text-[#202124] hover:bg-[#F3F4F6]'
+            }`}
+          >
+            <div className="flex items-center gap-2.5">
+              <Users className="w-4 h-4" />
+              <span>Candidates</span>
+            </div>
+            <span className="text-[11px] text-[#6B7280]">128</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('jobs')}
+            className={`w-full flex items-center justify-between px-3 py-2 rounded font-medium transition-colors cursor-pointer ${
+              activeTab === 'jobs' || activeTab === 'job_detail'
+                ? 'bg-[#FDF2F7] text-[#E83E8C] font-bold'
+                : 'text-[#4B5563] hover:text-[#202124] hover:bg-[#F3F4F6]'
+            }`}
+          >
+            <div className="flex items-center gap-2.5">
+              <Briefcase className="w-4 h-4" />
+              <span>Job Openings</span>
+            </div>
+            <span className="text-[11px] text-[#6B7280]">{SAMPLE_JOBS.length}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('matching')}
+            className={`w-full flex items-center justify-between px-3 py-2 rounded font-medium transition-colors cursor-pointer ${
+              activeTab === 'matching'
+                ? 'bg-[#FDF2F7] text-[#E83E8C] font-bold'
+                : 'text-[#4B5563] hover:text-[#202124] hover:bg-[#F3F4F6]'
+            }`}
+          >
+            <div className="flex items-center gap-2.5">
+              <BarChart2 className="w-4 h-4" />
+              <span>Matching</span>
+            </div>
+            <span className="text-[10px] px-1.5 py-0.2 rounded bg-[#E83E8C] text-white font-bold">
+              AI
             </span>
-            <div className="h-4 w-px bg-slate-200 hidden sm:block" />
-            <span className="text-slate-500 font-mono text-[11px] bg-slate-100 px-2 py-1 rounded">
-              Stage 5: Scored & Ranked
-            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('shortlisted')}
+            className={`w-full flex items-center justify-between px-3 py-2 rounded font-medium transition-colors cursor-pointer ${
+              activeTab === 'shortlisted'
+                ? 'bg-[#FDF2F7] text-[#E83E8C] font-bold'
+                : 'text-[#4B5563] hover:text-[#202124] hover:bg-[#F3F4F6]'
+            }`}
+          >
+            <div className="flex items-center gap-2.5">
+              <BookmarkCheck className="w-4 h-4" />
+              <span>Shortlisted</span>
+            </div>
+            {shortlistedIds.size > 0 && (
+              <span className="text-[11px] text-[#E83E8C] font-bold">
+                {shortlistedIds.size}
+              </span>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('interviews')}
+            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded font-medium transition-colors cursor-pointer ${
+              activeTab === 'interviews'
+                ? 'bg-[#FDF2F7] text-[#E83E8C] font-bold'
+                : 'text-[#4B5563] hover:text-[#202124] hover:bg-[#F3F4F6]'
+            }`}
+          >
+            <Calendar className="w-4 h-4" />
+            <span>Interviews</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('reports')}
+            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded font-medium transition-colors cursor-pointer ${
+              activeTab === 'reports'
+                ? 'bg-[#FDF2F7] text-[#E83E8C] font-bold'
+                : 'text-[#4B5563] hover:text-[#202124] hover:bg-[#F3F4F6]'
+            }`}
+          >
+            <PieChart className="w-4 h-4" />
+            <span>Reports</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('settings')}
+            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded font-medium transition-colors cursor-pointer ${
+              activeTab === 'settings'
+                ? 'bg-[#FDF2F7] text-[#E83E8C] font-bold'
+                : 'text-[#4B5563] hover:text-[#202124] hover:bg-[#F3F4F6]'
+            }`}
+          >
+            <Settings className="w-4 h-4" />
+            <span>Settings</span>
+          </button>
+        </nav>
+
+        {/* Recruiter Profile Widget at bottom */}
+        <div className="p-3 border-t border-[#E5E7EB] bg-[#F9FAFB] flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-full bg-[#202124] text-white flex items-center justify-center font-bold text-xs">
+            AS
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-bold text-[#202124] truncate">Arjun Sharma</p>
+            <p className="text-[10px] text-[#6B7280] truncate">Senior Recruiter</p>
           </div>
         </div>
-      </header>
+      </aside>
 
-      {/* Hero Section */}
-      <section className="pt-10 pb-8 px-4 sm:px-6 border-b border-slate-200/60 bg-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 text-xs font-medium text-blue-700 bg-blue-50/80 border border-blue-200/70 px-3 py-1 rounded-md mb-4">
-            <span>Recruiter Co-Pilot</span>
-            <span aria-hidden="true">·</span>
-            <span>Deterministic Candidate Matching & Scoring</span>
+      {/* MAIN CONTAINER */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* COMPACT TOP HEADER */}
+        <header className="h-14 bg-white border-b border-[#E5E7EB] px-5 flex items-center justify-between gap-4 sticky top-0 z-20">
+          <div className="flex items-center gap-3 flex-1 max-w-lg">
+            <div className="relative w-full">
+              <Search className="w-3.5 h-3.5 text-[#6B7280] absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={globalSearch}
+                onChange={(e) => setGlobalSearch(e.target.value)}
+                placeholder="Search candidates, jobs, skills..."
+                className="w-full pl-8 pr-3 py-1.5 bg-[#F9FAFB] border border-[#D1D5DB] rounded text-xs text-[#202124] focus:outline-none focus:border-[#E83E8C] placeholder:text-[#9CA3AF]"
+              />
+            </div>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900">
-            Find the right candidate faster.
-          </h1>
-          <p className="mt-3.5 text-base sm:text-lg text-slate-600 max-w-2xl mx-auto font-normal leading-relaxed">
-            Upload candidate resumes alongside your job description. The system extracts strict facts with Gemini AI,
-            then calculates transparent 100-point deterministic scores and rankings without AI scoring bias.
-          </p>
+          <div className="flex items-center gap-2.5">
+            {/* Quick Action Button */}
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('matching');
+              }}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded bg-[#E83E8C] hover:bg-[#D62F7B] text-white text-xs font-semibold cursor-pointer shadow-2xs transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>+ Add Match</span>
+            </button>
 
-          {/* Workflow Sequence */}
-          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-left">
-            {workflowSteps.map((step, idx) => {
-              const Icon = step.icon;
-              const isCurrent = idx === 3;
-              return (
-                <div
-                  key={step.step}
-                  className={`p-4 rounded-xl border transition-all shadow-2xs relative group ${
-                    isCurrent
-                      ? 'border-blue-500 bg-blue-50/30 ring-1 ring-blue-500/20'
-                      : 'border-slate-200/90 bg-white'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span
-                      className={`font-mono text-xs font-bold ${
-                        isCurrent ? 'text-blue-600' : 'text-slate-600'
-                      }`}
-                    >
-                      {step.step}
-                    </span>
-                    <Icon
-                      className={`w-4 h-4 ${
-                        isCurrent ? 'text-blue-600' : 'text-slate-500'
-                      }`}
-                    />
+            {/* Notification Bell */}
+            <button
+              type="button"
+              className="p-1.5 text-[#6B7280] hover:text-[#202124] hover:bg-[#F3F4F6] rounded cursor-pointer relative"
+              aria-label="Notifications"
+            >
+              <Bell className="w-4 h-4" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#E83E8C] absolute top-1.5 right-1.5" />
+            </button>
+
+            <div className="h-4 w-px bg-[#E5E7EB]" />
+
+            <div className="flex items-center gap-2 text-xs">
+              <span className="font-semibold text-[#202124] hidden sm:inline">Acme Corp HQ</span>
+            </div>
+          </div>
+        </header>
+
+        {/* MAIN BODY PER TAB */}
+        <main className="p-5 flex-1 overflow-y-auto space-y-5">
+          {/* TAB 1: HOME / DASHBOARD (Zoho Recruit Style Recruitment Operations) */}
+          {activeTab === 'home' && (
+            <div className="space-y-5">
+              {/* Header */}
+              <div>
+                <h1 className="text-base font-bold text-[#202124]">Home</h1>
+                <p className="text-xs text-[#6B7280]">Overview of your recruitment activity</p>
+              </div>
+
+              {/* Four Compact Metric Cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="bg-white p-3.5 rounded border border-[#E5E7EB] shadow-2xs">
+                  <span className="text-[11px] font-semibold text-[#6B7280] block">Open Jobs</span>
+                  <div className="text-xl font-bold text-[#202124] mt-0.5">14</div>
+                  <span className="text-[10px] text-[#10B981] font-medium block mt-0.5">4 priority roles</span>
+                </div>
+
+                <div className="bg-white p-3.5 rounded border border-[#E5E7EB] shadow-2xs">
+                  <span className="text-[11px] font-semibold text-[#6B7280] block">Candidates</span>
+                  <div className="text-xl font-bold text-[#202124] mt-0.5">128</div>
+                  <span className="text-[10px] text-[#6B7280] block mt-0.5">Active in pipeline</span>
+                </div>
+
+                <div className="bg-white p-3.5 rounded border border-[#E5E7EB] shadow-2xs">
+                  <span className="text-[11px] font-semibold text-[#6B7280] block">Resumes Analyzed</span>
+                  <div className="text-xl font-bold text-[#202124] mt-0.5">842</div>
+                  <span className="text-[10px] text-[#10B981] font-medium block mt-0.5">100% deterministic</span>
+                </div>
+
+                <div className="bg-white p-3.5 rounded border border-[#E5E7EB] shadow-2xs">
+                  <span className="text-[11px] font-semibold text-[#6B7280] block">Average Match</span>
+                  <div className="text-xl font-bold text-[#202124] mt-0.5">78%</div>
+                  <span className="text-[10px] text-[#E83E8C] font-semibold block mt-0.5">High fit cohort</span>
+                </div>
+              </div>
+
+              {/* RECRUITMENT PIPELINE */}
+              <div className="bg-white rounded border border-[#E5E7EB] p-4 shadow-2xs space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xs font-bold text-[#202124] uppercase tracking-wider">
+                    Recruitment Pipeline
+                  </h2>
+                  <span className="text-[11px] text-[#6B7280]">128 Total In-Process</span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
+                  <div className="bg-[#F9FAFB] p-2.5 rounded border border-[#E5E7EB] text-center">
+                    <span className="text-[11px] text-[#6B7280] block">New</span>
+                    <span className="text-base font-bold text-[#202124] block mt-0.5">42</span>
                   </div>
-                  <h3 className="font-semibold text-sm text-slate-900">
-                    {step.title}
+
+                  <div className="bg-[#F9FAFB] p-2.5 rounded border border-[#E5E7EB] text-center">
+                    <span className="text-[11px] text-[#6B7280] block">Screening</span>
+                    <span className="text-base font-bold text-[#202124] block mt-0.5">28</span>
+                  </div>
+
+                  <div className="bg-[#FDF2F7] p-2.5 rounded border border-[#E83E8C]/30 text-center">
+                    <span className="text-[11px] font-semibold text-[#E83E8C] block">Matched</span>
+                    <span className="text-base font-bold text-[#E83E8C] block mt-0.5">31</span>
+                  </div>
+
+                  <div className="bg-[#F9FAFB] p-2.5 rounded border border-[#E5E7EB] text-center">
+                    <span className="text-[11px] text-[#6B7280] block">Interview</span>
+                    <span className="text-base font-bold text-[#202124] block mt-0.5">15</span>
+                  </div>
+
+                  <div className="bg-[#F9FAFB] p-2.5 rounded border border-[#E5E7EB] text-center">
+                    <span className="text-[11px] text-[#6B7280] block">Shortlisted</span>
+                    <span className="text-base font-bold text-[#202124] block mt-0.5">8</span>
+                  </div>
+
+                  <div className="bg-emerald-50 p-2.5 rounded border border-emerald-200 text-center">
+                    <span className="text-[11px] text-emerald-800 font-semibold block">Hired</span>
+                    <span className="text-base font-bold text-emerald-800 block mt-0.5">4</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* ACTIVE JOB OPENINGS TABLE */}
+              <div className="bg-white rounded border border-[#E5E7EB] shadow-2xs overflow-hidden">
+                <div className="p-3.5 border-b border-[#E5E7EB] flex items-center justify-between">
+                  <h3 className="text-xs font-bold text-[#202124] uppercase tracking-wider">
+                    Active Job Openings
                   </h3>
-                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                    {step.desc}
-                  </p>
-                  {idx < workflowSteps.length - 1 && (
-                    <div className="hidden lg:block absolute -right-2 top-1/2 -translate-y-1/2 z-10 text-slate-300">
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </div>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('jobs')}
+                    className="text-xs font-semibold text-[#E83E8C] hover:underline"
+                  >
+                    View all jobs →
+                  </button>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
 
-      {/* Main Workspace / Action Area */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 flex-1 w-full space-y-8">
-        {/* Core Input Grid: Job Description & Resume Uploader */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <JobDescriptionInput
-            value={jobDescription}
-            onChange={(val) => {
-              setJobDescription(val);
-              if (error) setError('');
-            }}
-            disabled={isAnalyzing}
-            error={!jobDescription.trim() && error ? error : undefined}
-            onClearError={() => setError('')}
-          />
-
-          <ResumeUploader
-            files={resumes}
-            onFilesChange={(newFiles) => {
-              setResumes(newFiles);
-              if (error) setError('');
-            }}
-            disabled={isAnalyzing}
-            error={resumes.length === 0 && error ? error : undefined}
-            onClearError={() => setError('')}
-          />
-        </div>
-
-        {/* Global Error Banner */}
-        {error && (
-          <div className="p-4 rounded-xl border border-rose-200 bg-rose-50 text-rose-800 text-xs flex items-start justify-between gap-3 animate-in fade-in duration-150">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-              <span className="font-medium">{error}</span>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left recruit-table">
+                    <thead>
+                      <tr>
+                        <th>Job Title</th>
+                        <th>Department</th>
+                        <th>Location</th>
+                        <th>Candidates</th>
+                        <th>Top Match</th>
+                        <th>Status</th>
+                        <th>Updated</th>
+                        <th className="text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {SAMPLE_JOBS.map((job) => (
+                        <tr key={job.id} className="hover:bg-[#F9FAFB]">
+                          <td className="font-bold text-[#202124]">
+                            <button
+                              type="button"
+                              onClick={() => handleOpenJobDetail(job)}
+                              className="hover:text-[#E83E8C] hover:underline cursor-pointer text-left"
+                            >
+                              {job.title}
+                            </button>
+                          </td>
+                          <td className="text-[#6B7280]">{job.department}</td>
+                          <td className="text-[#6B7280]">{job.location}</td>
+                          <td className="font-semibold text-[#202124]">{job.candidatesCount}</td>
+                          <td>
+                            <span className="font-bold text-[#10B981]">{job.topMatch}%</span>
+                          </td>
+                          <td>
+                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              {job.status}
+                            </span>
+                          </td>
+                          <td className="text-[#6B7280] text-[11px]">{job.updated}</td>
+                          <td className="text-right">
+                            <button
+                              type="button"
+                              onClick={() => handleStartMatchingForJob(job)}
+                              className="px-2.5 py-1 rounded bg-[#FDF2F7] hover:bg-[#E83E8C] text-[#E83E8C] hover:text-white font-semibold text-xs border border-[#E83E8C]/30 transition-colors cursor-pointer"
+                            >
+                              Match Candidates
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
-            <button
-              type="button"
-              onClick={() => setError('')}
-              className="text-rose-600 hover:text-rose-800 text-xs font-semibold cursor-pointer"
-            >
-              Dismiss
-            </button>
-          </div>
-        )}
+          )}
 
-        {/* Primary Action Section */}
-        <div className="bg-white rounded-xl border border-slate-200/80 p-6 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="space-y-1 text-center sm:text-left">
-            <h3 className="text-base font-semibold text-slate-900">
-              Ready to match and rank candidates?
-            </h3>
-            <div className="flex items-center justify-center sm:justify-start gap-2 text-xs text-slate-500">
-              <span>
-                {jobDescription.trim()
-                  ? `${jobDescription.trim().split(/\s+/).filter(Boolean).length} words in job description`
-                  : 'Job description pending'}
-              </span>
-              <span aria-hidden="true">·</span>
-              <span>
-                {resumes.length} {resumes.length === 1 ? 'resume' : 'resumes'} queued
-              </span>
+          {/* TAB 2: CANDIDATES PAGE */}
+          {activeTab === 'candidates' && (
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h1 className="text-base font-bold text-[#202124]">Candidates</h1>
+                  <p className="text-xs text-[#6B7280]">Candidate database and stage tracking</p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('matching')}
+                    className="px-3 py-1.5 rounded bg-[#202124] text-white text-xs font-semibold hover:bg-black cursor-pointer inline-flex items-center gap-1.5"
+                  >
+                    <UploadCloud className="w-3.5 h-3.5" />
+                    <span>Import Resumes</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('matching')}
+                    className="px-3 py-1.5 rounded bg-[#E83E8C] text-white text-xs font-semibold hover:bg-[#D62F7B] cursor-pointer inline-flex items-center gap-1"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Candidate</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Candidate Table */}
+              <div className="bg-white rounded border border-[#E5E7EB] shadow-2xs overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left recruit-table">
+                    <thead>
+                      <tr>
+                        <th className="w-8 text-center">
+                          <input type="checkbox" className="accent-[#E83E8C] rounded" />
+                        </th>
+                        <th>Candidate</th>
+                        <th>Current Role</th>
+                        <th>Experience</th>
+                        <th>Skills</th>
+                        <th>Match</th>
+                        <th>Stage</th>
+                        <th>Applied For</th>
+                        <th className="text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {INITIAL_CANDIDATES.map((c) => (
+                        <tr key={c.id}>
+                          <td className="text-center">
+                            <input type="checkbox" className="accent-[#E83E8C] rounded" />
+                          </td>
+                          <td>
+                            <div className="font-bold text-[#202124]">{c.name}</div>
+                            <span className="text-[11px] text-[#6B7280]">{c.email}</span>
+                          </td>
+                          <td className="text-[#202124]">{c.role}</td>
+                          <td className="font-semibold text-[#202124]">{c.experience}</td>
+                          <td className="text-xs text-[#4B5563]">
+                            {c.skills.join(' · ')}
+                          </td>
+                          <td>
+                            <span className="font-extrabold text-[#10B981]">{c.matchScore}%</span>
+                          </td>
+                          <td>
+                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-gray-100 text-gray-800 border border-gray-200">
+                              {c.stage}
+                            </span>
+                          </td>
+                          <td className="text-[#202124] font-medium">{c.appliedFor}</td>
+                          <td className="text-right">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setJobDescription(SAMPLE_JOBS[0].jdText);
+                                setActiveTab('matching');
+                              }}
+                              className="px-2 py-1 rounded border border-[#D1D5DB] text-xs font-medium text-[#202124] hover:bg-[#F3F4F6] cursor-pointer"
+                            >
+                              Evaluate
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
 
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <button
-              type="button"
-              onClick={handleAnalyzeClick}
-              disabled={isAnalyzing}
-              className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-white font-medium text-sm transition-all shadow-xs cursor-pointer ${
-                isAnalyzing
-                  ? 'bg-blue-400 cursor-not-allowed opacity-90'
-                  : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800'
-              }`}
-            >
-              {isAnalyzing ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Matching & scoring candidates...</span>
-                </>
-              ) : (
-                <>
-                  <BarChart3 className="w-4 h-4" />
-                  <span>Match & Rank Candidates</span>
-                </>
-              )}
-            </button>
-          </div>
-        </div>
+          {/* TAB 3: JOB OPENINGS PAGE */}
+          {activeTab === 'jobs' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-base font-bold text-[#202124]">Job Openings</h1>
+                  <p className="text-xs text-[#6B7280]">Manage active requisitions and candidate matching benchmarks</p>
+                </div>
 
-        {/* Stage 5 Ranked Candidates Results */}
-        {stage5Result && (
-          <div className="space-y-6 animate-in fade-in duration-200">
-            {/* Target Job Requirements Summary Bar */}
-            {stage5Result.jobRequirements && (
-              <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-6 space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
-                      <Briefcase className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h3 className="text-base font-bold text-slate-900">
-                        {stage5Result.jobRequirements.jobTitle || 'Target Role Requirements'}
-                      </h3>
-                      <p className="text-xs text-slate-500">
-                        {stage5Result.candidates.length} candidate{stage5Result.candidates.length === 1 ? '' : 's'} ranked deterministically
-                      </p>
-                    </div>
-                  </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedJob(SAMPLE_JOBS[0]);
+                    setActiveTab('job_detail');
+                  }}
+                  className="px-3 py-1.5 rounded bg-[#E83E8C] text-white text-xs font-semibold hover:bg-[#D62F7B] cursor-pointer inline-flex items-center gap-1"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Create Job</span>
+                </button>
+              </div>
 
+              {/* Tabs */}
+              <div className="flex border-b border-[#E5E7EB] gap-2 text-xs font-medium text-[#6B7280]">
+                {(['All', 'Active', 'Draft', 'Closed'] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setJobFilterTab(tab)}
+                    className={`py-2 px-3 border-b-2 cursor-pointer transition-colors ${
+                      jobFilterTab === tab
+                        ? 'border-[#E83E8C] text-[#202124] font-bold'
+                        : 'border-transparent hover:text-[#202124]'
+                    }`}
+                  >
+                    {tab} {tab === 'All' ? `(${SAMPLE_JOBS.length})` : tab === 'Active' ? '(4)' : '(0)'}
+                  </button>
+                ))}
+              </div>
+
+              {/* Jobs Table */}
+              <div className="bg-white rounded border border-[#E5E7EB] shadow-2xs overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left recruit-table">
+                    <thead>
+                      <tr>
+                        <th>Job Title</th>
+                        <th>Department</th>
+                        <th>Location</th>
+                        <th>Employment Type</th>
+                        <th>Candidates</th>
+                        <th>Top Match</th>
+                        <th>Status</th>
+                        <th className="text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {SAMPLE_JOBS.map((job) => (
+                        <tr key={job.id}>
+                          <td className="font-bold text-[#202124]">
+                            <button
+                              type="button"
+                              onClick={() => handleOpenJobDetail(job)}
+                              className="hover:text-[#E83E8C] hover:underline cursor-pointer text-left"
+                            >
+                              {job.title}
+                            </button>
+                          </td>
+                          <td className="text-[#6B7280]">{job.department}</td>
+                          <td className="text-[#6B7280]">{job.location}</td>
+                          <td className="text-[#6B7280]">{job.type}</td>
+                          <td className="font-semibold text-[#202124]">{job.candidatesCount}</td>
+                          <td className="font-bold text-[#10B981]">{job.topMatch}%</td>
+                          <td>
+                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              {job.status}
+                            </span>
+                          </td>
+                          <td className="text-right">
+                            <button
+                              type="button"
+                              onClick={() => handleStartMatchingForJob(job)}
+                              className="px-2.5 py-1 rounded bg-[#FDF2F7] hover:bg-[#E83E8C] text-[#E83E8C] hover:text-white font-semibold text-xs border border-[#E83E8C]/30 transition-colors cursor-pointer"
+                            >
+                              Match Candidates
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: JOB DETAIL PAGE */}
+          {activeTab === 'job_detail' && (
+            <div className="space-y-4">
+              {/* Header */}
+              <div className="bg-white rounded border border-[#E5E7EB] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+                <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 font-medium">
-                      Stage 5 Verified
+                    <h1 className="text-lg font-bold text-[#202124]">{selectedJob.title}</h1>
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      {selectedJob.status}
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setStage5Result(null);
-                        setSelectedCandidateId(null);
-                      }}
-                      className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
-                      title="Clear results"
-                    >
-                      <RotateCcw className="w-4 h-4" />
-                    </button>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-[#6B7280] mt-1">
+                    <span>{selectedJob.department}</span>
+                    <span>·</span>
+                    <span>{selectedJob.location}</span>
+                    <span>·</span>
+                    <span>{selectedJob.type}</span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleStartMatchingForJob(selectedJob)}
+                    className="px-4 py-2 rounded bg-[#E83E8C] text-white text-xs font-bold hover:bg-[#D62F7B] transition-colors cursor-pointer shadow-2xs inline-flex items-center gap-1.5"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Find Matching Candidates</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Sub-sections */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div className="lg:col-span-2 bg-white rounded border border-[#E5E7EB] p-4 space-y-4 shadow-2xs text-xs">
                   <div>
-                    <span className="text-slate-500 font-medium block mb-1">
-                      Required Skills ({stage5Result.jobRequirements.requiredSkills.length}):
-                    </span>
+                    <h3 className="font-bold text-xs uppercase tracking-wider text-[#6B7280] mb-2">
+                      Job Description
+                    </h3>
+                    <p className="text-[#202124] leading-relaxed whitespace-pre-line bg-[#F9FAFB] p-3 rounded border border-[#F3F4F6]">
+                      {selectedJob.jdText}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded border border-[#E5E7EB] p-4 space-y-4 shadow-2xs text-xs">
+                  <div>
+                    <h3 className="font-bold text-xs uppercase tracking-wider text-[#6B7280] mb-2">
+                      Required Skills
+                    </h3>
                     <div className="flex flex-wrap gap-1">
-                      {stage5Result.jobRequirements.requiredSkills.map((skill, i) => (
-                        <span
-                          key={i}
-                          className="px-2 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-200 text-[11px]"
-                        >
-                          {skill}
+                      {selectedJob.requiredSkills.map((s, idx) => (
+                        <span key={idx} className="px-2 py-0.5 rounded bg-[#FDF2F7] text-[#E83E8C] border border-[#E83E8C]/20 font-medium">
+                          {s}
                         </span>
                       ))}
                     </div>
                   </div>
 
                   <div>
-                    <span className="text-slate-500 font-medium block mb-1">
-                      Preferred Skills ({stage5Result.jobRequirements.preferredSkills.length}):
-                    </span>
+                    <h3 className="font-bold text-xs uppercase tracking-wider text-[#6B7280] mb-2">
+                      Preferred Skills
+                    </h3>
                     <div className="flex flex-wrap gap-1">
-                      {stage5Result.jobRequirements.preferredSkills.length > 0 ? (
-                        stage5Result.jobRequirements.preferredSkills.map((skill, i) => (
-                          <span
-                            key={i}
-                            className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[11px]"
-                          >
-                            {skill}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="text-slate-400 text-[11px]">None specified</span>
-                      )}
+                      {selectedJob.preferredSkills.map((s, idx) => (
+                        <span key={idx} className="px-2 py-0.5 rounded bg-gray-100 text-gray-700">
+                          {s}
+                        </span>
+                      ))}
                     </div>
                   </div>
 
-                  <div>
-                    <span className="text-slate-500 font-medium block mb-1">Experience & Education:</span>
-                    <p className="text-slate-700 text-[11px]">
-                      {stage5Result.jobRequirements.requiredExperienceYears !== null
-                        ? `${stage5Result.jobRequirements.requiredExperienceYears}+ years required`
-                        : 'No minimum experience specified'}
-                    </p>
-                    {stage5Result.jobRequirements.educationRequirements.length > 0 && (
-                      <p className="text-slate-500 text-[11px] mt-0.5">
-                        {stage5Result.jobRequirements.educationRequirements[0]}
-                      </p>
-                    )}
+                  <div className="border-t border-[#E5E7EB] pt-3 space-y-2">
+                    <div>
+                      <span className="text-[#6B7280] block text-[11px]">Experience Requirement:</span>
+                      <span className="font-semibold text-[#202124]">{selectedJob.experience}</span>
+                    </div>
+                    <div>
+                      <span className="text-[#6B7280] block text-[11px]">Education:</span>
+                      <span className="font-semibold text-[#202124]">{selectedJob.education}</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            )}
-
-            {/* Warning notices for any unreadable or failed PDFs */}
-            {(stage5Result.unprocessedResumes.length > 0 || stage5Result.failedCandidates.length > 0) && (
-              <div className="p-4 rounded-xl border border-amber-200 bg-amber-50/60 text-xs text-amber-900 space-y-1">
-                <div className="flex items-center gap-1.5 font-semibold text-amber-800">
-                  <AlertTriangle className="w-4 h-4 text-amber-600" />
-                  <span>Some files could not be processed:</span>
-                </div>
-                <ul className="list-disc list-inside space-y-0.5 pl-1 text-[11px] text-amber-800">
-                  {stage5Result.unprocessedResumes.map((item, idx) => (
-                    <li key={`unproc-${idx}`}>
-                      <span className="font-medium">{item.fileName}:</span> {item.message || 'Unreadable PDF'}
-                    </li>
-                  ))}
-                  {stage5Result.failedCandidates.map((item, idx) => (
-                    <li key={`failcand-${idx}`}>
-                      <span className="font-medium">{item.fileName}:</span> {item.message || 'AI extraction failed'}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {/* Candidate List with client-side search, tier filters, sorting */}
-            <CandidateList
-              candidates={stage5Result.candidates}
-              selectedCandidateId={selectedCandidateId || undefined}
-              onSelectCandidate={(id) => setSelectedCandidateId(id)}
-            />
-          </div>
-        )}
-
-        {/* Transparent Scoring Model Explanation Card */}
-        <section className="bg-white rounded-xl border border-slate-200/80 p-6 shadow-xs">
-          <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-            <div>
-              <h2 className="text-base font-semibold text-slate-900 tracking-tight">
-                Transparent 100-Point Scoring Model
-              </h2>
-              <p className="text-xs text-slate-500">
-                Mathematical weights ensure reproducible, unbiased candidate ranking without AI scoring hallucinations
-              </p>
             </div>
-            <FileCheck2 className="w-5 h-5 text-slate-400" />
-          </div>
+          )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mt-4">
-            {scoringModelWeights.map((item) => (
-              <div
-                key={item.label}
-                className="p-3 rounded-lg border border-slate-200 bg-slate-50/60"
-              >
-                <div className="flex items-baseline justify-between">
-                  <span className="font-medium text-xs text-slate-800">{item.label}</span>
-                  <span className="font-bold text-sm text-blue-600">{item.weight}</span>
+          {/* TAB 5: MATCHING PAGE (The Most Important Part - Real Deterministic Pipeline) */}
+          {activeTab === 'matching' && (
+            <div className="space-y-4">
+              {/* Header Bar */}
+              <div className="bg-white rounded border border-[#E5E7EB] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-base font-bold text-[#202124]">AI Candidate Matching</h1>
+                    <span className="text-xs px-2 py-0.5 rounded font-bold bg-[#FDF2F7] text-[#E83E8C] border border-[#E83E8C]/20">
+                      {selectedJob.title}
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#6B7280] mt-0.5">
+                    {stage5Result ? `${stage5Result.candidates.length} candidate profiles evaluated deterministically` : 'Upload resumes and run factual scoring against job criteria'}
+                  </p>
                 </div>
-                <p className="text-[11px] text-slate-500 mt-1 leading-snug">
-                  {item.desc}
-                </p>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleAnalyzeClick}
+                    disabled={isAnalyzing}
+                    className={`px-4 py-2 rounded text-xs font-bold text-white transition-colors cursor-pointer shadow-2xs inline-flex items-center gap-1.5 ${
+                      isAnalyzing
+                        ? 'bg-[#E83E8C]/70 cursor-not-allowed'
+                        : 'bg-[#E83E8C] hover:bg-[#D62F7B]'
+                    }`}
+                  >
+                    {isAnalyzing ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Evaluating...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>Find Matching Candidates</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
-            ))}
-          </div>
 
-          <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between text-xs text-slate-500 gap-2">
-            <span>Total Weighted Score: 100 points</span>
-            <span>AI extracts factual signals · Deterministic code computes rank & explanations</span>
-          </div>
-        </section>
-      </main>
+              {/* Workspace Input Controls (Collapsible / Top section) */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <JobDescriptionInput
+                  value={jobDescription}
+                  onChange={(val) => {
+                    setJobDescription(val);
+                    if (error) setError('');
+                  }}
+                  disabled={isAnalyzing}
+                  error={!jobDescription.trim() && error ? error : undefined}
+                  onClearError={() => setError('')}
+                />
 
-      {/* Match Details Drawer Modal */}
-      {selectedCandidate && (
+                <ResumeUploader
+                  files={resumes}
+                  onFilesChange={(newFiles) => {
+                    setResumes(newFiles);
+                    if (error) setError('');
+                  }}
+                  disabled={isAnalyzing}
+                  error={resumes.length === 0 && error ? error : undefined}
+                  onClearError={() => setError('')}
+                />
+              </div>
+
+              {/* Global Error Banner */}
+              {error && (
+                <div className="p-3 rounded border border-red-200 bg-red-50 text-red-700 text-xs flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+                    <span>{error}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setError('')}
+                    className="text-red-700 hover:underline font-semibold cursor-pointer"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              )}
+
+              {/* MATCHED CANDIDATE RESULTS TABLE */}
+              {stage5Result && (
+                <div className="space-y-4 pt-2">
+                  <CandidateList
+                    candidates={stage5Result.candidates}
+                    selectedCandidateId={selectedCandidateId || undefined}
+                    shortlistedCandidateIds={shortlistedIds}
+                    onSelectCandidate={(id) => setSelectedCandidateId(id)}
+                    onToggleShortlist={handleToggleShortlist}
+                    jobTitle={selectedJob.title}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 6: SHORTLISTED CANDIDATES */}
+          {activeTab === 'shortlisted' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-base font-bold text-[#202124]">Shortlisted Candidates</h1>
+                  <p className="text-xs text-[#6B7280]">Recruiter shortlists earmarked for final interviews</p>
+                </div>
+                <span className="text-xs font-bold text-[#E83E8C] bg-[#FDF2F7] border border-[#E83E8C]/20 px-2.5 py-1 rounded">
+                  {shortlistedIds.size} Shortlisted Records
+                </span>
+              </div>
+
+              <div className="bg-white rounded border border-[#E5E7EB] shadow-2xs overflow-hidden">
+                <table className="w-full text-left recruit-table">
+                  <thead>
+                    <tr>
+                      <th>Candidate</th>
+                      <th>Applied Role</th>
+                      <th>Match Score</th>
+                      <th>Experience</th>
+                      <th>Contact</th>
+                      <th>Status</th>
+                      <th className="text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {INITIAL_CANDIDATES.filter((c) => shortlistedIds.has(c.id)).map((cand) => (
+                      <tr key={cand.id}>
+                        <td className="font-bold text-[#202124]">{cand.name}</td>
+                        <td className="text-[#6B7280]">{cand.appliedFor}</td>
+                        <td className="font-bold text-[#10B981]">{cand.matchScore}%</td>
+                        <td className="text-[#202124]">{cand.experience}</td>
+                        <td className="text-[#6B7280] text-xs">{cand.email}</td>
+                        <td>
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            Ready for Interview
+                          </span>
+                        </td>
+                        <td className="text-right">
+                          <button
+                            type="button"
+                            onClick={() => setActiveTab('interviews')}
+                            className="px-2.5 py-1 rounded bg-[#202124] text-white text-xs font-semibold hover:bg-black cursor-pointer"
+                          >
+                            Schedule
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 7: INTERVIEWS */}
+          {activeTab === 'interviews' && (
+            <div className="space-y-4">
+              <h1 className="text-base font-bold text-[#202124]">Interview Schedules</h1>
+              <div className="bg-white rounded border border-[#E5E7EB] p-6 shadow-2xs space-y-3">
+                <div className="flex items-center justify-between border-b border-[#E5E7EB] pb-3 text-xs">
+                  <div>
+                    <span className="font-bold text-[#202124] block">Technical Screening: Arjun Sharma</span>
+                    <span className="text-[#6B7280]">Role: Software Engineer · Interviewer: Engineering Lead</span>
+                  </div>
+                  <span className="font-mono text-[11px] text-[#202124] bg-gray-100 px-2 py-1 rounded">
+                    Tomorrow, 2:00 PM IST
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <div>
+                    <span className="font-bold text-[#202124] block">System Design: Vikram Patel</span>
+                    <span className="text-[#6B7280]">Role: Software Engineer · Interviewer: VP Engineering</span>
+                  </div>
+                  <span className="font-mono text-[11px] text-[#202124] bg-gray-100 px-2 py-1 rounded">
+                    Thursday, 11:00 AM IST
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 8: REPORTS */}
+          {activeTab === 'reports' && (
+            <div className="space-y-4">
+              <h1 className="text-base font-bold text-[#202124]">Recruitment Intelligence Reports</h1>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <div className="bg-white rounded border border-[#E5E7EB] p-4 shadow-2xs space-y-2">
+                  <span className="font-bold text-[#202124] block">Candidate Match Distribution</span>
+                  <p className="text-[#6B7280]">842 resumes parsed with 0 hallucinations across 14 job openings.</p>
+                  <div className="pt-2 flex items-center gap-2">
+                    <span className="text-xs font-bold text-[#10B981]">38% Strong Match</span>
+                    <span>·</span>
+                    <span className="text-xs font-bold text-[#E83E8C]">44% Good Match</span>
+                    <span>·</span>
+                    <span className="text-xs font-bold text-[#6B7280]">18% Moderate/Weak</span>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded border border-[#E5E7EB] p-4 shadow-2xs space-y-2">
+                  <span className="font-bold text-[#202124] block">Time-to-Shortlist Efficiency</span>
+                  <p className="text-[#6B7280]">Average candidate screening reduced from 4.2 days to 30 seconds.</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 9: SETTINGS */}
+          {activeTab === 'settings' && (
+            <div className="space-y-4 max-w-3xl">
+              <h1 className="text-base font-bold text-[#202124]">Scoring Engine Configuration</h1>
+              <div className="bg-white rounded border border-[#E5E7EB] p-5 shadow-2xs space-y-3 text-xs">
+                <span className="font-bold text-[#202124] block pb-2 border-b border-[#E5E7EB]">
+                  Deterministic 100-Point Scoring Model
+                </span>
+                <div className="space-y-2 text-[#6B7280]">
+                  <div className="flex justify-between">
+                    <span>Required Technical Skills (Semantic Normalization)</span>
+                    <span className="font-bold text-[#202124]">30 pts</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Preferred Qualifications</span>
+                    <span className="font-bold text-[#202124]">10 pts</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Experience Tenure Comparison</span>
+                    <span className="font-bold text-[#202124]">25 pts</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Education & STEM Degree Alignment</span>
+                    <span className="font-bold text-[#202124]">15 pts</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Project Evidence & Domain Keywords</span>
+                    <span className="font-bold text-[#202124]">20 pts</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* Candidate Match Detail Drawer Modal */}
+      {selectedMatchedCandidate && (
         <MatchDetails
-          candidate={selectedCandidate}
+          candidate={selectedMatchedCandidate}
+          isShortlisted={shortlistedIds.has(selectedMatchedCandidate.profile.id)}
+          onToggleShortlist={(id) => handleToggleShortlist(id)}
           onClose={() => setSelectedCandidateId(null)}
         />
       )}
-
-      {/* Footer */}
-      <footer className="border-t border-slate-200/80 bg-white py-6 mt-auto">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-3">
-          <p>© 2026 AI Resume & Job Matching System. Built for modern recruiting teams.</p>
-          <div className="flex items-center gap-4">
-            <span>No Auth Required</span>
-            <span aria-hidden="true">·</span>
-            <span>Zero Data Stored</span>
-            <span aria-hidden="true">·</span>
-            <span>Deterministic Scoring</span>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

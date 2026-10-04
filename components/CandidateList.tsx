@@ -1,163 +1,434 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Filter, ArrowUpDown } from 'lucide-react';
-import { CandidateCard } from './CandidateCard';
+import {
+  Search,
+  ArrowUpDown,
+  Filter,
+  Check,
+  AlertTriangle,
+  Bookmark,
+  BookmarkCheck,
+  ChevronRight,
+  Sparkles,
+  MoreHorizontal,
+  FileText,
+  SlidersHorizontal
+} from 'lucide-react';
 import { RankedCandidate, ScoreTierLabel } from '../lib/types';
 
 interface CandidateListProps {
   candidates: RankedCandidate[];
   selectedCandidateId?: string;
+  shortlistedCandidateIds?: Set<string>;
   onSelectCandidate: (candidateId: string) => void;
+  onToggleShortlist?: (candidateId: string, e?: React.MouseEvent) => void;
+  jobTitle?: string;
 }
 
 export const CandidateList: React.FC<CandidateListProps> = ({
   candidates,
   selectedCandidateId,
+  shortlistedCandidateIds = new Set(),
   onSelectCandidate,
+  onToggleShortlist,
+  jobTitle = 'Software Engineer',
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [tierFilter, setTierFilter] = useState<'All' | ScoreTierLabel>('All');
-  const [sortBy, setSortBy] = useState<'best' | 'lowest' | 'name'>('best');
+  const [minScore, setMinScore] = useState<number>(0);
+  const [minExp, setMinExp] = useState<number>(0);
+  const [skillFilter, setSkillFilter] = useState<string>('');
+  const [sortBy, setSortBy] = useState<'rank' | 'score' | 'experience' | 'name'>('rank');
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [selectedRowIds, setSelectedRowIds] = useState<Set<string>>(new Set());
 
-  const filterTiers: Array<'All' | ScoreTierLabel> = [
-    'All',
-    'Strong Match',
-    'Good Match',
-    'Moderate Match',
-    'Weak Match',
-  ];
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setSelectedRowIds(new Set(candidates.map((c) => c.profile.id)));
+    } else {
+      setSelectedRowIds(new Set());
+    }
+  };
+
+  const handleToggleRow = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedRowIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const filteredAndSortedCandidates = useMemo(() => {
     return candidates
       .filter((cand) => {
-        // 1. Text Search matching name, skills, role
+        // Text search
         const q = searchQuery.toLowerCase().trim();
-        let matchesQuery = true;
         if (q) {
           const name = (cand.profile.name || '').toLowerCase();
           const skills = cand.profile.skills.map((s) => s.toLowerCase());
           const roles = cand.profile.experience.map((e) => (e.role || '').toLowerCase());
           const matchedSkills = cand.match.matchedRequiredSkills.map((s) => s.toLowerCase());
 
-          matchesQuery =
+          const matches =
             name.includes(q) ||
             skills.some((s) => s.includes(q)) ||
             roles.some((r) => r.includes(q)) ||
             matchedSkills.some((s) => s.includes(q));
+
+          if (!matches) return false;
         }
 
-        // 2. Tier Filter
-        let matchesTier = true;
-        if (tierFilter !== 'All') {
-          matchesTier = cand.match.label === tierFilter;
+        // Tier filter
+        if (tierFilter !== 'All' && cand.match.label !== tierFilter) {
+          return false;
         }
 
-        return matchesQuery && matchesTier;
+        // Min score filter
+        if (minScore > 0 && cand.match.totalScore < minScore) {
+          return false;
+        }
+
+        // Min experience filter
+        if (minExp > 0 && (cand.match.experienceMatch.candidateYears || 0) < minExp) {
+          return false;
+        }
+
+        // Skill filter
+        if (skillFilter.trim()) {
+          const sf = skillFilter.toLowerCase().trim();
+          const hasSkill =
+            cand.profile.skills.some((s) => s.toLowerCase().includes(sf)) ||
+            cand.match.matchedRequiredSkills.some((s) => s.toLowerCase().includes(sf));
+          if (!hasSkill) return false;
+        }
+
+        return true;
       })
       .sort((a, b) => {
-        if (sortBy === 'best') {
-          // Default: rank ascending (Rank 1 is best)
-          return a.rank - b.rank;
-        }
-        if (sortBy === 'lowest') {
-          return a.match.totalScore - b.match.totalScore;
+        if (sortBy === 'rank') return a.rank - b.rank;
+        if (sortBy === 'score') return b.match.totalScore - a.match.totalScore;
+        if (sortBy === 'experience') {
+          return (
+            (b.match.experienceMatch.candidateYears || 0) -
+            (a.match.experienceMatch.candidateYears || 0)
+          );
         }
         if (sortBy === 'name') {
           return (a.profile.name || '').localeCompare(b.profile.name || '');
         }
         return 0;
       });
-  }, [candidates, searchQuery, tierFilter, sortBy]);
+  }, [candidates, searchQuery, tierFilter, minScore, minExp, skillFilter, sortBy]);
 
   return (
-    <div className="space-y-4">
-      {/* Search and Filters toolbar */}
-      <div className="bg-white rounded-xl border border-slate-200/80 shadow-xs p-4 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
-        {/* Search */}
-        <div className="relative flex-1">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search candidates by name, skill, or role..."
-            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400"
-          />
-        </div>
-
-        {/* Filters and Sort */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Tier Pills */}
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg text-xs">
-            {filterTiers.map((tier) => (
-              <button
-                key={tier}
-                type="button"
-                onClick={() => setTierFilter(tier)}
-                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
-                  tierFilter === tier
-                    ? 'bg-white text-slate-900 shadow-2xs font-semibold'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                {tier}
-              </button>
-            ))}
-          </div>
-
-          {/* Sort Selector */}
-          <div className="flex items-center gap-1.5 border border-slate-200 rounded-lg px-2.5 py-1.5 bg-slate-50 text-xs">
-            <ArrowUpDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              className="bg-transparent text-slate-700 font-medium focus:outline-none cursor-pointer pr-1"
-            >
-              <option value="best">Best Match (Rank)</option>
-              <option value="lowest">Lowest Match</option>
-              <option value="name">Candidate Name (A-Z)</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      {/* Results Header Count */}
-      <div className="flex items-center justify-between text-xs text-slate-500 px-1">
-        <span>
-          Showing {filteredAndSortedCandidates.length} of {candidates.length} ranked candidate
-          {candidates.length === 1 ? '' : 's'}
-        </span>
-        {tierFilter !== 'All' && (
-          <span className="font-medium text-slate-700">Filter: {tierFilter}</span>
-        )}
-      </div>
-
-      {/* Candidate Cards Stack */}
-      <div className="space-y-3">
-        {filteredAndSortedCandidates.length > 0 ? (
-          filteredAndSortedCandidates.map((candidate) => (
-            <CandidateCard
-              key={candidate.id}
-              candidate={candidate}
-              isSelected={selectedCandidateId === candidate.profile.id}
-              onSelect={onSelectCandidate}
+    <div className="space-y-3">
+      {/* Search & Filter Toolbar */}
+      <div className="bg-white rounded border border-[#E5E7EB] p-3 flex flex-wrap items-center justify-between gap-2.5 text-xs">
+        <div className="flex items-center gap-2 flex-1 min-w-[240px]">
+          <div className="relative flex-1">
+            <Search className="w-3.5 h-3.5 text-[#6B7280] absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search ranked candidates by name, skill, or role..."
+              className="w-full pl-8 pr-3 py-1.5 border border-[#D1D5DB] rounded text-xs focus:outline-none focus:border-[#E83E8C] placeholder:text-[#9CA3AF]"
             />
-          ))
-        ) : (
-          <div className="bg-white rounded-xl border border-slate-200 p-8 text-center text-xs text-slate-500 space-y-2">
-            <p className="font-semibold text-slate-700">No matching candidates found.</p>
-            <p>Try clearing your search query or switching tier filters.</p>
-            <button
-              type="button"
-              onClick={() => {
-                setSearchQuery('');
-                setTierFilter('All');
-              }}
-              className="mt-2 text-blue-600 hover:underline font-semibold cursor-pointer"
-            >
-              Reset Filters
-            </button>
           </div>
+
+          <button
+            type="button"
+            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+            className={`px-3 py-1.5 border rounded flex items-center gap-1.5 font-medium cursor-pointer ${
+              showAdvancedFilters || minScore > 0 || minExp > 0 || skillFilter
+                ? 'bg-[#FDF2F7] border-[#E83E8C]/40 text-[#E83E8C]'
+                : 'bg-white border-[#D1D5DB] text-[#4B5563] hover:bg-[#F9FAFB]'
+            }`}
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+            <span>Filters {(minScore > 0 || minExp > 0 || skillFilter) ? '(Active)' : ''}</span>
+          </button>
+        </div>
+
+        {/* Tier filter tabs */}
+        <div className="flex items-center gap-1">
+          {(['All', 'Strong Match', 'Good Match', 'Moderate Match', 'Weak Match'] as const).map((tier) => (
+            <button
+              key={tier}
+              type="button"
+              onClick={() => setTierFilter(tier)}
+              className={`px-2.5 py-1 rounded text-xs cursor-pointer transition-colors ${
+                tierFilter === tier
+                  ? 'bg-[#202124] text-white font-semibold'
+                  : 'text-[#6B7280] hover:text-[#202124] hover:bg-[#F3F4F6]'
+              }`}
+            >
+              {tier === 'All' ? 'All Tiers' : tier.replace(' Match', '')}
+            </button>
+          ))}
+        </div>
+
+        {/* Sort dropdown */}
+        <div className="flex items-center gap-1 border border-[#D1D5DB] rounded px-2 py-1 bg-white">
+          <ArrowUpDown className="w-3 h-3 text-[#6B7280]" />
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as any)}
+            className="bg-transparent text-xs text-[#202124] focus:outline-none cursor-pointer pr-1"
+          >
+            <option value="rank">Rank (#1 first)</option>
+            <option value="score">Match Score (High to Low)</option>
+            <option value="experience">Experience (Years)</option>
+            <option value="name">Candidate Name (A-Z)</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Advanced filters collapsible */}
+      {showAdvancedFilters && (
+        <div className="bg-[#F9FAFB] border border-[#E5E7EB] rounded p-3 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs animate-in fade-in duration-100">
+          <div>
+            <label className="text-[#6B7280] font-semibold block mb-1">
+              Minimum Match Score ({minScore}%):
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="90"
+              step="5"
+              value={minScore}
+              onChange={(e) => setMinScore(Number(e.target.value))}
+              className="w-full accent-[#E83E8C]"
+            />
+          </div>
+
+          <div>
+            <label className="text-[#6B7280] font-semibold block mb-1">
+              Minimum Experience ({minExp} yrs):
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="10"
+              step="1"
+              value={minExp}
+              onChange={(e) => setMinExp(Number(e.target.value))}
+              className="w-full accent-[#E83E8C]"
+            />
+          </div>
+
+          <div>
+            <label className="text-[#6B7280] font-semibold block mb-1">Filter by Specific Skill:</label>
+            <input
+              type="text"
+              value={skillFilter}
+              onChange={(e) => setSkillFilter(e.target.value)}
+              placeholder="e.g. Java, React, Docker..."
+              className="w-full px-2.5 py-1 border border-[#D1D5DB] rounded bg-white text-xs focus:outline-none focus:border-[#E83E8C]"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Table Information Row */}
+      <div className="flex items-center justify-between text-[11px] text-[#6B7280] px-1">
+        <span>
+          Showing <span className="font-bold text-[#202124]">{filteredAndSortedCandidates.length}</span> of {candidates.length} ranked candidate records
+        </span>
+        {selectedRowIds.size > 0 && (
+          <span className="font-semibold text-[#E83E8C]">
+            {selectedRowIds.size} candidates selected for batch action
+          </span>
         )}
+      </div>
+
+      {/* Zoho Recruit-Style Dense Ranked Candidate Table */}
+      <div className="bg-white rounded border border-[#E5E7EB] overflow-hidden shadow-2xs">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left recruit-table">
+            <thead>
+              <tr>
+                <th className="w-8 text-center">
+                  <input
+                    type="checkbox"
+                    checked={
+                      candidates.length > 0 &&
+                      selectedRowIds.size === candidates.length
+                    }
+                    onChange={handleSelectAll}
+                    className="accent-[#E83E8C] rounded cursor-pointer"
+                  />
+                </th>
+                <th className="w-12">Rank</th>
+                <th>Candidate</th>
+                <th>Match Score</th>
+                <th>Verified Skills</th>
+                <th>Experience</th>
+                <th>Skill Gaps</th>
+                <th>Recommendation</th>
+                <th className="text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredAndSortedCandidates.length > 0 ? (
+                filteredAndSortedCandidates.map((cand) => {
+                  const isShortlisted = shortlistedCandidateIds.has(cand.profile.id);
+                  const isSelected = selectedCandidateId === cand.profile.id;
+                  const isChecked = selectedRowIds.has(cand.profile.id);
+
+                  const expYears = cand.match.experienceMatch.candidateYears;
+                  const recommendation =
+                    cand.match.totalScore >= 85
+                      ? 'SHORTLIST'
+                      : cand.match.totalScore >= 70
+                      ? 'REVIEW'
+                      : cand.match.totalScore >= 50
+                      ? 'CONSIDER'
+                      : 'HOLD';
+
+                  return (
+                    <tr
+                      key={cand.id}
+                      onClick={() => onSelectCandidate(cand.profile.id)}
+                      className={`cursor-pointer transition-colors ${
+                        isSelected ? 'bg-[#FDF2F7]/60' : ''
+                      }`}
+                    >
+                      <td className="text-center" onClick={(e) => handleToggleRow(cand.profile.id, e)}>
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => {}}
+                          className="accent-[#E83E8C] rounded cursor-pointer"
+                        />
+                      </td>
+
+                      <td className="font-bold text-[#202124]">
+                        <span className="inline-block px-1.5 py-0.5 rounded bg-[#202124] text-white font-mono text-[11px]">
+                          #{cand.rank}
+                        </span>
+                      </td>
+
+                      <td>
+                        <div className="font-bold text-[#202124] flex items-center gap-1.5">
+                          <span>{cand.profile.name || 'Candidate Name'}</span>
+                          {isShortlisted && (
+                            <BookmarkCheck className="w-3.5 h-3.5 text-[#E83E8C]" />
+                          )}
+                        </div>
+                        <span className="text-[11px] text-[#6B7280]">
+                          {cand.profile.email || cand.fileName}
+                        </span>
+                      </td>
+
+                      <td>
+                        <div className="flex items-center gap-2">
+                          <span className="font-extrabold text-[#202124] text-sm">
+                            {cand.match.totalScore}%
+                          </span>
+                          <span
+                            className={`text-[10px] px-1.5 py-0.2 rounded font-semibold ${
+                              cand.match.totalScore >= 85
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                : cand.match.totalScore >= 70
+                                ? 'bg-[#FDF2F7] text-[#E83E8C] border border-[#E83E8C]/20'
+                                : 'bg-gray-100 text-gray-700'
+                            }`}
+                          >
+                            {cand.match.label.replace(' Match', '')}
+                          </span>
+                        </div>
+                      </td>
+
+                      <td className="max-w-[200px]">
+                        <div className="truncate text-xs text-[#202124] font-medium">
+                          {cand.match.matchedRequiredSkills.slice(0, 3).join(' · ') ||
+                            cand.profile.skills.slice(0, 3).join(' · ') ||
+                            'General'}
+                        </div>
+                      </td>
+
+                      <td>
+                        <span className="font-semibold text-[#202124]">
+                          {expYears !== null ? `${expYears} yrs` : 'Unspecified'}
+                        </span>
+                      </td>
+
+                      <td className="max-w-[160px]">
+                        {cand.match.missingRequiredSkills.length > 0 ? (
+                          <span className="text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded text-[11px] border border-amber-200 truncate inline-block max-w-[140px]">
+                            {cand.match.missingRequiredSkills[0]}
+                            {cand.match.missingRequiredSkills.length > 1
+                              ? ` +${cand.match.missingRequiredSkills.length - 1}`
+                              : ''}
+                          </span>
+                        ) : (
+                          <span className="text-emerald-700 text-[11px] font-medium">
+                            ✓ None
+                          </span>
+                        )}
+                      </td>
+
+                      <td>
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${
+                            recommendation === 'SHORTLIST'
+                              ? 'bg-[#E83E8C] text-white'
+                              : recommendation === 'REVIEW'
+                              ? 'bg-[#202124] text-white'
+                              : 'bg-gray-200 text-gray-700'
+                          }`}
+                        >
+                          {recommendation}
+                        </span>
+                      </td>
+
+                      <td className="text-right" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-end gap-1.5">
+                          {onToggleShortlist && (
+                            <button
+                              type="button"
+                              onClick={(e) => onToggleShortlist(cand.profile.id, e)}
+                              className={`p-1 rounded border cursor-pointer ${
+                                isShortlisted
+                                  ? 'bg-[#FDF2F7] text-[#E83E8C] border-[#E83E8C]/30'
+                                  : 'bg-white text-[#6B7280] border-[#D1D5DB] hover:text-[#202124]'
+                              }`}
+                              title={isShortlisted ? 'Shortlisted' : 'Add to Shortlist'}
+                            >
+                              {isShortlisted ? (
+                                <BookmarkCheck className="w-3.5 h-3.5 text-[#E83E8C]" />
+                              ) : (
+                                <Bookmark className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => onSelectCandidate(cand.profile.id)}
+                            className="px-2.5 py-1 rounded bg-white hover:bg-[#F3F4F6] text-[#202124] border border-[#D1D5DB] font-medium text-xs cursor-pointer inline-flex items-center gap-1"
+                          >
+                            <span>Profile</span>
+                            <ChevronRight className="w-3 h-3 text-[#6B7280]" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan={9} className="text-center py-8 text-[#6B7280]">
+                    <p className="font-semibold text-[#202124] text-xs">No matching candidate records found.</p>
+                    <p className="text-[11px] mt-1">Try resetting search criteria or adjusting score thresholds.</p>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

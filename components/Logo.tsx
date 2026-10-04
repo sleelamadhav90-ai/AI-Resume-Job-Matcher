@@ -1,0 +1,65 @@
+import React from 'react';
+
+interface LogoProps {
+  size?: 'sm' | 'md' | 'lg';
+  showTagline?: boolean;
+  className?: string;
+}
+
+export const LogoSymbol: React.FC<{ size?: number; className?: string }> = ({ size = 22, className = '' }) => {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={`shrink-0 ${className}`}
+      aria-label="HireMe AI Symbol"
+    >
+      {/* Crisp solid square with subtle radius */}
+      <rect width="24" height="24" rx="5" fill="#202124" />
+      
+      {/* Geometric 'H' with candidate focus node and match check */}
+      <rect x="5.5" y="6" width="2.5" height="12" rx="1" fill="#FFFFFF" />
+      <rect x="16" y="6" width="2.5" height="12" rx="1" fill="#FFFFFF" />
+      <circle cx="12" cy="8.5" r="1.5" fill="#E83E8C" />
+      <path
+        d="M7 12.5H11L13 14.5L17 10.5"
+        stroke="#E83E8C"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+
+export const Logo: React.FC<LogoProps> = ({
+  size = 'md',
+  showTagline = false,
+  className = ''
+}) => {
+  const textSizes = {
+    sm: 'text-sm',
+    md: 'text-base',
+    lg: 'text-lg',
+  };
+
+  return (
+    <div className={`flex items-center gap-2 select-none ${className}`}>
+      <LogoSymbol size={size === 'sm' ? 20 : size === 'md' ? 24 : 28} />
+      <div className="flex flex-col">
+        <div className={`font-bold tracking-tight ${textSizes[size]} text-[#202124] leading-none flex items-baseline gap-0.5`}>
+          <span>HIREME</span>
+          <span className="text-[#E83E8C] font-extrabold">AI</span>
+        </div>
+        {showTagline && (
+          <span className="text-[10px] text-[#6B7280] font-normal tracking-tight mt-0.5">
+            Find the right talent. Understand why.
+          </span>
+        )}
+      </div>
+    </div>
+  );
+};

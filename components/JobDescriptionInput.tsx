@@ -1,5 +1,5 @@
 import React from 'react';
-import { Briefcase, Sparkles, FileText, AlertCircle, X } from 'lucide-react';
+import { Briefcase, Sparkles, FileText, Check } from 'lucide-react';
 
 interface JobDescriptionInputProps {
   value: string;
@@ -9,49 +9,37 @@ interface JobDescriptionInputProps {
   onClearError?: () => void;
 }
 
-export const SAMPLE_JOB_DESCRIPTIONS = [
+const SAMPLE_TEMPLATES = [
   {
-    title: 'Senior Frontend Engineer (React/TypeScript)',
-    text: `Job Title: Senior Frontend Engineer
-Location: Remote
-Experience Required: 4+ years
-
-Responsibilities:
-- Build and maintain modern, performant web applications using React, Next.js, and TypeScript.
-- Architect reusable component libraries and maintain design system fidelity.
-- Collaborate with product designers and backend engineers to integrate REST/GraphQL APIs.
-- Optimize web vitals, bundle size, and rendering performance.
-
-Required Skills:
-- 4+ years of professional React experience with TypeScript.
-- Deep understanding of Tailwind CSS, modern CSS, and component state management.
-- Strong knowledge of responsive design, web accessibility (WCAG), and browser performance.
-- Experience with testing tools such as Vitest, Jest, or Cypress.
-
-Preferred Skills:
-- Experience with Next.js App Router and server-side rendering.
-- Familiarity with Cloud architectures (AWS/GCP), CI/CD pipelines, and Docker.
-- Experience with AI API integration or LLM workflows.
-
-Education:
-- Bachelor's degree in Computer Science, Software Engineering, or equivalent practical experience.`
+    title: 'Software Engineer',
+    desc: `Role: Software Engineer
+Requirements:
+- 3+ years experience with Java, Spring Boot, and AWS cloud infrastructure.
+- Solid understanding of PostgreSQL database design, REST APIs, and microservices.
+- Bachelor's degree in Computer Science, Information Technology, or equivalent.
+Preferred:
+- Kubernetes, Docker, and CI/CD pipelines (Jenkins / GitHub Actions).
+- Experience in financial technology or high-throughput transaction systems.`,
   },
   {
-    title: 'AI / Full-Stack Developer',
-    text: `Job Title: AI Full-Stack Developer
-Location: Hybrid / San Francisco, CA
-Experience Required: 3+ years
-
-Key Responsibilities:
-- Design and deploy AI-driven web features utilizing modern LLM APIs (Gemini, Claude, GPT).
-- Develop robust backend endpoints with Node.js/Express or Next.js API routes.
-- Implement efficient client state management and interactive dashboards.
-
+    title: 'Frontend Developer',
+    desc: `Role: Frontend Developer
 Requirements:
-- Hands-on experience developing with LLM SDKs, prompt engineering, and structured JSON output.
-- 3+ years full-stack JavaScript/TypeScript experience with Node.js and React.
-- Experience with vector search, embeddings, or retrieval systems is a plus.
-- Degree in STEM or relevant industry experience.`
+- 3+ years hands-on experience with React, TypeScript, and modern JavaScript (ES6+).
+- Strong command of HTML5, CSS3, responsive UI design, and state management.
+- Degree in Computer Science, Software Engineering, or related discipline.
+Preferred:
+- Next.js, Tailwind CSS, Webpack/Vite, and unit testing with Jest/Vitest.`,
+  },
+  {
+    title: 'Backend Developer',
+    desc: `Role: Backend Developer
+Requirements:
+- 3+ years backend development using Python (FastAPI/Django) or Node.js.
+- Strong SQL proficiency (PostgreSQL / MySQL) and Redis caching.
+- B.Tech / B.E. in Computer Science or equivalent.
+Preferred:
+- Docker, AWS Lambda, microservices architecture, and message queues (Kafka/RabbitMQ).`,
   }
 ];
 
@@ -60,109 +48,70 @@ export const JobDescriptionInput: React.FC<JobDescriptionInputProps> = ({
   onChange,
   disabled = false,
   error,
-  onClearError
+  onClearError,
 }) => {
   const wordCount = value.trim() ? value.trim().split(/\s+/).filter(Boolean).length : 0;
-  const charCount = value.length;
-
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onChange(e.target.value);
-    if (error && onClearError) {
-      onClearError();
-    }
-  };
-
-  const handleSelectSample = (sampleText: string) => {
-    onChange(sampleText);
-    if (error && onClearError) {
-      onClearError();
-    }
-  };
 
   return (
-    <div
-      className={`bg-white rounded-xl border shadow-xs p-6 transition-all ${
-        error
-          ? 'border-rose-400 ring-2 ring-rose-500/10'
-          : 'border-slate-200/80 hover:border-slate-300'
-      }`}
-    >
-      <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center font-medium">
-            <Briefcase className="w-4 h-4" />
-          </div>
-          <div>
-            <h2 className="text-base font-semibold text-slate-900 tracking-tight">
-              1. Job Description
-            </h2>
-            <p className="text-xs text-slate-500">
-              Paste the target job requirements or pick a quick template
-            </p>
-          </div>
+    <div className="bg-white rounded border border-[#E5E7EB] p-4 flex flex-col h-full shadow-2xs">
+      <div className="flex items-center justify-between pb-2.5 border-b border-[#E5E7EB]">
+        <div className="flex items-center gap-2">
+          <Briefcase className="w-4 h-4 text-[#202124]" />
+          <h2 className="text-xs font-bold text-[#202124] uppercase tracking-wider">
+            Job Requisition Criteria
+          </h2>
         </div>
-        <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
-          <span>{charCount.toLocaleString()} chars</span>
-          <span aria-hidden="true">·</span>
-          <span>{wordCount.toLocaleString()} words</span>
-          {value && !disabled && (
-            <button
-              type="button"
-              onClick={() => onChange('')}
-              className="ml-1 text-slate-400 hover:text-rose-600 transition-colors"
-              title="Clear description"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
+        <span className="text-[11px] font-mono text-[#6B7280]">
+          {wordCount} words
+        </span>
       </div>
 
-      {/* Validation Message */}
-      {error && (
-        <div className="mt-3 p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 shrink-0" />
-          <span>{error}</span>
-        </div>
-      )}
-
-      {/* Quick sample pickers */}
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        <span className="text-xs font-medium text-slate-500 flex items-center gap-1">
-          <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-          Try sample role:
-        </span>
-        {SAMPLE_JOB_DESCRIPTIONS.map((sample, idx) => (
+      {/* Preset template quick picks */}
+      <div className="py-2 flex items-center gap-1.5 overflow-x-auto text-xs">
+        <span className="text-[#6B7280] text-[11px] font-medium shrink-0">Sample Templates:</span>
+        {SAMPLE_TEMPLATES.map((tpl) => (
           <button
-            key={idx}
+            key={tpl.title}
             type="button"
             disabled={disabled}
-            onClick={() => handleSelectSample(sample.text)}
-            className="text-xs px-2.5 py-1 rounded-md bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors disabled:opacity-50 cursor-pointer"
+            onClick={() => {
+              onChange(tpl.desc);
+              if (onClearError) onClearError();
+            }}
+            className="px-2 py-0.5 rounded bg-[#F9FAFB] hover:bg-[#FDF2F7] hover:text-[#E83E8C] border border-[#D1D5DB] text-[#202124] text-[11px] font-medium transition-all shrink-0 cursor-pointer disabled:opacity-50"
           >
-            {sample.title}
+            {tpl.title}
           </button>
         ))}
       </div>
 
-      <div className="mt-3 relative">
+      <div className="mt-1 flex-1 flex flex-col">
         <textarea
           value={value}
-          onChange={handleTextChange}
+          onChange={(e) => {
+            onChange(e.target.value);
+            if (error && onClearError) onClearError();
+          }}
           disabled={disabled}
-          placeholder="Paste full job description here (responsibilities, required skills, preferred qualifications, experience level, education)..."
-          rows={9}
-          className={`w-full rounded-lg border bg-slate-50/50 p-3.5 text-sm text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none transition-all font-mono text-xs leading-relaxed ${
-            error
-              ? 'border-rose-300 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
-              : 'border-slate-200 focus:border-blue-600 focus:ring-1 focus:ring-blue-600'
+          placeholder="Enter job requirements, core skills, minimum experience, and qualifications..."
+          className={`w-full flex-1 min-h-[160px] p-3 bg-[#F9FAFB] border rounded text-xs font-normal text-[#202124] leading-relaxed resize-none focus:outline-none focus:border-[#E83E8C] focus:bg-white placeholder:text-[#9CA3AF] ${
+            error ? 'border-red-400 bg-red-50/20' : 'border-[#D1D5DB]'
           }`}
         />
-        {!value && (
-          <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center text-slate-400 gap-1.5 opacity-60">
-            <FileText className="w-6 h-6 stroke-1" />
-            <p className="text-xs">Paste text or choose a sample role above</p>
-          </div>
+
+        {error && (
+          <p className="mt-1 text-[11px] font-medium text-red-600 flex items-center gap-1">
+            <span>⚠</span> {error}
+          </p>
+        )}
+      </div>
+
+      <div className="mt-2.5 pt-2 border-t border-[#E5E7EB] flex items-center justify-between text-[11px] text-[#6B7280]">
+        <span>Required vs Preferred skills weighted automatically</span>
+        {value.trim() && (
+          <span className="text-[#10B981] font-semibold flex items-center gap-1">
+            <Check className="w-3.5 h-3.5" /> Requisition loaded
+          </span>
         )}
       </div>
     </div>

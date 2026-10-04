@@ -16,14 +16,19 @@ export const AICandidateMatchingSection: React.FC = () => {
               
               {/* CARD 1: CANDIDATE PROFILE & AI INSIGHTS (8 cols on desktop) */}
               <div className="sm:col-span-7 bg-white rounded-2xl border border-[#E2E8F0] shadow-md p-6 space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-full bg-[#0D3834] text-white font-bold flex items-center justify-center text-sm shadow-2xs">
-                    SK
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-full bg-[#0D3834] text-white font-bold flex items-center justify-center text-sm shadow-2xs">
+                      SK
+                    </div>
+                    <div>
+                      <h3 className="font-extrabold text-sm text-[#0F172A]">Sarah Kim</h3>
+                      <p className="text-xs text-[#64748B]">Senior Product Designer · 8 yrs exp</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-extrabold text-sm text-[#0F172A]">Sarah Kim</h3>
-                    <p className="text-xs text-[#64748B]">Senior Product Designer · 8 yrs exp</p>
-                  </div>
+                  <span className="text-[10px] font-mono font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                    DEMO PROFILE
+                  </span>
                 </div>
 
                 <div className="space-y-2.5 pt-1">

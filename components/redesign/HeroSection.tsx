@@ -32,15 +32,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onStartMatching, onSee
             </div>
 
             <h1 className="text-4xl sm:text-6xl lg:text-[68px] font-extrabold font-heading text-[#111318] tracking-tight leading-[1.05]">
-              Discover better candidates.<br />
-              Screen intelligently.<br />
+              Find the right talent.<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-700 via-[#0D3834] to-[#0A2E2B]">
-                Automate hiring.
+                Understand why.
               </span>
             </h1>
 
             <p className="text-base sm:text-xl text-[#525866] leading-relaxed max-w-xl font-sans pt-1">
-              HireMe AI combines AI-powered resume parsing, deterministic 100-point skill matching, and automated candidate workflows so your team can make faster, confident hiring decisions.
+              HireMe AI combines AI-powered resume parsing, deterministic 100-point skill matching, and verbatim evidence extraction so your team can make confident, auditable hiring decisions.
             </p>
 
             {/* CTAs */}
@@ -74,8 +73,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onStartMatching, onSee
                 <span>Verbatim Resume Evidence</span>
               </div>
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-emerald-600" />
-                <span>12h+ Saved Weekly</span>
+                <FileText className="w-4 h-4 text-emerald-600" />
+                <span>Multi-Resume Batch Analysis</span>
               </div>
             </div>
           </div>
@@ -172,30 +171,27 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onStartMatching, onSee
 
             </div>
 
-            {/* FLOATING CARD 1: Top Right "12h saved this week" (Inspired by Screenshot 2) */}
+            {/* FLOATING CARD 1: Top Right "100-PT RUBRIC" */}
             <div className="absolute -top-4 -right-2 sm:-right-4 bg-white rounded-2xl border border-[#E2E4E9] p-4 shadow-xl z-20 hidden sm:flex items-center gap-3 animate-bounce-subtle">
-              <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
-                <Clock className="w-5 h-5 text-emerald-700" />
+              <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold font-mono text-xs">
+                100
               </div>
               <div>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="font-extrabold text-base text-[#111318]">12h</span>
-                  <span className="text-xs font-medium text-[#525866]">saved this week</span>
+                  <span className="font-extrabold text-xs uppercase tracking-wider text-[#111318]">100-Point Rubric</span>
                 </div>
-                <div className="w-24 h-1.5 bg-emerald-100 rounded-full mt-1 overflow-hidden">
-                  <div className="w-[80%] h-full bg-emerald-600 rounded-full" />
-                </div>
+                <p className="text-[11px] text-[#525866] font-medium">Deterministic Match Engine</p>
               </div>
             </div>
 
-            {/* FLOATING CARD 2: Bottom Left "Running on Autopilot" */}
+            {/* FLOATING CARD 2: Bottom Left "Explainable Ranking" */}
             <div className="absolute -bottom-6 -left-2 sm:-left-6 bg-[#0D3834] text-white rounded-2xl p-4 shadow-2xl z-20 hidden sm:block max-w-[220px] text-xs space-y-1.5 border border-emerald-500/30">
               <div className="flex items-center justify-between text-[10px] text-emerald-300 font-mono font-bold uppercase tracking-wider">
-                <span>AUTOPILOT</span>
+                <span>DEMO DATA</span>
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               </div>
-              <p className="font-bold text-white text-xs">87% Automated Screening</p>
-              <p className="text-[11px] text-emerald-200/80">14 candidate profiles parsed & matched in background</p>
+              <p className="font-bold text-white text-xs">Explainable Candidate Ranking</p>
+              <p className="text-[11px] text-emerald-200/80">Every score grounded in verbatim resume evidence & claims audit</p>
             </div>
 
           </div>

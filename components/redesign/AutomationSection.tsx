@@ -17,7 +17,7 @@ export const AutomationSection: React.FC = () => {
           {/* LEFT 45%: Copy & Headlines */}
           <div className="lg:col-span-5 space-y-6">
             <span className="text-xs font-mono font-bold uppercase tracking-widest text-emerald-300 bg-emerald-950/80 px-3.5 py-1 rounded-full border border-emerald-500/30 inline-block">
-              EFFICIENCY
+              WORKFLOW VISION / FUTURE ROADMAP
             </span>
 
             <h2 className="text-4xl sm:text-6xl font-extrabold font-heading text-white tracking-tight leading-[1.05]">
@@ -26,21 +26,21 @@ export const AutomationSection: React.FC = () => {
             </h2>
 
             <p className="text-base sm:text-lg text-emerald-100/80 leading-relaxed font-normal">
-              Admin, scheduling, and follow-ups run on automation, so you can focus on the decisions that actually move hiring forward.
+              Concept visualization of future automated recruitment workflows: connecting HireMe AI's core candidate scoring engine with interview scheduling, follow-ups, and offer letter drafts.
             </p>
 
             <div className="pt-2 flex flex-col gap-3 text-xs text-emerald-200/90 font-medium">
               <div className="flex items-center gap-2.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                <span>Instant automated resume extraction & candidate ranking</span>
+                <span><strong className="text-white">Active Product:</strong> Instant resume parsing & 100-pt rubric scoring</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                <span>Automated interview sync agendas & debrief summaries</span>
+                <span><strong className="text-white">Active Product:</strong> Verbatim evidence extraction & 4-tier claims audit</span>
               </div>
               <div className="flex items-center gap-2.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                <span>Zero manual spreadsheet tracking required</span>
+                <span className="w-2 h-2 rounded-full text-emerald-300 font-mono text-[10px]">ROADMAP</span>
+                <span>Automated calendar sync & interview scheduling concepts</span>
               </div>
             </div>
           </div>
@@ -100,7 +100,9 @@ export const AutomationSection: React.FC = () => {
               <div className="absolute bottom-4 left-0 sm:left-4 bg-white text-[#0F172A] rounded-2xl p-5 shadow-2xl z-30 w-[300px] sm:w-[340px] border border-slate-200 space-y-3">
                 <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                   <span className="font-extrabold text-xs text-[#0F172A]">Running on Autopilot</span>
-                  <span className="text-[10px] text-slate-400 font-mono">Tasks handled automatically</span>
+                  <span className="text-[9px] text-emerald-800 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-mono font-bold">
+                    WORKFLOW CONCEPT
+                  </span>
                 </div>
 
                 <div className="space-y-2.5 text-xs">

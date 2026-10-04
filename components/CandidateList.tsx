@@ -11,7 +11,8 @@ import {
   Sparkles,
   MoreHorizontal,
   FileText,
-  SlidersHorizontal
+  SlidersHorizontal,
+  ShieldAlert
 } from 'lucide-react';
 import { RankedCandidate, ScoreTierLabel } from '../lib/types';
 
@@ -43,7 +44,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
-      setSelectedRowIds(new Set(candidates.map((c) => c.profile.id)));
+      setSelectedRowIds(new Set((candidates || []).map((c) => c.profile?.id || c.id)));
     } else {
       setSelectedRowIds(new Set());
     }
@@ -60,18 +61,32 @@ export const CandidateList: React.FC<CandidateListProps> = ({
   };
 
   const filteredAndSortedCandidates = useMemo(() => {
+    if (!Array.isArray(candidates)) return [];
+
     return candidates
       .filter((cand) => {
-        // Text search
-        const q = searchQuery.toLowerCase().trim();
+        if (!cand) return false;
+
+        // 1. Text search (case-insensitive, handles missing names, empty skills/roles)
+        const q = (searchQuery || '').toLowerCase().trim();
         if (q) {
-          const name = (cand.profile.name || '').toLowerCase();
-          const skills = cand.profile.skills.map((s) => s.toLowerCase());
-          const roles = cand.profile.experience.map((e) => (e.role || '').toLowerCase());
-          const matchedSkills = cand.match.matchedRequiredSkills.map((s) => s.toLowerCase());
+          const name = String(cand.profile?.name || '').toLowerCase();
+          const email = String(cand.profile?.email || '').toLowerCase();
+          const fileName = String(cand.fileName || '').toLowerCase();
+          const skills = Array.isArray(cand.profile?.skills)
+            ? cand.profile.skills.map((s) => String(s || '').toLowerCase())
+            : [];
+          const roles = Array.isArray(cand.profile?.experience)
+            ? cand.profile.experience.map((e) => String(e?.role || '').toLowerCase())
+            : [];
+          const matchedSkills = Array.isArray(cand.match?.matchedRequiredSkills)
+            ? cand.match.matchedRequiredSkills.map((s) => String(s || '').toLowerCase())
+            : [];
 
           const matches =
             name.includes(q) ||
+            email.includes(q) ||
+            fileName.includes(q) ||
             skills.some((s) => s.includes(q)) ||
             roles.some((r) => r.includes(q)) ||
             matchedSkills.some((s) => s.includes(q));
@@ -79,43 +94,43 @@ export const CandidateList: React.FC<CandidateListProps> = ({
           if (!matches) return false;
         }
 
-        // Tier filter
-        if (tierFilter !== 'All' && cand.match.label !== tierFilter) {
+        // 2. Tier filter
+        if (tierFilter !== 'All' && cand.match?.label !== tierFilter) {
           return false;
         }
 
-        // Min score filter
-        if (minScore > 0 && cand.match.totalScore < minScore) {
+        // 3. Min score filter
+        if (minScore > 0 && (cand.match?.totalScore || 0) < minScore) {
           return false;
         }
 
-        // Min experience filter
-        if (minExp > 0 && (cand.match.experienceMatch.candidateYears || 0) < minExp) {
+        // 4. Min experience filter
+        if (minExp > 0 && (cand.match?.experienceMatch?.candidateYears || 0) < minExp) {
           return false;
         }
 
-        // Skill filter
+        // 5. Skill filter
         if (skillFilter.trim()) {
           const sf = skillFilter.toLowerCase().trim();
           const hasSkill =
-            cand.profile.skills.some((s) => s.toLowerCase().includes(sf)) ||
-            cand.match.matchedRequiredSkills.some((s) => s.toLowerCase().includes(sf));
+            (cand.profile?.skills || []).some((s) => String(s || '').toLowerCase().includes(sf)) ||
+            (cand.match?.matchedRequiredSkills || []).some((s) => String(s || '').toLowerCase().includes(sf));
           if (!hasSkill) return false;
         }
 
         return true;
       })
       .sort((a, b) => {
-        if (sortBy === 'rank') return a.rank - b.rank;
-        if (sortBy === 'score') return b.match.totalScore - a.match.totalScore;
+        if (sortBy === 'rank') return (a.rank || 0) - (b.rank || 0);
+        if (sortBy === 'score') return (b.match?.totalScore || 0) - (a.match?.totalScore || 0);
         if (sortBy === 'experience') {
           return (
-            (b.match.experienceMatch.candidateYears || 0) -
-            (a.match.experienceMatch.candidateYears || 0)
+            (b.match?.experienceMatch?.candidateYears || 0) -
+            (a.match?.experienceMatch?.candidateYears || 0)
           );
         }
         if (sortBy === 'name') {
-          return (a.profile.name || '').localeCompare(b.profile.name || '');
+          return String(a.profile?.name || '').localeCompare(String(b.profile?.name || ''));
         }
         return 0;
       });
@@ -243,7 +258,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
         )}
       </div>
 
-      {/* Zoho Recruit-Style Dense Ranked Candidate Table */}
+      {/* Ranked Candidate Table */}
       <div className="bg-white rounded border border-[#E5E7EB] overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left recruit-table">
@@ -266,36 +281,32 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                 <th>Verified Skills</th>
                 <th>Experience</th>
                 <th>Skill Gaps</th>
-                <th>Recommendation</th>
+                <th>Audit / Claims</th>
                 <th className="text-right">Action</th>
               </tr>
             </thead>
             <tbody>
               {filteredAndSortedCandidates.length > 0 ? (
                 filteredAndSortedCandidates.map((cand) => {
-                  const isShortlisted = shortlistedCandidateIds.has(cand.profile.id);
-                  const isSelected = selectedCandidateId === cand.profile.id;
-                  const isChecked = selectedRowIds.has(cand.profile.id);
+                  const candidateId = cand.profile?.id || cand.id;
+                  const isShortlisted = shortlistedCandidateIds.has(candidateId);
+                  const isSelected = selectedCandidateId === candidateId;
+                  const isChecked = selectedRowIds.has(candidateId);
 
-                  const expYears = cand.match.experienceMatch.candidateYears;
-                  const recommendation =
-                    cand.match.totalScore >= 85
-                      ? 'SHORTLIST'
-                      : cand.match.totalScore >= 70
-                      ? 'REVIEW'
-                      : cand.match.totalScore >= 50
-                      ? 'CONSIDER'
-                      : 'HOLD';
+                  const expYears = cand.match?.experienceMatch?.candidateYears;
+                  const unverifiedCount = (cand.profile?.claimsToVerify || []).filter(
+                    (c) => c.status !== 'SUPPORTED'
+                  ).length;
 
                   return (
                     <tr
                       key={cand.id}
-                      onClick={() => onSelectCandidate(cand.profile.id)}
+                      onClick={() => onSelectCandidate(candidateId)}
                       className={`cursor-pointer transition-colors ${
                         isSelected ? 'bg-[#FDF2F7]/60' : ''
                       }`}
                     >
-                      <td className="text-center" onClick={(e) => handleToggleRow(cand.profile.id, e)}>
+                      <td className="text-center" onClick={(e) => handleToggleRow(candidateId, e)}>
                         <input
                           type="checkbox"
                           checked={isChecked}
@@ -312,13 +323,13 @@ export const CandidateList: React.FC<CandidateListProps> = ({
 
                       <td>
                         <div className="font-bold text-[#202124] flex items-center gap-1.5">
-                          <span>{cand.profile.name || 'Candidate Name'}</span>
+                          <span>{cand.profile?.name || 'Name not provided'}</span>
                           {isShortlisted && (
                             <BookmarkCheck className="w-3.5 h-3.5 text-[#E83E8C]" />
                           )}
                         </div>
                         <span className="text-[11px] text-[#6B7280]">
-                          {cand.profile.email || cand.fileName}
+                          {cand.profile?.email || cand.fileName}
                         </span>
                       </td>
 
@@ -343,20 +354,20 @@ export const CandidateList: React.FC<CandidateListProps> = ({
 
                       <td className="max-w-[200px]">
                         <div className="truncate text-xs text-[#202124] font-medium">
-                          {cand.match.matchedRequiredSkills.slice(0, 3).join(' · ') ||
-                            cand.profile.skills.slice(0, 3).join(' · ') ||
+                          {(cand.match?.matchedRequiredSkills || []).slice(0, 3).join(' · ') ||
+                            (cand.profile?.skills || []).slice(0, 3).join(' · ') ||
                             'General'}
                         </div>
                       </td>
 
                       <td>
                         <span className="font-semibold text-[#202124]">
-                          {expYears !== null ? `${expYears} yrs` : 'Unspecified'}
+                          {expYears !== null && expYears !== undefined ? `${expYears} yrs` : 'Not specified'}
                         </span>
                       </td>
 
                       <td className="max-w-[160px]">
-                        {cand.match.missingRequiredSkills.length > 0 ? (
+                        {(cand.match?.missingRequiredSkills || []).length > 0 ? (
                           <span className="text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded text-[11px] border border-amber-200 truncate inline-block max-w-[140px]">
                             {cand.match.missingRequiredSkills[0]}
                             {cand.match.missingRequiredSkills.length > 1
@@ -371,17 +382,16 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                       </td>
 
                       <td>
-                        <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${
-                            recommendation === 'SHORTLIST'
-                              ? 'bg-[#E83E8C] text-white'
-                              : recommendation === 'REVIEW'
-                              ? 'bg-[#202124] text-white'
-                              : 'bg-gray-200 text-gray-700'
-                          }`}
-                        >
-                          {recommendation}
-                        </span>
+                        {unverifiedCount > 0 ? (
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 inline-flex items-center gap-1">
+                            <ShieldAlert className="w-3 h-3 text-amber-600" />
+                            {unverifiedCount} to verify
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            ✓ Verified
+                          </span>
+                        )}
                       </td>
 
                       <td className="text-right" onClick={(e) => e.stopPropagation()}>
@@ -389,7 +399,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                           {onToggleShortlist && (
                             <button
                               type="button"
-                              onClick={(e) => onToggleShortlist(cand.profile.id, e)}
+                              onClick={(e) => onToggleShortlist(candidateId, e)}
                               className={`p-1 rounded border cursor-pointer ${
                                 isShortlisted
                                   ? 'bg-[#FDF2F7] text-[#E83E8C] border-[#E83E8C]/30'
@@ -407,10 +417,10 @@ export const CandidateList: React.FC<CandidateListProps> = ({
 
                           <button
                             type="button"
-                            onClick={() => onSelectCandidate(cand.profile.id)}
+                            onClick={() => onSelectCandidate(candidateId)}
                             className="px-2.5 py-1 rounded bg-white hover:bg-[#F3F4F6] text-[#202124] border border-[#D1D5DB] font-medium text-xs cursor-pointer inline-flex items-center gap-1"
                           >
-                            <span>Profile</span>
+                            <span>Details</span>
                             <ChevronRight className="w-3 h-3 text-[#6B7280]" />
                           </button>
                         </div>

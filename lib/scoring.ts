@@ -9,6 +9,8 @@
  * Total: 100 points
  *
  * 100% deterministic, explainable mathematical scoring without hallucinations.
+ * Audited for robustness: NaN/Infinity safety, missing field resilience, deduplication,
+ * and structured evidence-based explanations.
  */
 
 import {
@@ -16,7 +18,8 @@ import {
   JobRequirements,
   MatchAnalysis,
   RankedCandidate,
-  ScoreTierLabel
+  ScoreTierLabel,
+  StructuredMatchExplanation
 } from './types';
 
 // Common technical alias dictionary for semantic skill normalization
@@ -82,13 +85,24 @@ const SKILL_ALIASES: Record<string, string> = {
   'cpp': 'cpp',
   'python3': 'python',
   'python': 'python',
+  'fastapi': 'fastapi',
+  'django': 'django',
+  'flask': 'flask',
+  'spring': 'springboot',
+  'spring boot': 'springboot',
+  'springboot': 'springboot',
+  'sql': 'sql',
+  'nosql': 'nosql',
+  'redis': 'redis',
+  'kafka': 'kafka',
+  'terraform': 'terraform',
 };
 
 /**
  * Normalizes a skill string: lowercased, punctuation stripped, mapped to alias.
  */
 export function normalizeSkill(skill: string): string {
-  if (!skill) return '';
+  if (!skill || typeof skill !== 'string') return '';
   const cleaned = skill
     .toLowerCase()
     .trim()
@@ -106,6 +120,27 @@ export function normalizeSkill(skill: string): string {
 
   // Standardize spaces and hyphens
   return cleaned.replace(/[\s-_]+/g, '');
+}
+
+/**
+ * Deduplicates an array of skill strings using normalized identity.
+ */
+export function deduplicateSkills(skills: string[]): string[] {
+  if (!Array.isArray(skills)) return [];
+  const seen = new Set<string>();
+  const result: string[] = [];
+
+  for (const s of skills) {
+    if (!s || typeof s !== 'string') continue;
+    const norm = normalizeSkill(s);
+    if (!norm) continue;
+    if (!seen.has(norm)) {
+      seen.add(norm);
+      result.push(s.trim());
+    }
+  }
+
+  return result;
 }
 
 /**
@@ -162,9 +197,16 @@ function evaluateSkillMatch(
   }
 
   // 5. Look for whole-word occurrence in resume text
-  const regex = new RegExp(`\\b${normJobSkill}\\b`, 'i');
-  if (regex.test(allCandidateText)) {
-    return { status: 'partial', matchedSkillName: jobSkill };
+  try {
+    const regex = new RegExp(`\\b${normJobSkill}\\b`, 'i');
+    if (regex.test(allCandidateText)) {
+      return { status: 'partial', matchedSkillName: jobSkill };
+    }
+  } catch {
+    // If regex fails on special characters, fallback to includes
+    if (allCandidateText.toLowerCase().includes(normJobSkill)) {
+      return { status: 'partial', matchedSkillName: jobSkill };
+    }
   }
 
   return { status: 'missing' };
@@ -186,16 +228,16 @@ function evaluateEducation(
     return {
       score: 15,
       status: 'not_required',
-      evidence: ['No specific education level required by role.'],
+      evidence: ['No specific education credentials required by this job description.'],
     };
   }
 
   // If candidate has no education listed, 0 points
-  if (!candidateEducation || candidateEducation.length === 0) {
+  if (!candidateEducation || !Array.isArray(candidateEducation) || candidateEducation.length === 0) {
     return {
       score: 0,
       status: 'missing',
-      evidence: ['No education credentials found in resume.'],
+      evidence: ['No education credentials provided in resume.'],
     };
   }
 
@@ -203,27 +245,28 @@ function evaluateEducation(
   let highestTier = 0; // 0 = none, 1 = related/bootcamp, 2 = bachelor, 3 = master/phd
 
   const degreeKeywords = {
-    bachelor: ['bachelor', 'b.s.', 'bs', 'b.sc', 'b.tech', 'btech', 'b.e.', 'be', 'b.a.', 'undergraduate'],
-    master: ['master', 'm.s.', 'ms', 'm.sc', 'm.tech', 'mtech', 'mba', 'graduate'],
+    bachelor: ['bachelor', 'b.s.', 'bs', 'b.sc', 'b.tech', 'btech', 'b.e.', 'be', 'b.a.', 'undergraduate', 'bca'],
+    master: ['master', 'm.s.', 'ms', 'm.sc', 'm.tech', 'mtech', 'mba', 'graduate', 'mca'],
     doctorate: ['ph.d', 'phd', 'doctorate', 'doctoral'],
     diploma: ['associate', 'bootcamp', 'diploma', 'certificate'],
   };
 
   const isBachelorReq = jobEducationRequirements.some((req) =>
-    degreeKeywords.bachelor.some((k) => req.toLowerCase().includes(k))
+    degreeKeywords.bachelor.some((k) => (req || '').toLowerCase().includes(k))
   );
   const isMasterReq = jobEducationRequirements.some((req) =>
-    degreeKeywords.master.some((k) => req.toLowerCase().includes(k)) ||
-    degreeKeywords.doctorate.some((k) => req.toLowerCase().includes(k))
+    degreeKeywords.master.some((k) => (req || '').toLowerCase().includes(k)) ||
+    degreeKeywords.doctorate.some((k) => (req || '').toLowerCase().includes(k))
   );
 
   for (const edu of candidateEducation) {
+    if (!edu) continue;
     const degText = `${edu.degree || ''} ${edu.field || ''} ${edu.institution || ''}`.toLowerCase();
-    evidence.push(
-      [edu.degree, edu.field, edu.institution, edu.graduationYear ? `(${edu.graduationYear})` : '']
-        .filter(Boolean)
-        .join(' ')
-    );
+    const line = [edu.degree, edu.field, edu.institution, edu.graduationYear ? `(${edu.graduationYear})` : '']
+      .filter(Boolean)
+      .join(' ');
+
+    if (line) evidence.push(line);
 
     if (degreeKeywords.doctorate.some((k) => degText.includes(k))) {
       highestTier = Math.max(highestTier, 3);
@@ -238,6 +281,14 @@ function evaluateEducation(
     }
   }
 
+  if (evidence.length === 0) {
+    return {
+      score: 0,
+      status: 'missing',
+      evidence: ['No formal degree verified.'],
+    };
+  }
+
   if (isMasterReq) {
     if (highestTier >= 3) return { score: 15, status: 'matches', evidence };
     if (highestTier === 2) return { score: 10, status: 'partial', evidence };
@@ -250,7 +301,6 @@ function evaluateEducation(
     return { score: 5, status: 'partial', evidence };
   }
 
-  // Generic degree required and candidate has a degree
   if (highestTier >= 2) {
     return { score: 15, status: 'matches', evidence };
   } else if (highestTier === 1) {
@@ -268,7 +318,7 @@ function evaluateProjects(
   candidateProjects: CandidateProfile['projects'],
   targetSkills: string[]
 ): { score: number; relevantProjects: string[] } {
-  if (!candidateProjects || candidateProjects.length === 0) {
+  if (!candidateProjects || !Array.isArray(candidateProjects) || candidateProjects.length === 0) {
     return { score: 0, relevantProjects: [] };
   }
 
@@ -277,6 +327,7 @@ function evaluateProjects(
   let totalTechMatches = 0;
 
   for (const project of candidateProjects) {
+    if (!project) continue;
     const projectTech = (project.technologies || []).map(normalizeSkill);
     const descLower = (project.description || '').toLowerCase();
 
@@ -289,7 +340,7 @@ function evaluateProjects(
       }
     }
 
-    if (projectHasMatch) {
+    if (projectHasMatch && project.name) {
       relevantProjects.push(project.name);
     }
   }
@@ -302,7 +353,7 @@ function evaluateProjects(
   let score = 5 + Math.min(3, relevantProjects.length * 2) + Math.min(3, totalTechMatches * 1);
   score = Math.min(10, Math.max(0, score));
 
-  return { score, relevantProjects };
+  return { score: Number.isFinite(score) ? score : 0, relevantProjects };
 }
 
 /**
@@ -320,14 +371,15 @@ function evaluateOtherRequirements(
   ];
 
   if (requirementsToTest.length === 0) {
-    return { score: 10, matchedRequirements: ['All role requirements satisfied'], missingRequirements: [] };
+    return { score: 10, matchedRequirements: ['All general requirements satisfied'], missingRequirements: [] };
   }
 
   const matched: string[] = [];
   const missing: string[] = [];
-  const normText = allCandidateText.toLowerCase();
+  const normText = (allCandidateText || '').toLowerCase();
 
   for (const req of requirementsToTest) {
+    if (!req || typeof req !== 'string') continue;
     const cleanReq = req.trim();
     if (!cleanReq) continue;
 
@@ -352,7 +404,8 @@ function evaluateOtherRequirements(
   }
 
   const ratio = matched.length / Math.max(1, requirementsToTest.length);
-  const score = Math.min(10, Math.round(ratio * 10 * 10) / 10);
+  const rawScore = Math.min(10, ratio * 10);
+  const score = Number.isFinite(rawScore) ? Math.round(rawScore * 10) / 10 : 0;
 
   return { score, matchedRequirements: matched, missingRequirements: missing };
 }
@@ -392,8 +445,8 @@ function generateDeterministicExplanation(
   }
 
   // 3. Experience
-  if (requiredYears !== null) {
-    if (candidateYears !== null) {
+  if (requiredYears !== null && requiredYears > 0) {
+    if (candidateYears !== null && Number.isFinite(candidateYears)) {
       if (candidateYears >= requiredYears) {
         parts.push(`Meets experience requirement (${candidateYears} yrs vs ${requiredYears} yrs required).`);
       } else {
@@ -415,6 +468,83 @@ function generateDeterministicExplanation(
 }
 
 /**
+ * Builds structured explanation object for detailed recruiter inspection.
+ */
+function generateStructuredExplanation(
+  totalScore: number,
+  label: ScoreTierLabel,
+  matchedRequired: string[],
+  missingRequired: string[],
+  candidateYears: number | null,
+  requiredYears: number | null,
+  relevantProjects: string[],
+  candidateEducation: CandidateProfile['education'],
+  jobEducation: string[],
+  claimsToVerify: CandidateProfile['claimsToVerify']
+): StructuredMatchExplanation {
+  const headline = `${label} (${totalScore}%)`;
+
+  let expWhy: string | null = null;
+  let expMissing: string | null = null;
+
+  if (requiredYears !== null && requiredYears > 0) {
+    if (candidateYears !== null && Number.isFinite(candidateYears)) {
+      if (candidateYears >= requiredYears) {
+        expWhy = `${candidateYears} years verified experience (meets/exceeds ${requiredYears} years required)`;
+      } else {
+        expMissing = `${candidateYears} years verified (below ${requiredYears} years required)`;
+      }
+    } else {
+      expMissing = `Experience tenure not quantified in resume (Job requires ${requiredYears} years)`;
+    }
+  } else if (candidateYears !== null && candidateYears > 0) {
+    expWhy = `${candidateYears} years relevant industry experience`;
+  }
+
+  let eduWhy: string | null = null;
+  let eduMissing: string | null = null;
+
+  if (jobEducation && jobEducation.length > 0) {
+    if (candidateEducation && candidateEducation.length > 0) {
+      eduWhy = candidateEducation
+        .map((e) => [e.degree, e.field, e.institution].filter(Boolean).join(' in '))
+        .filter(Boolean)
+        .join('; ') || 'Degree listed';
+    } else {
+      eduMissing = `Education requirement specified (${jobEducation[0]}), but no credentials found in resume`;
+    }
+  } else {
+    eduWhy = candidateEducation && candidateEducation.length > 0
+      ? candidateEducation.map((e) => e.degree).filter(Boolean).join(', ')
+      : 'No formal degree required by job';
+  }
+
+  const unverifiedClaims = (claimsToVerify || []).filter(
+    (c) => c.status !== 'SUPPORTED' || c.verificationNeeded
+  );
+
+  return {
+    headline,
+    whyMatches: {
+      skills: matchedRequired,
+      experience: expWhy,
+      projects: relevantProjects,
+      education: eduWhy,
+    },
+    whatIsMissing: {
+      skills: missingRequired,
+      experience: expMissing,
+      education: eduMissing,
+      other: [],
+    },
+    recruiterAttention: {
+      unverifiedClaimsCount: unverifiedClaims.length,
+      flaggedItems: unverifiedClaims.map((c) => c.claim),
+    },
+  };
+}
+
+/**
  * Core deterministic candidate scoring engine.
  * Computes exact 0-100 score according to strict weights.
  */
@@ -422,24 +552,36 @@ export function calculateCandidateScore(
   candidate: CandidateProfile,
   job: JobRequirements
 ): MatchAnalysis {
+  // Safe defaults for all arrays
+  const candSkills = deduplicateSkills(candidate?.skills || []);
+  const candExperience = Array.isArray(candidate?.experience) ? candidate.experience : [];
+  const candProjects = Array.isArray(candidate?.projects) ? candidate.projects : [];
+  const candEducation = Array.isArray(candidate?.education) ? candidate.education : [];
+  const candClaims = Array.isArray(candidate?.claimsToVerify) ? candidate.claimsToVerify : [];
+
+  const rawReqSkills = Array.isArray(job?.requiredSkills) ? job.requiredSkills : [];
+  const rawPrefSkills = Array.isArray(job?.preferredSkills) ? job.preferredSkills : [];
+  const requiredSkills = deduplicateSkills(rawReqSkills);
+  const preferredSkills = deduplicateSkills(rawPrefSkills);
+
   // Extract all technology tokens from candidate experience and projects
   const candidateTechList: string[] = [];
-  candidate.experience.forEach((e) => {
-    if (e.technologies) candidateTechList.push(...e.technologies);
+  candExperience.forEach((e) => {
+    if (e && Array.isArray(e.technologies)) candidateTechList.push(...e.technologies);
   });
-  candidate.projects.forEach((p) => {
-    if (p.technologies) candidateTechList.push(...p.technologies);
+  candProjects.forEach((p) => {
+    if (p && Array.isArray(p.technologies)) candidateTechList.push(...p.technologies);
   });
 
   // Searchable text corpus for fallback keyword matching
   const candidateCorpus = [
-    candidate.summary,
-    candidate.skills.join(' '),
-    ...candidate.experience.map(
-      (e) => `${e.role || ''} ${e.company || ''} ${e.description} ${(e.technologies || []).join(' ')}`
+    candidate?.summary || '',
+    candSkills.join(' '),
+    ...candExperience.map(
+      (e) => `${e?.role || ''} ${e?.company || ''} ${e?.description || ''} ${(e?.technologies || []).join(' ')}`
     ),
-    ...candidate.projects.map((p) => `${p.name} ${p.description} ${(p.technologies || []).join(' ')}`),
-    candidate.certifications.join(' '),
+    ...candProjects.map((p) => `${p?.name || ''} ${p?.description || ''} ${(p?.technologies || []).join(' ')}`),
+    ...(Array.isArray(candidate?.certifications) ? candidate.certifications : []),
   ].join(' ');
 
   // 1. SKILLS (40 Points): 30 pts Required + 10 pts Preferred
@@ -447,13 +589,12 @@ export function calculateCandidateScore(
   const missingRequiredSkills: string[] = [];
   const partialSkills: string[] = [];
 
-  const requiredSkills = job.requiredSkills || [];
   let requiredSkillPoints = 30;
 
   if (requiredSkills.length > 0) {
     let rawRequiredScore = 0;
     for (const skill of requiredSkills) {
-      const match = evaluateSkillMatch(skill, candidate.skills, candidateTechList, candidateCorpus);
+      const match = evaluateSkillMatch(skill, candSkills, candidateTechList, candidateCorpus);
       if (match.status === 'matched') {
         matchedRequiredSkills.push(match.matchedSkillName || skill);
         rawRequiredScore += 1.0;
@@ -467,7 +608,6 @@ export function calculateCandidateScore(
     requiredSkillPoints = (rawRequiredScore / requiredSkills.length) * 30;
   }
 
-  const preferredSkills = job.preferredSkills || [];
   const matchedPreferredSkills: string[] = [];
   const missingPreferredSkills: string[] = [];
   let preferredSkillPoints = 10;
@@ -475,7 +615,7 @@ export function calculateCandidateScore(
   if (preferredSkills.length > 0) {
     let rawPreferredScore = 0;
     for (const skill of preferredSkills) {
-      const match = evaluateSkillMatch(skill, candidate.skills, candidateTechList, candidateCorpus);
+      const match = evaluateSkillMatch(skill, candSkills, candidateTechList, candidateCorpus);
       if (match.status === 'matched') {
         matchedPreferredSkills.push(match.matchedSkillName || skill);
         rawPreferredScore += 1.0;
@@ -489,13 +629,19 @@ export function calculateCandidateScore(
     preferredSkillPoints = (rawPreferredScore / preferredSkills.length) * 10;
   }
 
-  const skillScore = Math.min(40, requiredSkillPoints + preferredSkillPoints);
+  let skillScore = requiredSkillPoints + preferredSkillPoints;
+  if (!Number.isFinite(skillScore)) skillScore = 0;
+  skillScore = Math.min(40, Math.max(0, skillScore));
 
   // 2. EXPERIENCE (25 Points)
   let experienceScore = 25;
   let experienceStatus: 'meets' | 'partial' | 'unknown' = 'meets';
-  const candYears = candidate.totalExperienceYears;
-  const reqYears = job.requiredExperienceYears;
+  const candYears = typeof candidate?.totalExperienceYears === 'number' && Number.isFinite(candidate.totalExperienceYears)
+    ? candidate.totalExperienceYears
+    : null;
+  const reqYears = typeof job?.requiredExperienceYears === 'number' && Number.isFinite(job.requiredExperienceYears)
+    ? job.requiredExperienceYears
+    : null;
 
   if (reqYears !== null && reqYears > 0) {
     if (candYears !== null) {
@@ -508,10 +654,12 @@ export function calculateCandidateScore(
         experienceStatus = 'partial';
       }
     } else {
-      if (candidate.experience && candidate.experience.length > 0) {
-        experienceScore = Math.min(25, candidate.experience.length >= 2 ? 18 : 12);
+      if (candExperience.length > 0) {
+        // Unknown tenure but has experience entries
+        experienceScore = Math.min(15, candExperience.length >= 2 ? 12 : 6);
         experienceStatus = 'partial';
       } else {
+        // Unknown tenure and no experience entries
         experienceScore = 0;
         experienceStatus = 'unknown';
       }
@@ -522,26 +670,36 @@ export function calculateCandidateScore(
     experienceStatus = 'meets';
   }
 
+  if (!Number.isFinite(experienceScore)) experienceScore = 0;
+  experienceScore = Math.min(25, Math.max(0, experienceScore));
+
   // 3. EDUCATION (15 Points)
-  const eduResult = evaluateEducation(candidate.education, job.educationRequirements || []);
-  const educationScore = eduResult.score;
+  const eduResult = evaluateEducation(candEducation, job?.educationRequirements || []);
+  let educationScore = eduResult.score;
+  if (!Number.isFinite(educationScore)) educationScore = 0;
+  educationScore = Math.min(15, Math.max(0, educationScore));
 
   // 4. PROJECTS (10 Points)
   const allJobTargetSkills = [
-    ...(job.requiredSkills || []),
-    ...(job.preferredSkills || []),
-    ...(job.importantKeywords || []),
+    ...requiredSkills,
+    ...preferredSkills,
+    ...(Array.isArray(job?.importantKeywords) ? job.importantKeywords : []),
   ];
-  const projectResult = evaluateProjects(candidate.projects, allJobTargetSkills);
-  const projectScore = projectResult.score;
+  const projectResult = evaluateProjects(candProjects, allJobTargetSkills);
+  let projectScore = projectResult.score;
+  if (!Number.isFinite(projectScore)) projectScore = 0;
+  projectScore = Math.min(10, Math.max(0, projectScore));
 
   // 5. OTHER REQUIREMENTS (10 Points)
-  const otherReqResult = evaluateOtherRequirements(job, candidateCorpus);
-  const requirementsScore = otherReqResult.score;
+  const otherReqResult = evaluateOtherRequirements(job || ({} as JobRequirements), candidateCorpus);
+  let requirementsScore = otherReqResult.score;
+  if (!Number.isFinite(requirementsScore)) requirementsScore = 0;
+  requirementsScore = Math.min(10, Math.max(0, requirementsScore));
 
   // TOTAL SCORE (0 - 100)
   const rawTotal = skillScore + experienceScore + educationScore + projectScore + requirementsScore;
-  const totalScore = Math.max(0, Math.min(100, Math.round(rawTotal)));
+  const safeTotal = Number.isFinite(rawTotal) ? rawTotal : 0;
+  const totalScore = Math.max(0, Math.min(100, Math.round(safeTotal)));
 
   // SCORE LABEL
   let label: ScoreTierLabel = 'Weak Match';
@@ -564,8 +722,21 @@ export function calculateCandidateScore(
     projectResult.relevantProjects
   );
 
+  const structuredExplanation = generateStructuredExplanation(
+    totalScore,
+    label,
+    matchedRequiredSkills,
+    missingRequiredSkills,
+    candYears,
+    reqYears,
+    projectResult.relevantProjects,
+    candEducation,
+    job?.educationRequirements || [],
+    candClaims
+  );
+
   return {
-    candidateId: candidate.id,
+    candidateId: candidate?.id || 'unknown',
     totalScore,
     label,
     skillScore: Math.round(skillScore * 10) / 10,
@@ -593,6 +764,7 @@ export function calculateCandidateScore(
     matchedRequirements: otherReqResult.matchedRequirements,
     missingRequirements: otherReqResult.missingRequirements,
     explanation,
+    structuredExplanation,
   };
 }
 
@@ -604,6 +776,8 @@ export function rankCandidates(
   candidates: CandidateProfile[],
   job: JobRequirements
 ): RankedCandidate[] {
+  if (!Array.isArray(candidates)) return [];
+
   const scoredItems = candidates.map((profile, index) => {
     const match = calculateCandidateScore(profile, job);
     return {
@@ -631,9 +805,9 @@ export function rankCandidates(
   });
 
   return scoredItems.map((item, i) => ({
-    id: item.profile.id,
+    id: item.profile?.id || `cand-${i + 1}`,
     rank: i + 1,
-    fileName: item.profile.fileName,
+    fileName: item.profile?.fileName || `resume-${i + 1}.pdf`,
     status: 'processed' as const,
     profile: item.profile,
     match: item.match,

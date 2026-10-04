@@ -20,10 +20,18 @@ export interface CandidateProject {
   technologies: string[];
 }
 
+export type ClaimVerificationStatus =
+  | 'SUPPORTED'
+  | 'UNSUPPORTED'
+  | 'CONTRADICTORY'
+  | 'NOT_ENOUGH_EVIDENCE';
+
 export interface ResumeClaim {
   claim: string;
   evidence: string | null;
   verificationNeeded: boolean;
+  status: ClaimVerificationStatus;
+  explanation?: string;
 }
 
 export interface CandidateProfile {
@@ -55,6 +63,26 @@ export interface JobRequirements {
 }
 
 export type ScoreTierLabel = 'Strong Match' | 'Good Match' | 'Moderate Match' | 'Weak Match';
+
+export interface StructuredMatchExplanation {
+  headline: string;
+  whyMatches: {
+    skills: string[];
+    experience: string | null;
+    projects: string[];
+    education: string | null;
+  };
+  whatIsMissing: {
+    skills: string[];
+    experience: string | null;
+    education: string | null;
+    other: string[];
+  };
+  recruiterAttention: {
+    unverifiedClaimsCount: number;
+    flaggedItems: string[];
+  };
+}
 
 export interface MatchAnalysis {
   candidateId: string;
@@ -95,6 +123,7 @@ export interface MatchAnalysis {
   missingRequirements: string[];
 
   explanation: string;
+  structuredExplanation?: StructuredMatchExplanation;
 }
 
 export interface RankedCandidate {
@@ -136,5 +165,5 @@ export interface AnalyzeStage5Response {
   error?: string;
 }
 
-// Backward compatibility alias if needed
+// Backward compatibility alias
 export type AnalyzeResponse = AnalyzeStage5Response;

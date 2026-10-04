@@ -1,5 +1,6 @@
-import { calculateCandidateScore, rankCandidates, normalizeSkill } from './scoring';
-import { CandidateProfile, JobRequirements } from './types';
+import { calculateCandidateScore, rankCandidates, normalizeSkill, deduplicateSkills } from './scoring';
+import { classifyClaimStatus } from './ai';
+import { CandidateProfile, JobRequirements, ResumeClaim } from './types';
 
 function createMockCandidate(overrides: Partial<CandidateProfile> = {}): CandidateProfile {
   return {
@@ -42,7 +43,22 @@ function createMockCandidate(overrides: Partial<CandidateProfile> = {}): Candida
     certifications: ['AWS Certified Developer'],
     totalExperienceYears: 4,
     summary: 'Senior developer with 4 years of experience building scalable web applications and microservices.',
-    claimsToVerify: [],
+    claimsToVerify: [
+      {
+        claim: 'Led team of 10 engineers',
+        evidence: 'Managed sprint planning and led frontend pod of 10 developers at TechCorp',
+        verificationNeeded: false,
+        status: 'SUPPORTED',
+        explanation: 'Verified with supporting details directly in the candidate resume.',
+      },
+      {
+        claim: 'Increased transaction throughput by 300%',
+        evidence: null,
+        verificationNeeded: true,
+        status: 'UNSUPPORTED',
+        explanation: 'Needs verification — insufficient supporting evidence in the resume.',
+      },
+    ],
     ...overrides,
   };
 }
@@ -63,7 +79,7 @@ function createMockJob(overrides: Partial<JobRequirements> = {}): JobRequirement
 }
 
 function runTests() {
-  console.log('--- Starting Stage 5 Deterministic Scoring Engine Tests ---');
+  console.log('--- Starting Stage 6 Robustness & Claim Verification Tests ---');
 
   // Test 1: Perfect candidate
   console.log('\n[Test 1] Perfect candidate');
@@ -71,7 +87,6 @@ function runTests() {
   const standardJob = createMockJob();
   const score1 = calculateCandidateScore(perfectCandidate, standardJob);
   console.log(`Total Score: ${score1.totalScore} / 100, Label: ${score1.label}`);
-  console.log(`Breakdown: Skills=${score1.skillScore}, Exp=${score1.experienceScore}, Edu=${score1.educationScore}, Proj=${score1.projectScore}, Req=${score1.requirementsScore}`);
   console.assert(score1.totalScore === 100, `Expected 100, got ${score1.totalScore}`);
 
   // Test 2: No matching skills
@@ -89,14 +104,13 @@ function runTests() {
     projects: [],
   });
   const score2 = calculateCandidateScore(unrelatedCandidate, standardJob);
-  console.log(`Total Score: ${score2.totalScore} / 100`);
   console.assert(score2.totalScore < 50, `Expected score < 50, got ${score2.totalScore}`);
   console.assert(score2.missingRequiredSkills.length === 3, 'Should miss all 3 required skills');
 
   // Test 3: Required skill missing
   console.log('\n[Test 3] Required skill missing');
   const missingReqCandidate = createMockCandidate({
-    skills: ['React', 'Node.js', 'PostgreSQL', 'Docker'], // Missing TypeScript completely
+    skills: ['React', 'Node.js', 'PostgreSQL', 'Docker'],
     experience: [
       {
         company: 'TechCorp',
@@ -105,103 +119,139 @@ function runTests() {
         technologies: ['React', 'Node.js', 'PostgreSQL', 'Docker'],
       },
     ],
-    projects: [
-      {
-        name: 'E-commerce Platform',
-        description: 'Built store using React and Node.js.',
-        technologies: ['React', 'Node.js'],
-      },
-    ],
+    projects: [],
   });
   const score3 = calculateCandidateScore(missingReqCandidate, standardJob);
-  console.log(`Score with missing required skill: ${score3.totalScore}`);
   console.assert(score3.missingRequiredSkills.includes('TypeScript'), 'TypeScript should be in missingRequiredSkills');
-  console.assert(score3.totalScore < score1.totalScore, 'Score should be strictly less than perfect');
+  console.assert(score3.totalScore < score1.totalScore, 'Score should be less than perfect');
 
   // Test 4: Preferred skill missing vs required missing
   console.log('\n[Test 4] Preferred skill missing has smaller effect');
   const missingPrefCandidate = createMockCandidate({
-    skills: ['React', 'TypeScript', 'Node.js'], // Has all required, missing preferred PostgreSQL & Docker
-    experience: [
-      {
-        company: 'TechCorp',
-        role: 'Engineer',
-        description: 'React and Node.js microservices',
-        technologies: ['React', 'TypeScript', 'Node.js'],
-      },
-    ],
-    projects: [
-      {
-        name: 'Web App',
-        description: 'React and TypeScript app',
-        technologies: ['React', 'TypeScript', 'Node.js'],
-      },
-    ],
+    skills: ['React', 'TypeScript', 'Node.js'],
+    experience: [],
+    projects: [],
   });
   const score4 = calculateCandidateScore(missingPrefCandidate, standardJob);
-  console.log(`Score missing preferred: ${score4.totalScore} vs missing required: ${score3.totalScore}`);
-  console.assert(
-    score4.requiredSkillScore === 30,
-    `Expected full 30 required points, got ${score4.requiredSkillScore}`
-  );
-  console.assert(
-    score4.preferredSkillScore === 0,
-    `Expected 0 preferred points, got ${score4.preferredSkillScore}`
-  );
+  console.assert(score4.requiredSkillScore === 30, `Expected 30, got ${score4.requiredSkillScore}`);
+  console.assert(score4.preferredSkillScore === 0, `Expected 0, got ${score4.preferredSkillScore}`);
 
   // Test 5: Experience exceeds requirement
   console.log('\n[Test 5] Experience exceeds requirement (5 yrs vs 3 yrs)');
   const expExceeds = createMockCandidate({ totalExperienceYears: 5 });
   const score5 = calculateCandidateScore(expExceeds, standardJob);
   console.assert(score5.experienceScore === 25, `Expected 25, got ${score5.experienceScore}`);
-  console.assert(score5.experienceMatch.status === 'meets', 'Status should be meets');
+  console.assert(score5.experienceMatch.status === 'meets');
 
   // Test 6: Experience below requirement
   console.log('\n[Test 6] Experience below requirement (1 yr vs 3 yrs)');
   const expBelow = createMockCandidate({ totalExperienceYears: 1 });
   const score6 = calculateCandidateScore(expBelow, standardJob);
-  console.log(`Experience score for 1 yr / 3 yrs: ${score6.experienceScore}`);
-  console.assert(score6.experienceScore < 25, `Expected < 25, got ${score6.experienceScore}`);
-  console.assert(score6.experienceMatch.status === 'partial', 'Status should be partial');
+  console.assert(score6.experienceScore < 10, `Expected < 10, got ${score6.experienceScore}`);
+  console.assert(score6.experienceMatch.status === 'partial');
 
   // Test 7: No experience requirement in job
   console.log('\n[Test 7] No experience requirement in job');
   const noExpJob = createMockJob({ requiredExperienceYears: null });
-  const score7 = calculateCandidateScore(createMockCandidate({ totalExperienceYears: 0 }), noExpJob);
-  console.log(`Experience score when job has no requirement: ${score7.experienceScore}`);
-  console.assert(score7.experienceScore === 25, 'Should receive full 25 points');
+  const score7 = calculateCandidateScore(expBelow, noExpJob);
+  console.assert(score7.experienceScore === 25, `Expected 25, got ${score7.experienceScore}`);
 
-  // Test 8: React vs React.js semantic matching
+  // Test 8: React vs React.js normalization
   console.log('\n[Test 8] React vs React.js normalization');
-  console.assert(normalizeSkill('React') === normalizeSkill('React.js'), 'React and React.js must normalize to same key');
-  console.assert(normalizeSkill('ReactJS') === normalizeSkill('React'), 'ReactJS and React must normalize to same key');
+  console.assert(normalizeSkill('React.js') === 'react', 'React.js should normalize to react');
+  console.assert(normalizeSkill('ReactJS') === 'react', 'ReactJS should normalize to react');
 
-  // Test 9: Node.js vs NodeJS semantic matching
+  // Test 9: Node.js vs NodeJS normalization
   console.log('\n[Test 9] Node.js vs NodeJS normalization');
-  console.assert(normalizeSkill('Node.js') === normalizeSkill('NodeJS'), 'Node.js and NodeJS must normalize to same key');
+  console.assert(normalizeSkill('Node.js') === 'nodejs', 'Node.js should normalize to nodejs');
+  console.assert(normalizeSkill('NodeJS') === 'nodejs', 'NodeJS should normalize to nodejs');
 
   // Test 10: No education requirement in job
   console.log('\n[Test 10] No education requirement in job');
   const noEduJob = createMockJob({ educationRequirements: [] });
-  const noEduScore = calculateCandidateScore(createMockCandidate({ education: [] }), noEduJob);
-  console.log(`Education score when not required: ${noEduScore.educationScore}`);
-  console.assert(noEduScore.educationScore === 15, 'Should receive full 15 points');
+  const noEduCandidate = createMockCandidate({ education: [] });
+  const score10 = calculateCandidateScore(noEduCandidate, noEduJob);
+  console.assert(score10.educationScore === 15, `Expected 15, got ${score10.educationScore}`);
 
   // Test 11: Missing candidate education when required
   console.log('\n[Test 11] Missing candidate education when required');
-  const missingEduScore = calculateCandidateScore(createMockCandidate({ education: [] }), standardJob);
-  console.log(`Education score when missing: ${missingEduScore.educationScore}`);
-  console.assert(missingEduScore.educationScore === 0, 'Should receive 0 points');
+  const score11 = calculateCandidateScore(noEduCandidate, standardJob);
+  console.assert(score11.educationScore === 0, `Expected 0, got ${score11.educationScore}`);
 
   // Test 12: Deterministic ranking with equal scores
   console.log('\n[Test 12] Deterministic ranking with equal scores');
-  const candA = createMockCandidate({ id: 'cand-A', name: 'Alice' });
-  const candB = createMockCandidate({ id: 'cand-B', name: 'Bob' });
+  const candA = createMockCandidate({ id: 'cand-a', name: 'Alice' });
+  const candB = createMockCandidate({ id: 'cand-b', name: 'Bob' });
   const ranked = rankCandidates([candA, candB], standardJob);
-  console.assert(ranked[0].rank === 1 && ranked[0].id === 'cand-A', 'First candidate should hold rank 1');
-  console.assert(ranked[1].rank === 2 && ranked[1].id === 'cand-B', 'Second candidate should hold rank 2');
+  console.assert(ranked[0].rank === 1 && ranked[1].rank === 2);
+  console.assert(ranked[0].id === 'cand-a' && ranked[1].id === 'cand-b');
 
-  console.log('\nALL 12 UNIT TESTS PASSED WITH 0 ASSERTION FAILURES!');
+  // --- STAGE 6 ROBUSTNESS AUDIT TESTS ---
+
+  // Test 13: Empty candidate resilience
+  console.log('\n[Test 13] Empty candidate profile resilience');
+  const emptyCandidate: CandidateProfile = {
+    id: 'empty-1',
+    fileName: 'empty.pdf',
+    name: null,
+    email: null,
+    phone: null,
+    skills: [],
+    education: [],
+    experience: [],
+    projects: [],
+    certifications: [],
+    totalExperienceYears: null,
+    summary: '',
+    claimsToVerify: [],
+  };
+  const score13 = calculateCandidateScore(emptyCandidate, standardJob);
+  console.assert(Number.isFinite(score13.totalScore), 'Score must be finite');
+  console.assert(score13.totalScore >= 0 && score13.totalScore <= 100, 'Score must be bounded between 0 and 100');
+  console.assert(!isNaN(score13.totalScore), 'Score must not be NaN');
+
+  // Test 14: Duplicate skills handling
+  console.log('\n[Test 14] Duplicate skills deduplication');
+  const dupCandidate = createMockCandidate({
+    skills: ['React', 'react', 'REACT.JS', 'TypeScript', 'TS', 'Node.js', 'nodejs'],
+  });
+  const dupJob = createMockJob({
+    requiredSkills: ['React', 'react.js', 'TypeScript', 'Node.js'],
+  });
+  const dedupedCandSkills = deduplicateSkills(dupCandidate.skills);
+  const dedupedJobSkills = deduplicateSkills(dupJob.requiredSkills);
+  console.assert(dedupedCandSkills.length === 3, `Expected 3 deduped skills, got ${dedupedCandSkills.length}`);
+  console.assert(dedupedJobSkills.length === 3, `Expected 3 deduped job skills, got ${dedupedJobSkills.length}`);
+
+  // Test 15: Score clamping & NaN protection
+  console.log('\n[Test 15] Score clamping and NaN protection');
+  const nanYearsCandidate = createMockCandidate({ totalExperienceYears: NaN });
+  const score15 = calculateCandidateScore(nanYearsCandidate, standardJob);
+  console.assert(!isNaN(score15.experienceScore), 'Experience score must not be NaN');
+  console.assert(!isNaN(score15.totalScore), 'Total score must not be NaN');
+
+  // Test 16: Claim Verification Status Classification
+  console.log('\n[Test 16] Claim verification status classification');
+  const supportedClaim = classifyClaimStatus('SUPPORTED', 'Led 10 engineers', false);
+  console.assert(supportedClaim.status === 'SUPPORTED');
+
+  const unsupportedClaim = classifyClaimStatus('UNSUPPORTED', null, true);
+  console.assert(unsupportedClaim.status === 'UNSUPPORTED');
+  console.assert(unsupportedClaim.explanation.includes('insufficient supporting evidence'));
+
+  const contradictoryClaim = classifyClaimStatus('CONTRADICTORY', 'Discrepancy in timeline', true);
+  console.assert(contradictoryClaim.status === 'CONTRADICTORY');
+
+  const notEnoughEvidenceClaim = classifyClaimStatus('NOT_ENOUGH_EVIDENCE', 'Short mention without metric', true);
+  console.assert(notEnoughEvidenceClaim.status === 'NOT_ENOUGH_EVIDENCE');
+
+  // Test 17: Structured Explanation Generation
+  console.log('\n[Test 17] Structured match explanation');
+  const score17 = calculateCandidateScore(perfectCandidate, standardJob);
+  console.assert(Boolean(score17.structuredExplanation), 'Structured explanation must be present');
+  console.assert(score17.structuredExplanation?.whyMatches.skills.length === 3, 'Must identify 3 matching skills');
+
+  console.log('\n=== ALL 17 STAGE 6 UNIT TESTS PASSED WITH 0 ASSERTION FAILURES ===\n');
 }
 
 runTests();

@@ -37,13 +37,12 @@ import { ResumeUploader } from '../components/ResumeUploader';
 import { CandidateList, getCandidateInitials, getAvatarColorClass } from '../components/CandidateList';
 import { MatchDetails } from '../components/MatchDetails';
 import { ScrollStoryHero } from '../components/ScrollStoryHero';
-import { ResumeIntelligenceStory } from '../components/ResumeIntelligenceStory';
 import { EvidenceMatchingStory } from '../components/EvidenceMatchingStory';
-import { BigMetricsStory } from '../components/BigMetricsStory';
-import { LoopingTypography } from '../components/LoopingTypography';
 import { HiringSignalsMarquee } from '../components/HiringSignalsMarquee';
-import { RecruitmentPipelineFlow } from '../components/RecruitmentPipelineFlow';
-import { ATSProductShowcase } from '../components/ATSProductShowcase';
+import { CandidateCardStackSection } from '../components/CandidateCardStackSection';
+import { ScoreExplanationSection } from '../components/ScoreExplanationSection';
+import { AsymmetricBentoGrid } from '../components/AsymmetricBentoGrid';
+import { LandingCTA } from '../components/LandingCTA';
 import { ATSWorkspaceShell } from '../components/ATSWorkspaceShell';
 import { Footer } from '../components/Footer';
 import { AnalyzeStage5Response, RankedCandidate, JobRequirements } from '../lib/types';
@@ -636,34 +635,26 @@ export default function HireMeApp() {
         {activeNav === 'home' && (
           <div className="space-y-4">
             
-            {/* 1. HERO: FIND THE RIGHT TALENT. UNDERSTAND WHY. */}
+            {/* 1. HERO */}
             <ScrollStoryHero onStartMatching={() => setActiveNav('matching')} />
 
-            {/* 2. MOVING SIGNALS */}
-            <div className="py-2">
-              <LoopingTypography />
-              <HiringSignalsMarquee />
-            </div>
+            {/* 2. SIGNAL MARQUEE */}
+            <HiringSignalsMarquee />
 
-            {/* 3. FROM RESUME TO SIGNAL */}
-            <ResumeIntelligenceStory />
-
-            {/* 4. BIG NUMBERS */}
-            <BigMetricsStory />
-
-            {/* 5. NOT JUST A SCORE. THE REASON BEHIND IT */}
+            {/* 3. STICKY SCROLL REVEAL FEATURE STORY */}
             <EvidenceMatchingStory />
 
-            {/* 6. RECRUITMENT PIPELINE JOURNEY */}
-            <section className="py-12 sm:py-16 border-t border-[#E5E7EB]">
-              <RecruitmentPipelineFlow />
-            </section>
+            {/* 4. CANDIDATE CARD STACK */}
+            <CandidateCardStackSection />
 
-            {/* 7. LARGE ATS PRODUCT SHOWCASE (Product Presentation Canvas) */}
-            <ATSProductShowcase
-              onLaunchMatching={() => setActiveNav('matching')}
-              onSelectJob={(title) => handleSelectJobByTitle(title)}
-            />
+            {/* 5. SCORE EXPLANATION SECTION */}
+            <ScoreExplanationSection />
+
+            {/* 6. ASYMMETRIC BENTO GRID */}
+            <AsymmetricBentoGrid />
+
+            {/* 7. LANDING CTA */}
+            <LandingCTA onStartMatching={() => setActiveNav('matching')} />
 
             {/* ===================================================================== */}
             {/* 8. LIVE FUNCTIONAL RECRUITER WORKSPACE (Real Application Shell) */}

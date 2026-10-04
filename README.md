@@ -10,8 +10,6 @@
 
 **HireMe AI** is an explainable AI resume and job matching system that helps recruiters analyze multiple resumes against a job description, rank candidates using a deterministic scoring engine, and understand the evidence behind every match.
 
-Built for **ALGOTHON'26 (Problem Statement ALG-AI-01 — AI Resume & Job Matching System)**.
-
 ---
 
 ## 2. The Problem
@@ -178,18 +176,10 @@ npx tsc --noEmit
 * **Scanned / Image-only PDFs**: PDFs containing only rasterized scanned images without embedded text streams require OCR integration.
 * **Evidence-Based Auditing**: Claim verification relies strictly on extracted resume text; external portfolio verification is not performed.
 * **Human Judgment**: HireMe AI assists recruiters in screening but does not replace human hiring decisions.
-* **Stateless Demo Session**: The hackathon demo operates in-memory per session and does not persist records to an external enterprise database or OAuth authentication layer.
+* **Stateless Demo Session**: The demo operates in-memory per session and does not persist records to an external enterprise database or OAuth authentication layer.
 
 ---
 
 ## 13. AI Disclosure
 
 Google Gemini (`gemini-2.5-flash`) is used strictly for schema-constrained factual extraction and evidence/claim analysis via the official `@google/genai` TypeScript SDK. The final candidate score and ranking are calculated by HireMe AI's deterministic scoring engine rather than asking the LLM to directly assign the final score. The project was developed with AI-assisted coding where applicable.
-
----
-
-## 14. Hackathon Context
-
-* **Built for**: ALGOTHON'26
-* **Problem Statement**: ALG-AI-01 — AI Resume & Job Matching System
-* **Core Capabilities**: Multi-resume upload, job description analysis, information extraction, deterministic 100-point candidate scoring, stable ranking, search/filter/sort, and explainable evidence-grounded dossiers.

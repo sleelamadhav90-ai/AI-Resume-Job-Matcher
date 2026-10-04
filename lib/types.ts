@@ -1,46 +1,66 @@
 export interface CandidateExperience {
-  role: string;
-  company: string;
-  duration?: string;
-  description?: string;
-  highlights?: string[];
+  role: string | null;
+  company: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  description: string;
+  technologies: string[];
 }
 
 export interface CandidateEducation {
-  degree: string;
-  institution: string;
-  year?: string;
-  field?: string;
+  degree: string | null;
+  field: string | null;
+  institution: string | null;
+  graduationYear?: number | null;
 }
 
 export interface CandidateProject {
-  title: string;
+  name: string;
   description: string;
-  technologies?: string[];
+  technologies: string[];
 }
 
-export interface CandidateData {
+export interface ResumeClaim {
+  claim: string;
+  evidence: string | null;
+  verificationNeeded: boolean;
+}
+
+export interface CandidateProfile {
   id: string;
   fileName: string;
-  name: string;
-  email?: string;
-  phone?: string;
+  name: string | null;
+  email: string | null;
+  phone: string | null;
   skills: string[];
   education: CandidateEducation[];
   experience: CandidateExperience[];
   projects: CandidateProject[];
   certifications: string[];
-  rawText?: string;
+  totalExperienceYears: number | null;
+  summary: string;
+  claimsToVerify: ResumeClaim[];
+}
+
+export interface CandidateExtractionItem {
+  id: string;
+  fileName: string;
+  status: 'processed' | 'failed';
+  profile?: CandidateProfile;
+  reason?: string;
+  message?: string;
 }
 
 export interface JobRequirements {
-  title?: string;
-  rawText: string;
+  jobTitle: string | null;
   requiredSkills: string[];
   preferredSkills: string[];
-  requiredExperience: string;
-  educationRequirements: string;
-  importantResponsibilities: string[];
+  requiredExperienceYears: number | null;
+  educationRequirements: string[];
+  responsibilities: string[];
+  importantKeywords: string[];
+  domainRequirements: string[];
+  summary: string;
 }
 
 export interface ScoreBreakdown {
@@ -59,7 +79,7 @@ export interface ClaimToVerify {
 }
 
 export interface CandidateMatchResult {
-  candidate: CandidateData;
+  candidate: CandidateProfile;
   score: ScoreBreakdown;
   matchedSkills: string[];
   missingSkills: string[];
@@ -70,7 +90,6 @@ export interface CandidateMatchResult {
   claimsToVerify: ClaimToVerify[];
 }
 
-// Stage 3: Extracted resume item
 export interface ExtractedResumeItem {
   fileName: string;
   status: 'processed' | 'failed';
@@ -83,14 +102,11 @@ export interface ExtractedResumeItem {
   message?: string;
 }
 
-// Stage 3: API response
-export interface AnalyzeStage3Response {
+export interface AnalyzeStage4Response {
   success: boolean;
   message: string;
-  jobDescriptionLength: number;
-  resumeCount: number;
-  processedCount: number;
-  failedCount: number;
-  resumes: ExtractedResumeItem[];
+  jobRequirements?: JobRequirements;
+  candidates: CandidateExtractionItem[];
+  unprocessedResumes: ExtractedResumeItem[];
   error?: string;
 }

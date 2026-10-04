@@ -13,18 +13,21 @@ import {
   Loader2,
   FileText,
   AlertTriangle,
-  RotateCcw
+  RotateCcw,
+  GraduationCap,
+  FolderGit2,
+  Award
 } from 'lucide-react';
 import { JobDescriptionInput } from '../components/JobDescriptionInput';
 import { ResumeUploader } from '../components/ResumeUploader';
-import { AnalyzeStage3Response } from '../lib/types';
+import { AnalyzeStage4Response } from '../lib/types';
 
 export default function LandingPage() {
   const [jobDescription, setJobDescription] = useState<string>('');
   const [resumes, setResumes] = useState<File[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
-  const [analysisResult, setAnalysisResult] = useState<AnalyzeStage3Response | null>(null);
+  const [stage4Result, setStage4Result] = useState<AnalyzeStage4Response | null>(null);
 
   const workflowSteps = [
     {
@@ -43,13 +46,13 @@ export default function LandingPage() {
       step: '03',
       title: 'PDF Text Extraction',
       desc: 'Reliably extract, clean, and validate text from candidate PDF documents.',
-      icon: Cpu,
+      icon: FileText,
     },
     {
       step: '04',
-      title: 'Ranked Candidates',
-      desc: 'Deterministic weighted scoring with transparent gap analysis and explanations.',
-      icon: BarChart3,
+      title: 'AI Structured Extraction',
+      desc: 'Gemini extracts structured facts, skills, timelines, and verifiable claims.',
+      icon: Cpu,
     },
   ];
 
@@ -76,7 +79,7 @@ export default function LandingPage() {
 
     // Clear previous errors & previous results
     setError('');
-    setAnalysisResult(null);
+    setStage4Result(null);
     setIsAnalyzing(true);
 
     try {
@@ -96,16 +99,15 @@ export default function LandingPage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        if (data.resumes) {
-          // Keep the partial results visible if provided
-          setAnalysisResult(data as AnalyzeStage3Response);
+        if (data.candidates || data.jobRequirements) {
+          setStage4Result(data as AnalyzeStage4Response);
         }
-        throw new Error(data.error || 'Something went wrong while extracting the resumes. Please try again.');
+        throw new Error(data.error || 'Something went wrong during AI extraction. Please try again.');
       }
 
-      setAnalysisResult(data as AnalyzeStage3Response);
+      setStage4Result(data as AnalyzeStage4Response);
     } catch (err: any) {
-      console.error('Extraction error:', err);
+      console.error('Stage 4 extraction error:', err);
       setError(
         err.message || 'Something went wrong while processing the resumes. Please try again.'
       );
@@ -113,6 +115,8 @@ export default function LandingPage() {
       setIsAnalyzing(false);
     }
   };
+
+  const processedCount = stage4Result?.candidates.filter(c => c.status === 'processed').length || 0;
 
   return (
     <div className="min-h-screen bg-slate-50/50 text-slate-900 flex flex-col font-sans">
@@ -140,7 +144,7 @@ export default function LandingPage() {
             </span>
             <div className="h-4 w-px bg-slate-200 hidden sm:block" />
             <span className="text-slate-500 font-mono text-[11px] bg-slate-100 px-2 py-1 rounded">
-              Stage 3: PDF Extraction
+              Stage 4: AI Extraction
             </span>
           </div>
         </div>
@@ -152,44 +156,42 @@ export default function LandingPage() {
           <div className="inline-flex items-center gap-2 text-xs font-medium text-blue-700 bg-blue-50/80 border border-blue-200/70 px-3 py-1 rounded-md mb-4">
             <span>Recruiter Co-Pilot</span>
             <span aria-hidden="true">·</span>
-            <span>Real PDF Text Extraction & Validation</span>
+            <span>Gemini AI Structured Extraction</span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900">
             Find the right candidate faster.
           </h1>
           <p className="mt-3.5 text-base sm:text-lg text-slate-600 max-w-2xl mx-auto font-normal leading-relaxed">
-            Upload candidate resumes alongside your job description. The system extracts text,
-            cleans structural artifacts, detects scanned documents, and prepares data for AI matching.
+            Extract strict factual signals from resumes and job descriptions without hallucinations.
+            Prepares structured skills, timelines, and verifiable claims for deterministic matching.
           </p>
 
           {/* Workflow Sequence */}
           <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-left">
             {workflowSteps.map((step, idx) => {
               const Icon = step.icon;
-              const isActive = idx === 0 || idx === 1 || idx === 2;
+              const isCurrent = idx === 3;
               return (
                 <div
                   key={step.step}
                   className={`p-4 rounded-xl border transition-all shadow-2xs relative group ${
-                    idx === 2
+                    isCurrent
                       ? 'border-blue-500 bg-blue-50/30 ring-1 ring-blue-500/20'
-                      : isActive
-                      ? 'border-blue-200 bg-white'
                       : 'border-slate-200/90 bg-white'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <span
                       className={`font-mono text-xs font-bold ${
-                        idx === 2 ? 'text-blue-600' : isActive ? 'text-slate-700' : 'text-slate-400'
+                        isCurrent ? 'text-blue-600' : 'text-slate-600'
                       }`}
                     >
                       {step.step}
                     </span>
                     <Icon
                       className={`w-4 h-4 ${
-                        idx === 2 ? 'text-blue-600' : isActive ? 'text-slate-600' : 'text-slate-400'
+                        isCurrent ? 'text-blue-600' : 'text-slate-500'
                       }`}
                     />
                   </div>
@@ -259,7 +261,7 @@ export default function LandingPage() {
         <div className="bg-white rounded-xl border border-slate-200/80 p-6 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="space-y-1 text-center sm:text-left">
             <h3 className="text-base font-semibold text-slate-900">
-              Ready to extract resume content?
+              Ready to extract structured candidate data?
             </h3>
             <div className="flex items-center justify-center sm:justify-start gap-2 text-xs text-slate-500">
               <span>
@@ -288,49 +290,37 @@ export default function LandingPage() {
               {isAnalyzing ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Extracting text from PDF resumes...</span>
+                  <span>Extracting facts with Gemini AI...</span>
                 </>
               ) : (
                 <>
                   <Cpu className="w-4 h-4" />
-                  <span>Extract & Validate Resumes</span>
+                  <span>Run AI Structured Extraction</span>
                 </>
               )}
             </button>
           </div>
         </div>
 
-        {/* Stage 3 Extraction Results */}
-        {analysisResult && (
-          <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-6 animate-in fade-in duration-200">
+        {/* Stage 4 Extraction Summary */}
+        {stage4Result && (
+          <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-6 animate-in fade-in duration-200 space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
               <div className="flex items-center gap-3">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    analysisResult.processedCount > 0
-                      ? 'bg-emerald-100 text-emerald-700'
-                      : 'bg-rose-100 text-rose-700'
-                  }`}
-                >
-                  {analysisResult.processedCount > 0 ? (
-                    <CheckCircle2 className="w-5 h-5" />
-                  ) : (
-                    <AlertTriangle className="w-5 h-5" />
-                  )}
+                <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center">
+                  <Cpu className="w-5 h-5" />
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-slate-900">
-                    {analysisResult.resumeCount} {analysisResult.resumeCount === 1 ? 'resume' : 'resumes'} processed
+                    AI Analysis Complete
                   </h3>
                   <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
-                    <span className="text-emerald-700 font-medium">
-                      {analysisResult.processedCount} successfully extracted
-                    </span>
-                    {analysisResult.failedCount > 0 && (
+                    <span>Candidates analyzed: {processedCount}</span>
+                    {stage4Result.jobRequirements?.jobTitle && (
                       <>
                         <span aria-hidden="true">·</span>
-                        <span className="text-amber-700 font-medium">
-                          {analysisResult.failedCount} failed / unreadable
+                        <span className="font-medium text-slate-700">
+                          Target Role: {stage4Result.jobRequirements.jobTitle}
                         </span>
                       </>
                     )}
@@ -339,12 +329,12 @@ export default function LandingPage() {
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="text-xs px-2.5 py-1 rounded-md bg-blue-50 text-blue-800 border border-blue-200 font-medium">
-                  Stage 3 Verified
+                <span className="text-xs px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 font-medium">
+                  Stage 4 Verified
                 </span>
                 <button
                   type="button"
-                  onClick={() => setAnalysisResult(null)}
+                  onClick={() => setStage4Result(null)}
                   className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
                   title="Clear results"
                 >
@@ -353,86 +343,197 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* List of Resumes with extraction status */}
-            <div className="mt-5 space-y-3">
-              {analysisResult.resumes.map((item, idx) => (
-                <div
-                  key={idx}
-                  className={`p-4 rounded-xl border text-xs transition-colors ${
-                    item.status === 'processed'
-                      ? 'bg-slate-50/70 border-slate-200 hover:border-slate-300'
-                      : 'bg-amber-50/50 border-amber-200'
-                  }`}
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      {item.status === 'processed' ? (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                      ) : (
-                        <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-                      )}
-                      <span className="font-semibold text-slate-900 truncate">
-                        {item.fileName}
-                      </span>
-                    </div>
+            {/* Extracted Job Requirements Card */}
+            {stage4Result.jobRequirements && (
+              <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 text-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-semibold text-slate-900 flex items-center gap-1.5">
+                    <Briefcase className="w-3.5 h-3.5 text-blue-600" />
+                    Structured Job Requirements: {stage4Result.jobRequirements.jobTitle || 'Role'}
+                  </h4>
+                  {stage4Result.jobRequirements.requiredExperienceYears !== null && (
+                    <span className="text-slate-600 font-medium">
+                      Required Experience: {stage4Result.jobRequirements.requiredExperienceYears}+ years
+                    </span>
+                  )}
+                </div>
 
-                    {/* Unboxed clean metadata line */}
-                    {item.status === 'processed' ? (
-                      <div className="flex items-center gap-2 text-slate-500 font-mono text-[11px]">
-                        <span>{item.characterCount?.toLocaleString()} characters</span>
-                        <span aria-hidden="true">·</span>
-                        <span>{item.wordCount?.toLocaleString()} words</span>
-                        {item.pageCount && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <div>
+                    <span className="font-medium text-slate-700 block mb-1">
+                      Required Skills ({stage4Result.jobRequirements.requiredSkills.length}):
+                    </span>
+                    <div className="flex flex-wrap gap-1">
+                      {stage4Result.jobRequirements.requiredSkills.map((skill, i) => (
+                        <span
+                          key={i}
+                          className="px-2 py-0.5 rounded bg-blue-100/70 text-blue-800 border border-blue-200 text-[11px]"
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="font-medium text-slate-700 block mb-1">
+                      Preferred Skills ({stage4Result.jobRequirements.preferredSkills.length}):
+                    </span>
+                    <div className="flex flex-wrap gap-1">
+                      {stage4Result.jobRequirements.preferredSkills.length > 0 ? (
+                        stage4Result.jobRequirements.preferredSkills.map((skill, i) => (
+                          <span
+                            key={i}
+                            className="px-2 py-0.5 rounded bg-slate-200/80 text-slate-700 text-[11px]"
+                          >
+                            {skill}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-slate-400">None specified</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {stage4Result.jobRequirements.summary && (
+                  <p className="text-slate-600 border-t border-slate-200/60 pt-2 leading-relaxed">
+                    <span className="font-medium text-slate-700">Summary:</span>{' '}
+                    {stage4Result.jobRequirements.summary}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Candidate Profiles List */}
+            <div className="space-y-3">
+              <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider">
+                Extracted Candidate Profiles ({stage4Result.candidates.length})
+              </h4>
+
+              {stage4Result.candidates.map((cand) => {
+                if (cand.status === 'failed' || !cand.profile) {
+                  return (
+                    <div
+                      key={cand.id}
+                      className="p-4 rounded-xl border border-amber-200 bg-amber-50/50 text-xs space-y-1"
+                    >
+                      <div className="flex items-center gap-2 font-semibold text-amber-900">
+                        <AlertTriangle className="w-4 h-4 text-amber-600" />
+                        <span>{cand.fileName}</span>
+                      </div>
+                      <p className="text-amber-800">
+                        {cand.message || 'AI extraction failed for this candidate resume.'}
+                      </p>
+                    </div>
+                  );
+                }
+
+                const { profile } = cand;
+                return (
+                  <div
+                    key={profile.id}
+                    className="p-4 rounded-xl border border-slate-200 bg-white hover:border-slate-300 shadow-2xs text-xs space-y-3"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <h5 className="text-sm font-bold text-slate-900">
+                          {profile.name || 'Candidate Name Not Found'}
+                        </h5>
+                        <span className="text-slate-400 font-mono text-[11px]">
+                          ({profile.fileName})
+                        </span>
+                      </div>
+
+                      {/* Unboxed metadata */}
+                      <div className="flex items-center gap-2 text-slate-500 text-[11px]">
+                        {profile.email && <span>{profile.email}</span>}
+                        {profile.email && profile.phone && <span aria-hidden="true">·</span>}
+                        {profile.phone && <span>{profile.phone}</span>}
+                        {profile.totalExperienceYears !== null && (
                           <>
                             <span aria-hidden="true">·</span>
-                            <span>{item.pageCount} {item.pageCount === 1 ? 'page' : 'pages'}</span>
-                          </>
-                        )}
-                        {item.isTruncated && (
-                          <>
-                            <span aria-hidden="true">·</span>
-                            <span className="text-amber-700 font-sans font-medium">Truncated (100k cap)</span>
+                            <span className="font-semibold text-slate-700">
+                              {profile.totalExperienceYears} yrs experience
+                            </span>
                           </>
                         )}
                       </div>
-                    ) : (
-                      <span className="text-amber-800 font-medium">
-                        {item.reason === 'NO_TEXT_FOUND'
-                          ? 'Scanned / No readable text found'
-                          : item.reason === 'CORRUPTED'
-                          ? 'Corrupted or unreadable PDF'
-                          : 'Extraction failed'}
-                      </span>
+                    </div>
+
+                    {/* Counts overview */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] pt-1 border-t border-slate-100">
+                      <div className="flex items-center gap-1.5 text-slate-700">
+                        <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                        <span>{profile.skills.length} skills detected</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-slate-700">
+                        <Briefcase className="w-3.5 h-3.5 text-slate-500" />
+                        <span>{profile.experience.length} experience entries</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-slate-700">
+                        <FolderGit2 className="w-3.5 h-3.5 text-slate-500" />
+                        <span>{profile.projects.length} projects</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-slate-700">
+                        <GraduationCap className="w-3.5 h-3.5 text-slate-500" />
+                        <span>{profile.education.length} education entries</span>
+                      </div>
+                    </div>
+
+                    {/* Detected Skills preview */}
+                    {profile.skills.length > 0 && (
+                      <div className="flex flex-wrap gap-1 pt-1">
+                        {profile.skills.map((skill, i) => (
+                          <span
+                            key={i}
+                            className="px-2 py-0.5 rounded bg-slate-100 text-slate-800 text-[11px]"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Summary */}
+                    {profile.summary && (
+                      <p className="text-slate-600 leading-relaxed italic bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                        "{profile.summary}"
+                      </p>
+                    )}
+
+                    {/* Claims to verify preview */}
+                    {profile.claimsToVerify.length > 0 && (
+                      <div className="p-2.5 rounded-lg bg-amber-50/60 border border-amber-200 text-amber-900 text-[11px] space-y-1">
+                        <div className="flex items-center gap-1 font-semibold text-amber-800">
+                          <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                          <span>Claims flagged for verification ({profile.claimsToVerify.length}):</span>
+                        </div>
+                        <ul className="list-disc list-inside space-y-0.5 pl-1">
+                          {profile.claimsToVerify.map((c, idx) => (
+                            <li key={idx}>
+                              <span className="font-medium">"{c.claim}"</span> —{' '}
+                              <span className="text-amber-700">
+                                {c.evidence ? `Supporting mention: ${c.evidence}` : 'Evidence not clearly found in resume'}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     )}
                   </div>
-
-                  {/* Text preview for processed resumes */}
-                  {item.status === 'processed' && item.textPreview && (
-                    <div className="mt-2.5 pt-2.5 border-t border-slate-200/60 flex items-start gap-2 text-slate-600 font-mono text-[11px] leading-relaxed">
-                      <FileText className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
-                      <p className="line-clamp-2 italic">
-                        "{item.textPreview}"
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Failure explanation */}
-                  {item.status === 'failed' && (
-                    <p className="mt-2 text-amber-700 leading-relaxed text-[11px]">
-                      {item.message || 'No extractable text was found in this document. Scanned documents require OCR.'}
-                    </p>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
 
-            <div className="mt-5 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between text-xs text-slate-500 gap-2">
+            <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between text-xs text-slate-500 gap-2">
               <span>
-                Raw extracted text is cached server-side ready for Gemini AI structured parsing (Stage 4).
+                Factual candidate signals structured successfully. Ready for Stage 5 deterministic scoring.
               </span>
               <button
                 type="button"
-                onClick={() => setAnalysisResult(null)}
+                onClick={() => setStage4Result(null)}
                 className="text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
               >
                 Reset & Test Another Batch

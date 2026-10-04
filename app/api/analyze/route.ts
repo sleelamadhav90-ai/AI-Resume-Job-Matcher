@@ -1,14 +1,230 @@
 /**
  * /api/analyze route handler
- * Stage 3: Real PDF text extraction & cleaning
+ * Stage 4: Real PDF text extraction + Gemini AI structured extraction
+ * Handles job requirements extraction and per-candidate factual profiling.
  */
 
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import { extractTextFromPdf, PdfExtractionResult } from '../../../lib/parser';
-import { AnalyzeStage3Response, ExtractedResumeItem } from '../../../lib/types';
+import { extractCandidateFromResume, extractJobRequirements } from '../../../lib/ai';
+import {
+  AnalyzeStage4Response,
+  CandidateExtractionItem,
+  ExtractedResumeItem,
+  JobRequirements
+} from '../../../lib/types';
 
 const MAX_FILES = 10;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+
+/**
+ * Core business workflow for Stage 4 analysis:
+ * 1. Extract raw PDF text and filter valid resumes
+ * 2. Verify Gemini API configuration
+ * 3. Extract structured job requirements via Gemini (1 call)
+ * 4. Extract structured candidate profiles via Gemini (1 call per valid resume)
+ */
+async function processAnalyzeWorkflow(
+  jobDescription: string,
+  pdfFiles: Array<{ name: string; buffer: Buffer }>
+): Promise<{ statusCode: number; data: AnalyzeStage4Response }> {
+  // 1. Validate inputs
+  if (!jobDescription || typeof jobDescription !== 'string' || !jobDescription.trim()) {
+    return {
+      statusCode: 400,
+      data: {
+        success: false,
+        message: 'Validation failed',
+        error: 'No job description provided.',
+        candidates: [],
+        unprocessedResumes: [],
+      },
+    };
+  }
+
+  if (!pdfFiles || pdfFiles.length === 0) {
+    return {
+      statusCode: 400,
+      data: {
+        success: false,
+        message: 'Validation failed',
+        error: 'Please upload at least one resume.',
+        candidates: [],
+        unprocessedResumes: [],
+      },
+    };
+  }
+
+  if (pdfFiles.length > MAX_FILES) {
+    return {
+      statusCode: 400,
+      data: {
+        success: false,
+        message: 'Validation failed',
+        error: `Maximum ${MAX_FILES} resumes allowed.`,
+        candidates: [],
+        unprocessedResumes: [],
+      },
+    };
+  }
+
+  // 2. Stage 3: PDF Text Extraction
+  const textExtractionResults: Array<{
+    name: string;
+    text: string;
+    extraction: PdfExtractionResult;
+  }> = [];
+  const unprocessedResumes: ExtractedResumeItem[] = [];
+
+  for (const file of pdfFiles) {
+    const isPdf = file.name.toLowerCase().endsWith('.pdf');
+    if (!isPdf) {
+      unprocessedResumes.push({
+        fileName: file.name,
+        status: 'failed',
+        reason: 'INVALID_FILE',
+        message: 'Only PDF files are supported.',
+      });
+      continue;
+    }
+
+    if (file.buffer.length > MAX_FILE_SIZE) {
+      unprocessedResumes.push({
+        fileName: file.name,
+        status: 'failed',
+        reason: 'INVALID_FILE',
+        message: `File exceeds 5 MB limit (${(file.buffer.length / (1024 * 1024)).toFixed(1)} MB).`,
+      });
+      continue;
+    }
+
+    try {
+      const extraction = await extractTextFromPdf(file.buffer, file.name);
+      if (extraction.success && extraction.cleanedText) {
+        textExtractionResults.push({
+          name: file.name,
+          text: extraction.cleanedText,
+          extraction,
+        });
+      } else {
+        unprocessedResumes.push({
+          fileName: file.name,
+          status: 'failed',
+          reason: extraction.reason,
+          message: extraction.message,
+        });
+      }
+    } catch {
+      unprocessedResumes.push({
+        fileName: file.name,
+        status: 'failed',
+        reason: 'CORRUPTED',
+        message: `Could not read "${file.name}". The PDF may be corrupted or invalid.`,
+      });
+    }
+  }
+
+  // Check if any resume was readable
+  if (textExtractionResults.length === 0) {
+    return {
+      statusCode: 400,
+      data: {
+        success: false,
+        message: 'Extraction failed',
+        error: 'No readable text could be extracted from any of the uploaded resumes.',
+        candidates: [],
+        unprocessedResumes,
+      },
+    };
+  }
+
+  // 3. Check Gemini API key configuration
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || apiKey.trim() === '' || apiKey === 'MY_GEMINI_API_KEY') {
+    return {
+      statusCode: 500,
+      data: {
+        success: false,
+        message: 'Configuration error',
+        error: 'GEMINI_API_KEY is not configured.',
+        candidates: [],
+        unprocessedResumes,
+      },
+    };
+  }
+
+  // 4. Extract Structured Job Requirements (1 Gemini request)
+  let jobRequirements: JobRequirements;
+  try {
+    jobRequirements = await extractJobRequirements(jobDescription);
+  } catch (err: any) {
+    console.error('Job requirements extraction failed:', err);
+    return {
+      statusCode: 502,
+      data: {
+        success: false,
+        message: 'Job analysis error',
+        error: `AI extraction for job description failed: ${err.message || 'Please try again.'}`,
+        candidates: [],
+        unprocessedResumes,
+      },
+    };
+  }
+
+  // 5. Extract Structured Candidate Profiles (1 Gemini request per resume)
+  const candidateResults: CandidateExtractionItem[] = [];
+
+  for (let i = 0; i < textExtractionResults.length; i++) {
+    const item = textExtractionResults[i];
+    const candidateId = `candidate-${i + 1}-${Date.now().toString(36)}`;
+
+    try {
+      const profile = await extractCandidateFromResume(item.text, item.name, candidateId);
+      candidateResults.push({
+        id: candidateId,
+        fileName: item.name,
+        status: 'processed',
+        profile,
+      });
+    } catch (err: any) {
+      console.error(`AI extraction failed for ${item.name}:`, err);
+      candidateResults.push({
+        id: candidateId,
+        fileName: item.name,
+        status: 'failed',
+        reason: 'AI_EXTRACTION_FAILED',
+        message: err.message || 'AI extraction temporarily failed for this resume.',
+      });
+    }
+  }
+
+  const processedCandidatesCount = candidateResults.filter((c) => c.status === 'processed').length;
+
+  if (processedCandidatesCount === 0 && candidateResults.length > 0) {
+    return {
+      statusCode: 502,
+      data: {
+        success: false,
+        message: 'AI processing error',
+        error: 'AI extraction temporarily failed for all candidate resumes. Please try again.',
+        jobRequirements,
+        candidates: candidateResults,
+        unprocessedResumes,
+      },
+    };
+  }
+
+  return {
+    statusCode: 200,
+    data: {
+      success: true,
+      message: 'AI structured extraction completed successfully',
+      jobRequirements,
+      candidates: candidateResults,
+      unprocessedResumes,
+    },
+  };
+}
 
 /**
  * Standard Web Request handler (Next.js App Router compatible)
@@ -16,130 +232,30 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 export async function POST(request: Request): Promise<Response> {
   try {
     const formData = await request.formData();
-    const jobDescription = formData.get('jobDescription');
+    const jobDescription = formData.get('jobDescription') as string;
     const rawResumes = formData.getAll('resumes');
 
-    if (!jobDescription || typeof jobDescription !== 'string' || !jobDescription.trim()) {
-      return Response.json(
-        { success: false, error: 'No job description provided.' },
-        { status: 400 }
-      );
-    }
-
-    const resumes = rawResumes.filter((item): item is File => item instanceof File);
-
-    if (resumes.length === 0) {
-      return Response.json(
-        { success: false, error: 'Please upload at least one resume.' },
-        { status: 400 }
-      );
-    }
-
-    if (resumes.length > MAX_FILES) {
-      return Response.json(
-        { success: false, error: `Maximum ${MAX_FILES} resumes allowed.` },
-        { status: 400 }
-      );
-    }
-
-    const results: ExtractedResumeItem[] = [];
-
-    for (const file of resumes) {
-      const isPdfName = file.name.toLowerCase().endsWith('.pdf');
-      const isPdfType =
-        file.type === 'application/pdf' ||
-        file.type === 'application/x-pdf' ||
-        file.type === '';
-
-      if (!isPdfName && !isPdfType) {
-        results.push({
-          fileName: file.name,
-          status: 'failed',
-          reason: 'INVALID_FILE',
-          message: 'Only PDF files are supported.',
-        });
-        continue;
-      }
-
-      if (file.size > MAX_FILE_SIZE) {
-        results.push({
-          fileName: file.name,
-          status: 'failed',
-          reason: 'INVALID_FILE',
-          message: `File exceeds 5 MB limit (${(file.size / (1024 * 1024)).toFixed(1)} MB).`,
-        });
-        continue;
-      }
-
-      try {
-        const arrayBuffer = await file.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        const extractRes: PdfExtractionResult = await extractTextFromPdf(buffer, file.name);
-
-        if (extractRes.success) {
-          results.push({
-            fileName: file.name,
-            status: 'processed',
-            characterCount: extractRes.characterCount,
-            wordCount: extractRes.wordCount,
-            pageCount: extractRes.pageCount,
-            textPreview: extractRes.textPreview,
-            isTruncated: extractRes.isTruncated,
-            message: extractRes.message,
-          });
-        } else {
-          results.push({
-            fileName: file.name,
-            status: 'failed',
-            reason: extractRes.reason,
-            message: extractRes.message,
-          });
-        }
-      } catch (err: any) {
-        results.push({
-          fileName: file.name,
-          status: 'failed',
-          reason: 'CORRUPTED',
-          message: `Could not read "${file.name}". The PDF may be corrupted or invalid.`,
+    const pdfFiles: Array<{ name: string; buffer: Buffer }> = [];
+    for (const item of rawResumes) {
+      if (item instanceof File) {
+        const arrayBuffer = await item.arrayBuffer();
+        pdfFiles.push({
+          name: item.name,
+          buffer: Buffer.from(arrayBuffer),
         });
       }
     }
 
-    const processedCount = results.filter((r) => r.status === 'processed').length;
-    const failedCount = results.filter((r) => r.status === 'failed').length;
-
-    // If every uploaded resume failed extraction, return an overall error
-    if (processedCount === 0) {
-      return Response.json(
-        {
-          success: false,
-          error: 'No readable text could be extracted from any of the uploaded resumes.',
-          resumeCount: resumes.length,
-          processedCount: 0,
-          failedCount,
-          jobDescriptionLength: jobDescription.trim().length,
-          resumes: results,
-        },
-        { status: 400 }
-      );
-    }
-
-    const responsePayload: AnalyzeStage3Response = {
-      success: true,
-      message: 'Resumes extracted successfully',
-      jobDescriptionLength: jobDescription.trim().length,
-      resumeCount: resumes.length,
-      processedCount,
-      failedCount,
-      resumes: results,
-    };
-
-    return Response.json(responsePayload, { status: 200 });
+    const { statusCode, data } = await processAnalyzeWorkflow(jobDescription, pdfFiles);
+    return Response.json(data, { status: statusCode });
   } catch (err: any) {
     return Response.json(
       {
         success: false,
+        message: 'Server error',
         error: 'Something went wrong while processing the resumes. Please try again.',
+        candidates: [],
+        unprocessedResumes: [],
       },
       { status: 500 }
     );
@@ -154,123 +270,21 @@ export async function handleAnalyzeExpress(req: ExpressRequest, res: ExpressResp
     const jobDescription = req.body?.jobDescription;
     const files = (req.files as Express.Multer.File[]) || [];
 
-    if (!jobDescription || typeof jobDescription !== 'string' || !jobDescription.trim()) {
-      return res.status(400).json({
-        success: false,
-        error: 'No job description provided.',
-      });
-    }
+    const pdfFiles: Array<{ name: string; buffer: Buffer }> = files.map((f) => ({
+      name: f.originalname,
+      buffer: f.buffer,
+    }));
 
-    if (!files || files.length === 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'Please upload at least one resume.',
-      });
-    }
-
-    if (files.length > MAX_FILES) {
-      return res.status(400).json({
-        success: false,
-        error: `Maximum ${MAX_FILES} resumes allowed.`,
-      });
-    }
-
-    const results: ExtractedResumeItem[] = [];
-
-    for (const file of files) {
-      const isPdfName = file.originalname.toLowerCase().endsWith('.pdf');
-      const isPdfMime =
-        file.mimetype === 'application/pdf' ||
-        file.mimetype === 'application/x-pdf' ||
-        file.mimetype === 'application/octet-stream';
-
-      if (!isPdfName && !isPdfMime) {
-        results.push({
-          fileName: file.originalname,
-          status: 'failed',
-          reason: 'INVALID_FILE',
-          message: 'Only PDF files are supported.',
-        });
-        continue;
-      }
-
-      if (file.size > MAX_FILE_SIZE) {
-        results.push({
-          fileName: file.originalname,
-          status: 'failed',
-          reason: 'INVALID_FILE',
-          message: `File exceeds 5 MB limit (${(file.size / (1024 * 1024)).toFixed(1)} MB).`,
-        });
-        continue;
-      }
-
-      try {
-        const extractRes: PdfExtractionResult = await extractTextFromPdf(
-          file.buffer,
-          file.originalname
-        );
-
-        if (extractRes.success) {
-          results.push({
-            fileName: file.originalname,
-            status: 'processed',
-            characterCount: extractRes.characterCount,
-            wordCount: extractRes.wordCount,
-            pageCount: extractRes.pageCount,
-            textPreview: extractRes.textPreview,
-            isTruncated: extractRes.isTruncated,
-            message: extractRes.message,
-          });
-        } else {
-          results.push({
-            fileName: file.originalname,
-            status: 'failed',
-            reason: extractRes.reason,
-            message: extractRes.message,
-          });
-        }
-      } catch (err: any) {
-        results.push({
-          fileName: file.originalname,
-          status: 'failed',
-          reason: 'CORRUPTED',
-          message: `Could not read "${file.originalname}". The PDF may be corrupted or invalid.`,
-        });
-      }
-    }
-
-    const processedCount = results.filter((r) => r.status === 'processed').length;
-    const failedCount = results.filter((r) => r.status === 'failed').length;
-
-    // If every resume failed, return overall error
-    if (processedCount === 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'No readable text could be extracted from any of the uploaded resumes.',
-        resumeCount: files.length,
-        processedCount: 0,
-        failedCount,
-        jobDescriptionLength: jobDescription.trim().length,
-        resumes: results,
-      });
-    }
-
-    const responsePayload: AnalyzeStage3Response = {
-      success: true,
-      message: 'Resumes extracted successfully',
-      jobDescriptionLength: jobDescription.trim().length,
-      resumeCount: files.length,
-      processedCount,
-      failedCount,
-      resumes: results,
-    };
-
-    return res.status(200).json(responsePayload);
+    const { statusCode, data } = await processAnalyzeWorkflow(jobDescription, pdfFiles);
+    return res.status(statusCode).json(data);
   } catch (err: any) {
     console.error('Server error in handleAnalyzeExpress:', err);
     return res.status(500).json({
       success: false,
+      message: 'Server error',
       error: 'Something went wrong while processing the resumes. Please try again.',
+      candidates: [],
+      unprocessedResumes: [],
     });
   }
 }

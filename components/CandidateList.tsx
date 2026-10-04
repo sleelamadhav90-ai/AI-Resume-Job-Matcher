@@ -21,8 +21,9 @@ export const CandidateList: React.FC<CandidateListProps> = ({
   const filteredAndSortedCandidates = useMemo(() => {
     return results
       .filter((res) => {
+        const candidateName = res.candidate.name || 'Candidate';
         const matchesQuery =
-          res.candidate.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          candidateName.toLowerCase().includes(searchQuery.toLowerCase()) ||
           res.candidate.skills.some((s) => s.toLowerCase().includes(searchQuery.toLowerCase())) ||
           res.matchedSkills.some((s) => s.toLowerCase().includes(searchQuery.toLowerCase()));
 
@@ -32,7 +33,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
       .sort((a, b) => {
         if (sortBy === 'score-desc') return b.score.totalScore - a.score.totalScore;
         if (sortBy === 'score-asc') return a.score.totalScore - b.score.totalScore;
-        return a.candidate.name.localeCompare(b.candidate.name);
+        return (a.candidate.name || '').localeCompare(b.candidate.name || '');
       });
   }, [results, searchQuery, minScore, sortBy]);
 

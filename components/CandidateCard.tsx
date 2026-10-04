@@ -41,7 +41,7 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
           </div>
           <div>
             <h3 className="text-base font-semibold text-slate-900 flex items-center gap-2">
-              {candidate.name}
+              {candidate.name || 'Candidate Name Unavailable'}
             </h3>
 
             {/* Unboxed metadata line with typographic bullet separators */}
@@ -69,7 +69,7 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
             {candidate.experience.length > 0 && (
               <p className="text-xs text-slate-600 mt-2">
                 <span className="font-medium text-slate-700">Latest:</span>{' '}
-                {candidate.experience[0].role} at {candidate.experience[0].company}
+                {candidate.experience[0].role || 'Position'} at {candidate.experience[0].company || 'Company'}
               </p>
             )}
           </div>

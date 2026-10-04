@@ -41,7 +41,7 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({ result, onClose }) =
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-xl font-bold text-slate-900 tracking-tight">
-                {candidate.name}
+                {candidate.name || 'Candidate Name Unavailable'}
               </h2>
               <span className="text-xs px-2 py-0.5 rounded font-medium bg-blue-50 text-blue-700 border border-blue-200">
                 {score.totalScore}% Match

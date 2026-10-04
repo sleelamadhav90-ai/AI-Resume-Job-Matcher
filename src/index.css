@@ -3,29 +3,39 @@
 @layer base {
   :root {
     --bg-page: #F7F8FA;
-    --bg-card: #FFFFFF;
+    --bg-surface: #FFFFFF;
     --text-primary: #202124;
     --text-secondary: #6B7280;
-    --border-color: #E5E7EB;
-    --hireme-accent: #E83E8C;
-    --hireme-accent-hover: #D62F7B;
-    --hireme-accent-light: #FDF2F7;
+    --border-subtle: #E5E7EB;
+    --border-light: #F3F4F6;
+    
+    /* Brand Accent */
+    --hireme-brand: #E83E8C;
+    
+    /* AI Intelligence Sub-System (Muted Indigo) */
+    --ai-indigo: #6366F1;
+    --ai-indigo-light: #EEF2FF;
+    --ai-indigo-tint: #F5F7FF;
+    
+    /* Status Colors */
     --color-success: #10B981;
     --color-warning: #F59E0B;
-    --color-info: #3B82F6;
+    --color-danger: #EF4444;
   }
 
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: #F7F8FA;
     color: #202124;
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.5;
+    letter-spacing: -0.01em;
   }
 
   h1, h2, h3, .font-heading, .font-brand {
     font-family: 'Manrope', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     font-weight: 600;
+    letter-spacing: -0.02em;
   }
 
   code, pre, .font-mono {
@@ -33,35 +43,46 @@
   }
 }
 
-/* Compact enterprise data table styling */
-.recruit-table th {
+/* Premium enterprise data table styling with generous breathing room */
+.enterprise-table th {
   font-family: 'Inter', sans-serif;
   font-weight: 600;
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   color: #6B7280;
-  background-color: #F9FAFB;
+  background-color: transparent;
   border-bottom: 1px solid #E5E7EB;
-  padding: 8px 12px;
+  padding: 14px 16px;
 }
 
-.recruit-table td {
-  padding: 10px 12px;
+.enterprise-table td {
+  padding: 18px 16px;
   border-bottom: 1px solid #F3F4F6;
-  font-size: 12px;
+  font-size: 13.5px;
   color: #202124;
   vertical-align: middle;
 }
 
-.recruit-table tr:hover td {
-  background-color: #F8FAFC;
+.enterprise-table tr:hover td {
+  background-color: #FAFBFC;
 }
 
-/* Clean scrollbar */
+/* Quote styling for evidence excerpts */
+.resume-quote {
+  border-left: 2px solid #6366F1;
+  background-color: #F8FAFC;
+  padding: 8px 12px;
+  border-radius: 0 4px 4px 0;
+  font-size: 12.5px;
+  color: #374151;
+  font-style: italic;
+}
+
+/* Clean slim scrollbar */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;

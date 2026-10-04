@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { UploadCloud, FileText, X, AlertCircle, Check, ShieldCheck } from 'lucide-react';
+import { UploadCloud, FileText, X, AlertCircle, Check } from 'lucide-react';
 
 interface ResumeUploaderProps {
   files: File[];
@@ -68,7 +68,7 @@ export const ResumeUploader: React.FC<ResumeUploaderProps> = ({
         validFiles.some((f) => f.name === file.name && f.size === file.size);
 
       if (isDuplicate) {
-        localError = `"${file.name}" already added.`;
+        localError = `"${file.name}" has already been added.`;
         continue;
       }
 
@@ -83,16 +83,19 @@ export const ResumeUploader: React.FC<ResumeUploaderProps> = ({
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (!disabled) setIsDragOver(true);
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsDragOver(false);
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsDragOver(false);
     if (disabled) return;
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
@@ -100,56 +103,37 @@ export const ResumeUploader: React.FC<ResumeUploaderProps> = ({
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       validateAndAddFiles(e.target.files);
-      e.target.value = '';
     }
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleRemoveFile = (index: number) => {
     if (disabled) return;
-    onFilesChange(files.filter((_, i) => i !== index));
-    if (fileError) setFileError(null);
-    if (onClearError) onClearError();
+    const newFiles = [...files];
+    newFiles.splice(index, 1);
+    onFilesChange(newFiles);
   };
 
-  return (
-    <div className="bg-white rounded border border-[#E5E7EB] p-4 flex flex-col h-full shadow-2xs">
-      <div className="flex items-center justify-between pb-2.5 border-b border-[#E5E7EB]">
-        <div className="flex items-center gap-2">
-          <UploadCloud className="w-4 h-4 text-[#202124]" />
-          <h2 className="text-xs font-bold text-[#202124] uppercase tracking-wider">
-            Applicant Resume Batch
-          </h2>
-        </div>
-        <div className="flex items-center gap-2">
-          {files.length > 0 && !disabled && (
-            <button
-              type="button"
-              onClick={() => onFilesChange([])}
-              className="text-[11px] text-[#6B7280] hover:text-red-600 cursor-pointer"
-            >
-              Clear
-            </button>
-          )}
-          <span className="text-[11px] font-mono text-[#6B7280]">
-            {files.length} / {maxFiles} files
-          </span>
-        </div>
-      </div>
+  const activeError = fileError || error;
 
-      {/* Drag & Drop Zone */}
+  return (
+    <div className="space-y-3">
+      {/* Upload Zone */}
       <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => !disabled && fileInputRef.current?.click()}
-        className={`mt-2.5 p-4 border border-dashed rounded flex flex-col items-center justify-center text-center cursor-pointer transition-colors ${
-          isDragOver
-            ? 'border-[#E83E8C] bg-[#FDF2F7]'
-            : 'border-[#D1D5DB] hover:border-[#9CA3AF] bg-[#F9FAFB]'
-        } ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`}
+        className={`border-2 border-dashed rounded p-6 text-center cursor-pointer transition-all ${
+          disabled
+            ? 'border-[#E5E7EB] bg-[#F9FAFB] cursor-not-allowed'
+            : isDragOver
+            ? 'border-[#202124] bg-[#F3F4F6]'
+            : 'border-[#D1D5DB] bg-[#FAFBFC] hover:border-[#202124] hover:bg-white'
+        }`}
       >
         <input
           ref={fileInputRef}
@@ -157,76 +141,77 @@ export const ResumeUploader: React.FC<ResumeUploaderProps> = ({
           accept=".pdf,application/pdf"
           multiple
           disabled={disabled}
-          onChange={handleFileChange}
+          onChange={handleFileInputChange}
           className="hidden"
         />
 
-        <UploadCloud className="w-5 h-5 text-[#6B7280] mb-1" />
-        <p className="text-xs font-semibold text-[#202124]">
-          Click to upload resumes <span className="font-normal text-[#6B7280]">or drag and drop</span>
-        </p>
-        <p className="text-[11px] text-[#6B7280]">
-          PDF format (up to 5 MB per file)
-        </p>
+        <div className="flex flex-col items-center justify-center space-y-2">
+          <div className="w-10 h-10 rounded-full bg-white border border-[#E5E7EB] flex items-center justify-center text-[#202124] shadow-2xs">
+            <UploadCloud className="w-5 h-5 text-[#202124]" />
+          </div>
+          <div>
+            <span className="font-semibold text-xs text-[#202124] block">
+              Click to browse or drop candidate resumes
+            </span>
+            <span className="text-[11px] text-[#6B7280] block mt-0.5">
+              PDF only · Up to 10 files · Max 5 MB per file
+            </span>
+          </div>
+        </div>
       </div>
 
-      {(fileError || error) && (
-        <div className="mt-2 text-[11px] text-red-600 font-medium flex items-center gap-1 p-2 rounded bg-red-50 border border-red-200">
+      {activeError && (
+        <div className="p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700 flex items-center gap-1.5">
           <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-          <span>{fileError || error}</span>
+          <span>{activeError}</span>
         </div>
       )}
 
-      {/* File list */}
-      <div className="mt-2.5 flex-1 min-h-[90px] max-h-[140px] overflow-y-auto space-y-1 pr-1 text-xs">
-        {files.length > 0 ? (
-          files.map((file, idx) => (
-            <div
-              key={`${file.name}-${idx}`}
-              className="flex items-center justify-between p-1.5 rounded bg-[#F9FAFB] border border-[#E5E7EB]"
+      {/* Selected File List */}
+      {files.length > 0 && (
+        <div className="space-y-1.5 pt-1">
+          <div className="flex items-center justify-between text-xs text-[#6B7280]">
+            <span className="font-medium">Uploaded resumes ({files.length}/{maxFiles}):</span>
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={() => onFilesChange([])}
+              className="text-[11px] text-[#6B7280] hover:text-[#202124] underline cursor-pointer"
             >
-              <div className="flex items-center gap-2 min-w-0 pr-2">
-                <FileText className="w-3.5 h-3.5 text-[#6B7280] shrink-0" />
-                <span className="font-medium text-[#202124] truncate text-[11px]">
-                  {file.name}
-                </span>
-                <span className="text-[10px] text-[#6B7280] font-mono shrink-0">
-                  ({formatFileSize(file.size)})
-                </span>
-              </div>
+              Clear all
+            </button>
+          </div>
 
-              {!disabled && (
+          <div className="max-h-44 overflow-y-auto space-y-1 pr-1">
+            {files.map((file, idx) => (
+              <div
+                key={`${file.name}-${idx}`}
+                className="flex items-center justify-between p-2 bg-white border border-[#E5E7EB] rounded text-xs"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <FileText className="w-3.5 h-3.5 text-[#6B7280] shrink-0" />
+                  <span className="truncate text-[#202124] font-medium">{file.name}</span>
+                  <span className="text-[11px] text-[#9CA3AF] shrink-0 font-mono">
+                    ({formatFileSize(file.size)})
+                  </span>
+                </div>
                 <button
                   type="button"
+                  disabled={disabled}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleRemoveFile(idx);
                   }}
-                  className="p-0.5 text-[#6B7280] hover:text-red-600 rounded cursor-pointer"
+                  className="p-1 text-[#9CA3AF] hover:text-[#202124] rounded cursor-pointer"
+                  title="Remove file"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
-              )}
-            </div>
-          ))
-        ) : (
-          <div className="h-full flex flex-col items-center justify-center text-center p-3 text-[11px] text-[#6B7280]">
-            <span>No resumes in queue</span>
-            <span className="text-[10px] text-[#9CA3AF]">
-              Upload PDF resumes to run AI evaluation
-            </span>
+              </div>
+            ))}
           </div>
-        )}
-      </div>
-
-      <div className="mt-2.5 pt-2 border-t border-[#E5E7EB] flex items-center justify-between text-[11px] text-[#6B7280]">
-        <span>Batch candidate evaluation</span>
-        {files.length > 0 && (
-          <span className="text-[#10B981] font-semibold flex items-center gap-1">
-            <Check className="w-3.5 h-3.5" /> {files.length} ready
-          </span>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -23,17 +23,22 @@ import {
   Check,
   Activity,
   Award,
-  Zap
+  Zap,
+  ArrowDown
 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { JobDescriptionInput } from '../components/JobDescriptionInput';
 import { ResumeUploader } from '../components/ResumeUploader';
 import { CandidateList, getCandidateInitials, getAvatarColorClass } from '../components/CandidateList';
 import { MatchDetails } from '../components/MatchDetails';
-import { AIMatchVisual } from '../components/AIMatchVisual';
+import { ScrollStoryHero } from '../components/ScrollStoryHero';
+import { ResumeIntelligenceStory } from '../components/ResumeIntelligenceStory';
+import { EvidenceMatchingStory } from '../components/EvidenceMatchingStory';
+import { BigMetricsStory } from '../components/BigMetricsStory';
 import { LoopingTypography } from '../components/LoopingTypography';
 import { HiringSignalsMarquee } from '../components/HiringSignalsMarquee';
 import { RecruitmentPipelineFlow } from '../components/RecruitmentPipelineFlow';
+import { Footer } from '../components/Footer';
 import { AnalyzeStage5Response, RankedCandidate } from '../lib/types';
 import { useCountUp } from '../lib/useCountUp';
 
@@ -234,20 +239,6 @@ const INITIAL_CANDIDATES_POOL: GeneralCandidate[] = [
   },
 ];
 
-const AnimatedStatistic: React.FC<{ target: number; suffix?: string; duration?: number }> = ({
-  target,
-  suffix = '',
-  duration = 600,
-}) => {
-  const count = useCountUp(target, duration);
-  return (
-    <span className="font-mono">
-      {count}
-      {suffix}
-    </span>
-  );
-};
-
 export default function HireMeApp() {
   const [activeNav, setActiveNav] = useState<NavigationTab>('home');
   const [selectedJob, setSelectedJob] = useState<JobOpening>(SAMPLE_JOBS[0]);
@@ -337,8 +328,10 @@ export default function HireMeApp() {
   return (
     <div className="min-h-screen bg-[#F7F8FA] text-[#202124] flex flex-col font-sans selection:bg-[#6366F1]/20 selection:text-[#202124]">
       
-      {/* Calm, Premium Top Navigation Bar */}
-      <header className="bg-white border-b border-[#E5E7EB] sticky top-0 z-30 motion-fade">
+      {/* ========================================================================= */}
+      {/* 1. NAVBAR */}
+      {/* ========================================================================= */}
+      <header className="bg-white border-b border-[#E5E7EB] sticky top-0 z-40 motion-fade">
         <div className="max-w-[1440px] mx-auto px-6 sm:px-10 flex items-center justify-between h-16">
           
           {/* Left: Brand & Navigation Links */}
@@ -458,12 +451,6 @@ export default function HireMeApp() {
         </div>
       </header>
 
-      {/* Looping Continuous Typography Bar */}
-      <LoopingTypography />
-
-      {/* Hiring Signals Live Ticker Marquee */}
-      <HiringSignalsMarquee />
-
       {/* Error Banner */}
       {errorBanner && (
         <div className="bg-amber-50 border-b border-amber-200 px-6 py-2.5 text-xs text-amber-900 flex items-center justify-between max-w-[1440px] mx-auto w-full motion-fade">
@@ -482,250 +469,261 @@ export default function HireMeApp() {
       )}
 
       {/* Main Workspace Surface */}
-      <main className="flex-1 max-w-[1440px] w-full mx-auto px-6 sm:px-10 py-10">
+      <main className="flex-1 max-w-[1440px] w-full mx-auto px-6 sm:px-10 py-6">
         
         {/* ========================================================================= */}
-        {/* VIEW 1: HOME / EDITORIAL RECRUITMENT WORKSPACE */}
+        {/* VIEW 1: EXACT REQUESTED SCROLL STORY SEQUENCE */}
         {/* ========================================================================= */}
         {activeNav === 'home' && (
-          <div className="space-y-10">
+          <div className="space-y-4">
             
-            {/* 1. SIGNATURE AI MATCHING VISUAL (Connected Nodes with Signal Animation) */}
-            <AIMatchVisual onStartMatching={() => setActiveNav('matching')} />
+            {/* 2. BIG HERO ("FIND THE RIGHT TALENT. UNDERSTAND WHY.") + CREATIVE AI MATCHING VISUAL */}
+            <ScrollStoryHero onStartMatching={() => setActiveNav('matching')} />
 
-            {/* 2. ASYMMETRIC OVERVIEW SECTION (65% Welcome & Stats / 35% AI Match Health) */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-              
-              {/* Left 65%: Welcome & Stats */}
-              <div className="lg:col-span-8 bg-white rounded-lg border border-[#E5E7EB] p-8 shadow-2xs flex flex-col justify-between space-y-6 motion-fade-up">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h1 className="text-2xl font-bold text-[#202124] font-heading tracking-tight">
-                        Good morning, Recruiter
-                      </h1>
-                      <p className="text-xs text-[#6B7280] mt-0.5">
-                        3 active requisitions require candidate matching review today.
-                      </p>
-                    </div>
-                    <span className="text-xs px-2.5 py-1 rounded bg-[#F9FAFB] text-[#4B5563] border border-[#E5E7EB] font-mono">
-                      Acme Talent Operations
-                    </span>
-                  </div>
+            {/* 3. MOVING SIGNAL / MARQUEE */}
+            <div className="py-2">
+              <LoopingTypography />
+              <HiringSignalsMarquee />
+            </div>
 
-                  {/* AI Hiring Insight Callout */}
-                  <div className="bg-[#EEF2FF] rounded-md p-3.5 border border-[#6366F1]/20 flex items-start gap-2.5">
-                    <Sparkles className="w-4 h-4 text-[#6366F1] shrink-0 mt-0.5" />
-                    <div>
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-[#6366F1] block">
-                        AI Hiring Insight
-                      </span>
-                      <p className="text-xs text-[#374151] mt-0.5">
-                        Your <span className="font-semibold text-[#202124]">Senior Full Stack Engineer</span> opening has 18 strong matches. 4 candidates exceed mandatory tenure.
-                      </p>
-                    </div>
-                  </div>
+            {/* 4. BIG STORY SECTION ("FROM RESUME TO SIGNAL.") + ANIMATED RESUME -> AI -> CANDIDATE */}
+            <ResumeIntelligenceStory />
 
-                  {/* 4 Structured Metrics */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-2 divide-y sm:divide-y-0 sm:divide-x divide-[#F3F4F6]">
-                    <div>
-                      <span className="text-xs text-[#6B7280] block font-medium">Open Roles</span>
-                      <div className="text-2xl font-bold text-[#202124] mt-0.5">
-                        <AnimatedStatistic target={14} />
-                      </div>
-                      <span className="text-[11px] text-emerald-700 font-medium">+2 this week</span>
-                    </div>
+            {/* 5. BIG NUMBERS (247 RESUMES, 86 MATCHES, 24 SHORTLIST, 8 REVIEW) */}
+            <BigMetricsStory />
 
-                    <div className="pt-2 sm:pt-0 sm:pl-5">
-                      <span className="text-xs text-[#6B7280] block font-medium">Evaluated</span>
-                      <div className="text-2xl font-bold text-[#202124] mt-0.5">
-                        <AnimatedStatistic target={842} />
-                      </div>
-                      <span className="text-[11px] text-[#6B7280]">Candidates</span>
-                    </div>
+            {/* 6. CREATIVE EVIDENCE SECTION ("NOT JUST A SCORE. THE REASON BEHIND IT.") + AI EVIDENCE VISUAL */}
+            <EvidenceMatchingStory />
 
-                    <div className="pt-2 sm:pt-0 sm:pl-5">
-                      <span className="text-xs text-[#6B7280] block font-medium">Avg. Alignment</span>
-                      <div className="text-2xl font-bold text-[#202124] mt-0.5">
-                        <AnimatedStatistic target={78} suffix="%" />
-                      </div>
-                      <span className="text-[11px] text-emerald-700 font-medium">High quality</span>
-                    </div>
+            {/* 7. RECRUITMENT PIPELINE */}
+            <section className="py-12 sm:py-16 border-t border-[#E5E7EB]">
+              <RecruitmentPipelineFlow shortlistedCount={shortlistedIds.size + 7} />
+            </section>
 
-                    <div className="pt-2 sm:pt-0 sm:pl-5">
-                      <span className="text-xs text-[#6B7280] block font-medium">Shortlisted</span>
-                      <div className="text-2xl font-bold text-[#202124] mt-0.5">
-                        <AnimatedStatistic target={shortlistedIds.size + 7} />
-                      </div>
-                      <span className="text-[11px] text-[#6B7280]">For interview</span>
-                    </div>
-                  </div>
+            {/* 8. ACTUAL ATS WORKSPACE & CANDIDATE TABLE */}
+            <section className="py-16 border-t border-[#E5E7EB] space-y-8">
+              <div className="flex flex-wrap items-baseline justify-between gap-4">
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#6366F1] font-mono">
+                    03 / ATS Operations
+                  </span>
+                  <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-[#202124] tracking-tight mt-1">
+                    NOW MAKE THE DECISION.
+                  </h2>
+                  <p className="text-sm text-[#6B7280] mt-1">
+                    Active requisitions and candidate records ready for recruitment actions.
+                  </p>
                 </div>
 
-                <div className="pt-4 border-t border-[#F3F4F6] flex items-center justify-between">
-                  <span className="text-xs text-[#6B7280]">
-                    Launch deterministic evaluation for active requisitions.
-                  </span>
+                <div className="flex items-center gap-3">
                   <button
                     type="button"
                     onClick={() => setActiveNav('matching')}
                     className="px-4 py-2 bg-[#202124] hover:bg-black text-white rounded-md text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-colors"
                   >
-                    <span>Match Candidates</span>
+                    <span>Launch Matching Workspace</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
 
-              {/* Right 35%: Signature AI Match Health Signal */}
-              <div className="lg:col-span-4 bg-white rounded-lg border border-[#E5E7EB] p-8 shadow-2xs flex flex-col justify-between space-y-4 motion-fade-up stagger-1">
-                <div>
-                  <div className="flex items-center justify-between pb-3 border-b border-[#F3F4F6]">
-                    <span className="text-xs font-bold uppercase tracking-wider text-[#6366F1] flex items-center gap-1.5">
-                      <Activity className="w-3.5 h-3.5 text-[#6366F1]" />
-                      AI Match Health
-                    </span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded border border-emerald-200 font-semibold">
-                      Strong Signal
-                    </span>
+              {/* Active Jobs Table */}
+              <div className="bg-white rounded-lg border border-[#E5E7EB] overflow-hidden shadow-2xs">
+                <div className="p-6 border-b border-[#E5E7EB] flex items-center justify-between">
+                  <div>
+                    <h3 className="font-bold text-base text-[#202124] font-heading">
+                      Active Job Requisitions
+                    </h3>
+                    <p className="text-xs text-[#6B7280] mt-0.5">
+                      Select any job to initiate instant candidate matching.
+                    </p>
                   </div>
-
-                  <div className="py-4 text-center">
-                    <div className="text-4xl font-black text-[#202124] font-mono">
-                      <AnimatedStatistic target={86} suffix="%" />
-                    </div>
-                    <span className="text-xs text-[#6B7280] font-medium block mt-1">
-                      Cohort Match Confidence
-                    </span>
-                  </div>
-
-                  <div className="space-y-2.5 text-xs">
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <span className="text-[#4B5563]">Required Skills Precision</span>
-                        <span className="font-mono font-bold text-[#202124]">91%</span>
-                      </div>
-                      <div className="w-full h-1.5 bg-[#F3F4F6] rounded-full overflow-hidden">
-                        <div className="h-full bg-[#202124] rounded-full" style={{ width: '91%' }} />
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <span className="text-[#4B5563]">Experience Fit Tenure</span>
-                        <span className="font-mono font-bold text-[#202124]">84%</span>
-                      </div>
-                      <div className="w-full h-1.5 bg-[#F3F4F6] rounded-full overflow-hidden">
-                        <div className="h-full bg-[#6366F1] rounded-full" style={{ width: '84%' }} />
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <span className="text-[#4B5563]">Project & Domain Relevance</span>
-                        <span className="font-mono font-bold text-[#202124]">88%</span>
-                      </div>
-                      <div className="w-full h-1.5 bg-[#F3F4F6] rounded-full overflow-hidden">
-                        <div className="h-full bg-[#202124] rounded-full" style={{ width: '88%' }} />
-                      </div>
-                    </div>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setActiveNav('jobs')}
+                    className="text-xs font-semibold text-[#202124] hover:text-[#6366F1] cursor-pointer"
+                  >
+                    View all requisitions →
+                  </button>
                 </div>
 
-                <div className="pt-3 border-t border-[#F3F4F6] text-[11px] text-[#6B7280] text-center">
-                  Calibrated across 842 candidate profiles
-                </div>
-              </div>
-            </div>
-
-            {/* 3. CONNECTED RECRUITMENT PIPELINE WITH TRAVELING PULSE */}
-            <RecruitmentPipelineFlow shortlistedCount={shortlistedIds.size + 7} />
-
-            {/* 4. ACTIVE JOB OPENINGS TABLE */}
-            <div className="bg-white rounded-lg border border-[#E5E7EB] overflow-hidden shadow-2xs motion-fade-up stagger-3">
-              <div className="p-6 border-b border-[#E5E7EB] flex items-center justify-between">
-                <div>
-                  <h3 className="font-bold text-base text-[#202124] font-heading">
-                    Active Job Openings
-                  </h3>
-                  <p className="text-xs text-[#6B7280] mt-0.5">
-                    Click Match to launch immediate candidate evaluation for any opening.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setActiveNav('jobs')}
-                  className="text-xs font-semibold text-[#202124] hover:text-[#6366F1] cursor-pointer"
-                >
-                  View all →
-                </button>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left enterprise-table">
-                  <thead>
-                    <tr>
-                      <th>Job Title</th>
-                      <th>Department</th>
-                      <th>Location</th>
-                      <th>Candidates</th>
-                      <th>Top Match</th>
-                      <th>Status</th>
-                      <th>Updated</th>
-                      <th className="text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {SAMPLE_JOBS.map((job, idx) => (
-                      <tr
-                        key={job.id}
-                        className={`hover:bg-[#FAFBFC] transition-colors motion-fade-up stagger-${idx + 1}`}
-                      >
-                        <td>
-                          <div className="font-bold text-[14px] text-[#202124]">
-                            {job.title}
-                          </div>
-                          <span className="text-xs text-[#6B7280] font-mono">ID: {job.id}</span>
-                        </td>
-                        <td>
-                          <span className="text-xs text-[#202124]">{job.department}</span>
-                        </td>
-                        <td>
-                          <span className="text-xs text-[#6B7280]">{job.location}</span>
-                        </td>
-                        <td>
-                          <span className="font-mono font-medium text-xs text-[#202124]">{job.candidatesCount}</span>
-                        </td>
-                        <td>
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-mono font-bold text-xs text-[#202124]">{job.topMatch}%</span>
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#6366F1]" />
-                          </div>
-                        </td>
-                        <td>
-                          <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
-                            {job.status}
-                          </span>
-                        </td>
-                        <td>
-                          <span className="text-xs text-[#6B7280]">{job.updated}</span>
-                        </td>
-                        <td className="text-right">
-                          <button
-                            type="button"
-                            onClick={() => handleStartMatchingForJob(job)}
-                            className="px-3 py-1.5 bg-white hover:bg-[#F3F4F6] text-[#202124] border border-[#E5E7EB] rounded-md font-medium text-xs inline-flex items-center gap-1 cursor-pointer transition-colors"
-                          >
-                            <span>Match</span>
-                            <ChevronRight className="w-3.5 h-3.5 text-[#6B7280]" />
-                          </button>
-                        </td>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left enterprise-table">
+                    <thead>
+                      <tr>
+                        <th>Job Title</th>
+                        <th>Department</th>
+                        <th>Location</th>
+                        <th>Candidates</th>
+                        <th>Top Match</th>
+                        <th>Status</th>
+                        <th>Updated</th>
+                        <th className="text-right">Action</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {SAMPLE_JOBS.map((job) => (
+                        <tr key={job.id} className="hover:bg-[#FAFBFC] transition-colors">
+                          <td>
+                            <div className="font-bold text-[14px] text-[#202124]">
+                              {job.title}
+                            </div>
+                            <span className="text-xs text-[#6B7280] font-mono">ID: {job.id}</span>
+                          </td>
+                          <td>
+                            <span className="text-xs text-[#202124]">{job.department}</span>
+                          </td>
+                          <td>
+                            <span className="text-xs text-[#6B7280]">{job.location}</span>
+                          </td>
+                          <td>
+                            <span className="font-mono font-medium text-xs text-[#202124]">{job.candidatesCount}</span>
+                          </td>
+                          <td>
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-mono font-bold text-xs text-[#202124]">{job.topMatch}%</span>
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#6366F1]" />
+                            </div>
+                          </td>
+                          <td>
+                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              {job.status}
+                            </span>
+                          </td>
+                          <td>
+                            <span className="text-xs text-[#6B7280]">{job.updated}</span>
+                          </td>
+                          <td className="text-right">
+                            <button
+                              type="button"
+                              onClick={() => handleStartMatchingForJob(job)}
+                              className="px-3 py-1.5 bg-white hover:bg-[#F3F4F6] text-[#202124] border border-[#E5E7EB] rounded-md font-medium text-xs inline-flex items-center gap-1 cursor-pointer transition-colors"
+                            >
+                              <span>Match</span>
+                              <ChevronRight className="w-3.5 h-3.5 text-[#6B7280]" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
+
+              {/* Candidates Database Table */}
+              <div className="bg-white rounded-lg border border-[#E5E7EB] overflow-hidden shadow-2xs">
+                <div className="p-6 border-b border-[#E5E7EB] flex items-center justify-between">
+                  <div>
+                    <h3 className="font-bold text-base text-[#202124] font-heading">
+                      Candidate Talent Pool
+                    </h3>
+                    <p className="text-xs text-[#6B7280] mt-0.5">
+                      Evaluated profiles ready for shortlisting and recruiter screening.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setActiveNav('candidates')}
+                    className="text-xs font-semibold text-[#202124] hover:text-[#6366F1] cursor-pointer"
+                  >
+                    Manage talent pool →
+                  </button>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left enterprise-table">
+                    <thead>
+                      <tr>
+                        <th className="w-10 text-center">
+                          <input type="checkbox" className="accent-[#202124] rounded" />
+                        </th>
+                        <th>Candidate & Role</th>
+                        <th>Experience</th>
+                        <th>Verified Skills</th>
+                        <th>Match</th>
+                        <th>Stage</th>
+                        <th>Applied For</th>
+                        <th className="text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {candidatesPool.map((c, idx) => {
+                        const initials = getCandidateInitials(c.name, `C${idx + 1}`);
+                        const avatarColor = getAvatarColorClass(c.name);
+
+                        return (
+                          <tr
+                            key={c.id}
+                            className={`hover:bg-[#FAFBFC] transition-colors motion-fade-up stagger-${Math.min(idx + 1, 6)}`}
+                          >
+                            <td className="text-center">
+                              <input type="checkbox" className="accent-[#202124] rounded" />
+                            </td>
+                            <td>
+                              <div className="flex items-center gap-3">
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 font-mono shadow-2xs ${avatarColor}`}>
+                                  {initials}
+                                </div>
+                                <div>
+                                  <div className="font-bold text-[14px] text-[#202124]">
+                                    {c.name}
+                                  </div>
+                                  <span className="text-xs text-[#6B7280]">{c.role} · {c.email}</span>
+                                </div>
+                              </div>
+                            </td>
+                            <td>
+                              <span className="text-xs font-medium text-[#202124]">{c.experience}</span>
+                            </td>
+                            <td className="max-w-[200px]">
+                              <div className="flex flex-wrap gap-1">
+                                {c.skills.slice(0, 3).map((s, sIdx) => (
+                                  <span key={sIdx} className="px-2 py-0.5 rounded bg-[#F3F4F6] text-[#374151] text-[11px] font-medium border border-[#E5E7EB]">
+                                    {s}
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
+                            <td>
+                              <div className="flex items-center gap-1">
+                                <span className="font-mono font-bold text-xs text-[#202124]">{c.matchScore}%</span>
+                                <span className="text-[10px] font-bold text-[#6366F1]">AI</span>
+                              </div>
+                            </td>
+                            <td>
+                              <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-gray-100 text-gray-800">
+                                {c.stage}
+                              </span>
+                            </td>
+                            <td>
+                              <span className="text-xs text-[#6B7280]">{c.appliedFor}</span>
+                            </td>
+                            <td className="text-right">
+                              <button
+                                type="button"
+                                onClick={() => handleToggleShortlist(c.id)}
+                                className={`p-1.5 rounded-md border cursor-pointer transition-colors ${
+                                  shortlistedIds.has(c.id)
+                                    ? 'bg-[#FDF2F7] text-[#E83E8C] border-[#E83E8C]/30'
+                                    : 'bg-white text-[#6B7280] border-[#E5E7EB] hover:text-[#202124]'
+                                }`}
+                                title={shortlistedIds.has(c.id) ? 'Shortlisted' : 'Add to Shortlist'}
+                              >
+                                {shortlistedIds.has(c.id) ? (
+                                  <BookmarkCheck className="w-4 h-4 text-[#E83E8C]" />
+                                ) : (
+                                  <Bookmark className="w-4 h-4" />
+                                )}
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
           </div>
         )}
 
@@ -1208,6 +1206,9 @@ export default function HireMeApp() {
           </div>
         )}
       </main>
+
+      {/* 9. FOOTER */}
+      <Footer />
 
       {/* Candidate Record Inspection Drawer */}
       {selectedCandidateId && selectedCandidateRecord && (

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export function useCountUp(target: number, duration: number = 600): number {
+export function useCountUp(target: number, duration: number = 700, trigger: boolean = true): number {
   const [count, setCount] = useState<number>(() => {
     if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       return target;
@@ -9,6 +9,8 @@ export function useCountUp(target: number, duration: number = 600): number {
   });
 
   useEffect(() => {
+    if (!trigger) return;
+
     if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setCount(target);
       return;
@@ -31,7 +33,7 @@ export function useCountUp(target: number, duration: number = 600): number {
 
     const handle = requestAnimationFrame(update);
     return () => cancelAnimationFrame(handle);
-  }, [target, duration]);
+  }, [target, duration, trigger]);
 
   return count;
 }

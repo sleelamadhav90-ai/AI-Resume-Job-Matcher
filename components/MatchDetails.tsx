@@ -17,9 +17,13 @@ import {
   FileText,
   Clock,
   HelpCircle,
-  AlertCircle
+  AlertCircle,
+  Award,
+  Layers,
+  MapPin
 } from 'lucide-react';
 import { ClaimVerificationStatus, RankedCandidate, ResumeClaim } from '../lib/types';
+import { getCandidateInitials, getAvatarColorClass } from './CandidateList';
 
 interface MatchDetailsProps {
   candidate: RankedCandidate;
@@ -105,6 +109,9 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
   };
 
   const struct = match.structuredExplanation;
+  const name = profile?.name || 'Candidate Record';
+  const initials = getCandidateInitials(name, `C${rank}`);
+  const avatarColor = getAvatarColorClass(name);
 
   // Percentage calculations for thin bar indicators
   const reqPercent = Math.round((match.requiredSkillScore / 30) * 100);
@@ -113,10 +120,10 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
   const eduPercent = Math.round((match.educationScore / 15) * 100);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-2xs flex items-center justify-end">
-      <div className="bg-white w-full max-w-5xl h-full shadow-2xl flex flex-col border-l border-[#E5E7EB] animate-in slide-in-from-right duration-150">
+    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-2xs flex items-center justify-end motion-fade">
+      <div className="bg-white w-full max-w-5xl h-full shadow-2xl flex flex-col border-l border-[#E5E7EB] motion-drawer">
         
-        {/* Header Bar */}
+        {/* Recruiter Dossier Top Bar with Avatar */}
         <div className="px-8 py-5 border-b border-[#E5E7EB] bg-white flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <button
@@ -128,24 +135,30 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
               <ArrowLeft className="w-5 h-5" />
             </button>
 
-            <div>
-              <div className="flex items-center gap-3">
-                <h2 className="text-xl font-bold text-[#202124] font-heading">
-                  {profile?.name || 'Candidate Record'}
-                </h2>
-                <span className="text-xs px-2.5 py-0.5 rounded font-mono font-bold bg-[#EEF2FF] text-[#6366F1]">
-                  {match.totalScore}% Match
-                </span>
-                <span className="text-xs px-2.5 py-0.5 rounded font-medium bg-[#F3F4F6] text-[#4B5563]">
-                  {currentStage}
-                </span>
+            <div className="flex items-center gap-3.5">
+              <div className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-sm shrink-0 font-mono shadow-2xs ${avatarColor}`}>
+                {initials}
               </div>
-              <div className="flex items-center gap-3 text-xs text-[#6B7280] mt-1">
-                <span>{profile?.experience?.[0]?.role || 'Applicant Record'}</span>
-                <span>·</span>
-                <span>{match.experienceMatch.candidateYears !== null ? `${match.experienceMatch.candidateYears} yrs verified` : 'Tenure not specified'}</span>
-                <span>·</span>
-                <span className="font-mono text-[11px]">{candidate.fileName}</span>
+
+              <div>
+                <div className="flex items-center gap-3">
+                  <h2 className="text-xl font-bold text-[#202124] font-heading">
+                    {name}
+                  </h2>
+                  <span className="text-xs px-2.5 py-0.5 rounded font-mono font-bold bg-[#EEF2FF] text-[#6366F1]">
+                    {match.totalScore}% Match
+                  </span>
+                  <span className="text-xs px-2.5 py-0.5 rounded font-medium bg-[#F3F4F6] text-[#4B5563]">
+                    {currentStage}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 text-xs text-[#6B7280] mt-1">
+                  <span>{profile?.experience?.[0]?.role || 'Software Engineer'}</span>
+                  <span>·</span>
+                  <span>{match.experienceMatch.candidateYears !== null ? `${match.experienceMatch.candidateYears} yrs verified` : 'Tenure n/a'}</span>
+                  <span>·</span>
+                  <span className="font-mono text-[11px]">{candidate.fileName}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -155,7 +168,7 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
             <select
               value={currentStage}
               onChange={(e) => setCurrentStage(e.target.value as any)}
-              className="px-3 py-1.5 border border-[#E5E7EB] rounded text-xs font-semibold bg-white text-[#202124] cursor-pointer focus:outline-none focus:border-[#202124]"
+              className="px-3 py-1.5 border border-[#E5E7EB] rounded-md text-xs font-semibold bg-white text-[#202124] cursor-pointer focus:outline-none focus:border-[#202124]"
             >
               <option value="Screening">Stage: Screening</option>
               <option value="Matched">Stage: Matched</option>
@@ -168,7 +181,7 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
               <button
                 type="button"
                 onClick={() => onToggleShortlist(profile.id)}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold border transition-all cursor-pointer ${
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold border transition-all cursor-pointer ${
                   isShortlisted
                     ? 'bg-[#FDF2F7] text-[#E83E8C] border-[#E83E8C]/30'
                     : 'bg-white text-[#202124] border-[#E5E7EB] hover:bg-[#F9FAFB]'
@@ -199,17 +212,17 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
           </div>
         </div>
 
-        {/* Two-Column Workspace (Spacious, Level 2 Surface with Level 3 Separators) */}
+        {/* Two-Column Recruiter Dossier Body */}
         <div className="flex-1 overflow-y-auto p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 bg-[#F7F8FA]">
           
-          {/* LEFT COLUMN (65% on desktop): Main Candidate Record */}
+          {/* LEFT COLUMN (65% on desktop): Profile, Experience, Education */}
           <div className="lg:col-span-7 space-y-6">
             
-            {/* Contact Information & Metadata */}
-            <div className="bg-white rounded-lg border border-[#E5E7EB] p-6 space-y-4 shadow-2xs">
+            {/* Contact Information & Summary */}
+            <div className="bg-white rounded-lg border border-[#E5E7EB] p-6 space-y-4 shadow-2xs motion-fade-up stagger-1">
               <div className="flex items-center justify-between pb-3 border-b border-[#F3F4F6]">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-[#6B7280]">
-                  Candidate Profile
+                  Contact & Profile Summary
                 </h3>
                 <span className="text-xs text-[#6B7280] font-mono">
                   ID: {profile?.id}
@@ -235,7 +248,7 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
             </div>
 
             {/* Why This Candidate Matches & What is Missing */}
-            <div className="bg-white rounded-lg border border-[#E5E7EB] p-6 space-y-4 shadow-2xs">
+            <div className="bg-white rounded-lg border border-[#E5E7EB] p-6 space-y-4 shadow-2xs motion-fade-up stagger-2">
               <div className="pb-3 border-b border-[#F3F4F6] flex items-center justify-between">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-[#202124] font-heading flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-[#6366F1]" />
@@ -305,7 +318,7 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
             </div>
 
             {/* Work History */}
-            <div className="bg-white rounded-lg border border-[#E5E7EB] p-6 space-y-4 shadow-2xs">
+            <div className="bg-white rounded-lg border border-[#E5E7EB] p-6 space-y-4 shadow-2xs motion-fade-up stagger-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-[#6B7280]">
                 Work Experience History
               </h3>
@@ -342,7 +355,7 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
               {profile?.projects && profile.projects.length > 0 ? (
                 <div className="space-y-3">
                   {profile.projects.map((proj, idx) => (
-                    <div key={idx} className="p-3 rounded bg-[#FAFBFC] border border-[#E5E7EB] text-xs space-y-1">
+                    <div key={idx} className="p-3 rounded-md bg-[#FAFBFC] border border-[#E5E7EB] text-xs space-y-1">
                       <span className="font-bold text-[#202124] block">{proj.name || 'Project'}</span>
                       {proj.description && <p className="text-xs text-[#4B5563]">{proj.description}</p>}
                       {proj.technologies && proj.technologies.length > 0 && (
@@ -381,22 +394,22 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
             </div>
           </div>
 
-          {/* RIGHT COLUMN (35% on desktop): AI Match Verification Layer */}
+          {/* RIGHT COLUMN (35% on desktop): AI Match, Evidence & Claims */}
           <div className="lg:col-span-5 space-y-6">
             
-            {/* 100-Point Score Allocation with Thin Progress Bars */}
-            <div className="bg-white rounded-lg border border-[#E5E7EB] p-6 shadow-2xs space-y-4">
+            {/* Signature AI Match Breakdown Component */}
+            <div className="bg-white rounded-lg border border-[#E5E7EB] p-6 shadow-2xs space-y-4 motion-fade-up stagger-1">
               <div className="flex items-baseline justify-between pb-3 border-b border-[#F3F4F6]">
                 <div>
                   <h3 className="text-xs font-bold uppercase tracking-wider text-[#6B7280]">
-                    Match Score Breakdown
+                    AI Match Breakdown
                   </h3>
                   <div className="flex items-baseline gap-1.5 mt-1">
                     <span className="text-3xl font-black text-[#202124] font-mono">{match.totalScore}</span>
                     <span className="text-xs font-bold text-[#6B7280]">/ 100 Points</span>
                   </div>
                 </div>
-                <span className="text-xs px-2.5 py-1 rounded font-bold bg-[#EEF2FF] text-[#6366F1]">
+                <span className="text-xs px-2.5 py-1 rounded-md font-bold bg-[#EEF2FF] text-[#6366F1]">
                   {match.label}
                 </span>
               </div>
@@ -445,7 +458,7 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
 
                 <div>
                   <div className="flex justify-between mb-1">
-                    <span className="text-[#202124] font-medium">Projects & Core Requirements</span>
+                    <span className="text-[#202124] font-medium">Projects & Requirements</span>
                     <span className="font-mono font-bold text-[#202124]">{match.projectScore + match.requirementsScore} / 20 pts</span>
                   </div>
                   <div className="w-full h-1.5 bg-[#F3F4F6] rounded-full overflow-hidden">
@@ -456,7 +469,7 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
             </div>
 
             {/* Recruiter Attention: Claims to Verify (Stage 6) */}
-            <div className="bg-white rounded-lg border border-[#E5E7EB] p-6 shadow-2xs space-y-3">
+            <div className="bg-white rounded-lg border border-[#E5E7EB] p-6 shadow-2xs space-y-3 motion-fade-up stagger-2">
               <div className="flex items-center justify-between pb-3 border-b border-[#F3F4F6]">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-[#202124] flex items-center gap-1.5">
                   <ShieldAlert className="w-4 h-4 text-amber-600" />
@@ -470,7 +483,7 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
               {profile?.claimsToVerify && profile.claimsToVerify.length > 0 ? (
                 <div className="space-y-3">
                   {profile.claimsToVerify.map((item: ResumeClaim, idx: number) => (
-                    <div key={idx} className="p-3 bg-[#FAFBFC] border border-[#E5E7EB] rounded space-y-1.5 text-xs">
+                    <div key={idx} className="p-3 bg-[#FAFBFC] border border-[#E5E7EB] rounded-md space-y-1.5 text-xs">
                       <div className="flex items-start justify-between gap-2">
                         <span className="font-bold text-[#202124]">
                           "{item.claim}"
@@ -495,7 +508,7 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
             </div>
 
             {/* Evidence Behind The Match */}
-            <div className="bg-white rounded-lg border border-[#E5E7EB] p-6 shadow-2xs space-y-3">
+            <div className="bg-white rounded-lg border border-[#E5E7EB] p-6 shadow-2xs space-y-3 motion-fade-up stagger-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-[#202124] pb-3 border-b border-[#F3F4F6]">
                 Evidence Behind the Match
               </h3>
@@ -528,7 +541,7 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
               
               <div className="space-y-2">
                 {notes.map((note, idx) => (
-                  <div key={idx} className="p-2.5 bg-[#FAFBFC] border border-[#E5E7EB] rounded text-xs flex items-start gap-2">
+                  <div key={idx} className="p-2.5 bg-[#FAFBFC] border border-[#E5E7EB] rounded-md text-xs flex items-start gap-2">
                     <Clock className="w-3.5 h-3.5 text-[#6B7280] shrink-0 mt-0.5" />
                     <div>
                       <p className="text-[#202124]">{note}</p>
@@ -543,11 +556,11 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
                   value={newNote}
                   onChange={(e) => setNewNote(e.target.value)}
                   placeholder="Add note or interview observation..."
-                  className="flex-1 px-3 py-1.5 border border-[#E5E7EB] rounded text-xs focus:outline-none focus:border-[#202124]"
+                  className="flex-1 px-3 py-1.5 border border-[#E5E7EB] rounded-md text-xs focus:outline-none focus:border-[#202124]"
                 />
                 <button
                   type="submit"
-                  className="px-3 py-1.5 bg-[#202124] hover:bg-black text-white rounded text-xs font-semibold cursor-pointer"
+                  className="px-3.5 py-1.5 bg-[#202124] hover:bg-black text-white rounded-md text-xs font-semibold cursor-pointer"
                 >
                   Add
                 </button>
@@ -564,7 +577,7 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2 bg-[#202124] hover:bg-black text-white rounded text-xs font-semibold cursor-pointer transition-colors"
+            className="px-5 py-2 bg-[#202124] hover:bg-black text-white rounded-md text-xs font-semibold cursor-pointer transition-colors"
           >
             Close Record
           </button>

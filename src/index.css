@@ -62,6 +62,7 @@
   font-size: 13.5px;
   color: #202124;
   vertical-align: middle;
+  transition: background-color 0.15s ease;
 }
 
 .enterprise-table tr:hover td {
@@ -77,6 +78,68 @@
   font-size: 12.5px;
   color: #374151;
   font-style: italic;
+}
+
+/* Restrained motion system (Greenhouse-inspired) */
+@keyframes ghFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ghFade {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes ghSlideDrawer {
+  0% {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.motion-fade-up {
+  animation: ghFadeUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.motion-fade {
+  animation: ghFade 0.25s ease-out both;
+}
+
+.motion-drawer {
+  animation: ghSlideDrawer 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.stagger-1 { animation-delay: 40ms; }
+.stagger-2 { animation-delay: 80ms; }
+.stagger-3 { animation-delay: 120ms; }
+.stagger-4 { animation-delay: 160ms; }
+.stagger-5 { animation-delay: 200ms; }
+.stagger-6 { animation-delay: 240ms; }
+.stagger-7 { animation-delay: 280ms; }
+
+/* Accessibility: Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Clean slim scrollbar */

@@ -13,21 +13,21 @@ import {
   Loader2,
   FileText,
   AlertTriangle,
-  RotateCcw,
-  GraduationCap,
-  FolderGit2,
-  Award
+  RotateCcw
 } from 'lucide-react';
 import { JobDescriptionInput } from '../components/JobDescriptionInput';
 import { ResumeUploader } from '../components/ResumeUploader';
-import { AnalyzeStage4Response } from '../lib/types';
+import { CandidateList } from '../components/CandidateList';
+import { MatchDetails } from '../components/MatchDetails';
+import { AnalyzeStage5Response, RankedCandidate } from '../lib/types';
 
 export default function LandingPage() {
   const [jobDescription, setJobDescription] = useState<string>('');
   const [resumes, setResumes] = useState<File[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
-  const [stage4Result, setStage4Result] = useState<AnalyzeStage4Response | null>(null);
+  const [stage5Result, setStage5Result] = useState<AnalyzeStage5Response | null>(null);
+  const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
 
   const workflowSteps = [
     {
@@ -44,24 +44,24 @@ export default function LandingPage() {
     },
     {
       step: '03',
-      title: 'PDF Text Extraction',
-      desc: 'Reliably extract, clean, and validate text from candidate PDF documents.',
-      icon: FileText,
+      title: 'AI Fact Extraction',
+      desc: 'Gemini extracts factual skills, timeline, education, and claims without hallucinations.',
+      icon: Cpu,
     },
     {
       step: '04',
-      title: 'AI Structured Extraction',
-      desc: 'Gemini extracts structured facts, skills, timelines, and verifiable claims.',
-      icon: Cpu,
+      title: 'Deterministic Ranking',
+      desc: 'Deterministic mathematical weighted scoring (100 pts) with transparent explanations.',
+      icon: BarChart3,
     },
   ];
 
   const scoringModelWeights = [
-    { label: 'Skills', weight: '40%', desc: 'Direct & semantic technical skill alignment' },
-    { label: 'Experience', weight: '25%', desc: 'Tenure, role seniority & relevant scope' },
-    { label: 'Education', weight: '15%', desc: 'Academic credentials & field of study' },
-    { label: 'Projects', weight: '10%', desc: 'Practical projects & portfolio relevance' },
-    { label: 'Requirements', weight: '10%', desc: 'Certifications & role-specific must-haves' },
+    { label: 'Skills', weight: '40 pts', desc: '30 pts Required + 10 pts Preferred coverage' },
+    { label: 'Experience', weight: '25 pts', desc: 'Tenure ratio vs required years (min(cand/req, 1))' },
+    { label: 'Education', weight: '15 pts', desc: 'Degree level and relevant discipline' },
+    { label: 'Projects', weight: '10 pts', desc: 'Demonstrated skills in project descriptions' },
+    { label: 'Requirements', weight: '10 pts', desc: 'Domain keywords & core responsibilities' },
   ];
 
   const handleAnalyzeClick = async () => {
@@ -79,7 +79,8 @@ export default function LandingPage() {
 
     // Clear previous errors & previous results
     setError('');
-    setStage4Result(null);
+    setStage5Result(null);
+    setSelectedCandidateId(null);
     setIsAnalyzing(true);
 
     try {
@@ -99,15 +100,15 @@ export default function LandingPage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        if (data.candidates || data.jobRequirements) {
-          setStage4Result(data as AnalyzeStage4Response);
+        if (data.candidates && data.candidates.length > 0) {
+          setStage5Result(data as AnalyzeStage5Response);
         }
-        throw new Error(data.error || 'Something went wrong during AI extraction. Please try again.');
+        throw new Error(data.error || 'Something went wrong during candidate matching. Please try again.');
       }
 
-      setStage4Result(data as AnalyzeStage4Response);
+      setStage5Result(data as AnalyzeStage5Response);
     } catch (err: any) {
-      console.error('Stage 4 extraction error:', err);
+      console.error('Stage 5 analysis error:', err);
       setError(
         err.message || 'Something went wrong while processing the resumes. Please try again.'
       );
@@ -116,7 +117,9 @@ export default function LandingPage() {
     }
   };
 
-  const processedCount = stage4Result?.candidates.filter(c => c.status === 'processed').length || 0;
+  const selectedCandidate: RankedCandidate | undefined = stage5Result?.candidates.find(
+    (c) => c.profile.id === selectedCandidateId
+  );
 
   return (
     <div className="min-h-screen bg-slate-50/50 text-slate-900 flex flex-col font-sans">
@@ -140,11 +143,11 @@ export default function LandingPage() {
           <div className="flex items-center gap-4 text-xs">
             <span className="text-slate-500 hidden sm:inline-flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              Transparent Scoring Model
+              Deterministic 100-Point Scoring
             </span>
             <div className="h-4 w-px bg-slate-200 hidden sm:block" />
             <span className="text-slate-500 font-mono text-[11px] bg-slate-100 px-2 py-1 rounded">
-              Stage 4: AI Extraction
+              Stage 5: Scored & Ranked
             </span>
           </div>
         </div>
@@ -156,15 +159,15 @@ export default function LandingPage() {
           <div className="inline-flex items-center gap-2 text-xs font-medium text-blue-700 bg-blue-50/80 border border-blue-200/70 px-3 py-1 rounded-md mb-4">
             <span>Recruiter Co-Pilot</span>
             <span aria-hidden="true">·</span>
-            <span>Gemini AI Structured Extraction</span>
+            <span>Deterministic Candidate Matching & Scoring</span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900">
             Find the right candidate faster.
           </h1>
           <p className="mt-3.5 text-base sm:text-lg text-slate-600 max-w-2xl mx-auto font-normal leading-relaxed">
-            Extract strict factual signals from resumes and job descriptions without hallucinations.
-            Prepares structured skills, timelines, and verifiable claims for deterministic matching.
+            Upload candidate resumes alongside your job description. The system extracts strict facts with Gemini AI,
+            then calculates transparent 100-point deterministic scores and rankings without AI scoring bias.
           </p>
 
           {/* Workflow Sequence */}
@@ -261,7 +264,7 @@ export default function LandingPage() {
         <div className="bg-white rounded-xl border border-slate-200/80 p-6 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="space-y-1 text-center sm:text-left">
             <h3 className="text-base font-semibold text-slate-900">
-              Ready to extract structured candidate data?
+              Ready to match and rank candidates?
             </h3>
             <div className="flex items-center justify-center sm:justify-start gap-2 text-xs text-slate-500">
               <span>
@@ -290,84 +293,67 @@ export default function LandingPage() {
               {isAnalyzing ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Extracting facts with Gemini AI...</span>
+                  <span>Matching & scoring candidates...</span>
                 </>
               ) : (
                 <>
-                  <Cpu className="w-4 h-4" />
-                  <span>Run AI Structured Extraction</span>
+                  <BarChart3 className="w-4 h-4" />
+                  <span>Match & Rank Candidates</span>
                 </>
               )}
             </button>
           </div>
         </div>
 
-        {/* Stage 4 Extraction Summary */}
-        {stage4Result && (
-          <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-6 animate-in fade-in duration-200 space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center">
-                  <Cpu className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-slate-900">
-                    AI Analysis Complete
-                  </h3>
-                  <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
-                    <span>Candidates analyzed: {processedCount}</span>
-                    {stage4Result.jobRequirements?.jobTitle && (
-                      <>
-                        <span aria-hidden="true">·</span>
-                        <span className="font-medium text-slate-700">
-                          Target Role: {stage4Result.jobRequirements.jobTitle}
-                        </span>
-                      </>
-                    )}
+        {/* Stage 5 Ranked Candidates Results */}
+        {stage5Result && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            {/* Target Job Requirements Summary Bar */}
+            {stage5Result.jobRequirements && (
+              <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-6 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
+                      <Briefcase className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-slate-900">
+                        {stage5Result.jobRequirements.jobTitle || 'Target Role Requirements'}
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        {stage5Result.candidates.length} candidate{stage5Result.candidates.length === 1 ? '' : 's'} ranked deterministically
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 font-medium">
+                      Stage 5 Verified
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setStage5Result(null);
+                        setSelectedCandidateId(null);
+                      }}
+                      className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+                      title="Clear results"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
-              </div>
 
-              <div className="flex items-center gap-2">
-                <span className="text-xs px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 font-medium">
-                  Stage 4 Verified
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setStage4Result(null)}
-                  className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
-                  title="Clear results"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* Extracted Job Requirements Card */}
-            {stage4Result.jobRequirements && (
-              <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 text-xs space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-semibold text-slate-900 flex items-center gap-1.5">
-                    <Briefcase className="w-3.5 h-3.5 text-blue-600" />
-                    Structured Job Requirements: {stage4Result.jobRequirements.jobTitle || 'Role'}
-                  </h4>
-                  {stage4Result.jobRequirements.requiredExperienceYears !== null && (
-                    <span className="text-slate-600 font-medium">
-                      Required Experience: {stage4Result.jobRequirements.requiredExperienceYears}+ years
-                    </span>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                   <div>
-                    <span className="font-medium text-slate-700 block mb-1">
-                      Required Skills ({stage4Result.jobRequirements.requiredSkills.length}):
+                    <span className="text-slate-500 font-medium block mb-1">
+                      Required Skills ({stage5Result.jobRequirements.requiredSkills.length}):
                     </span>
                     <div className="flex flex-wrap gap-1">
-                      {stage4Result.jobRequirements.requiredSkills.map((skill, i) => (
+                      {stage5Result.jobRequirements.requiredSkills.map((skill, i) => (
                         <span
                           key={i}
-                          className="px-2 py-0.5 rounded bg-blue-100/70 text-blue-800 border border-blue-200 text-[11px]"
+                          className="px-2 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-200 text-[11px]"
                         >
                           {skill}
                         </span>
@@ -376,169 +362,70 @@ export default function LandingPage() {
                   </div>
 
                   <div>
-                    <span className="font-medium text-slate-700 block mb-1">
-                      Preferred Skills ({stage4Result.jobRequirements.preferredSkills.length}):
+                    <span className="text-slate-500 font-medium block mb-1">
+                      Preferred Skills ({stage5Result.jobRequirements.preferredSkills.length}):
                     </span>
                     <div className="flex flex-wrap gap-1">
-                      {stage4Result.jobRequirements.preferredSkills.length > 0 ? (
-                        stage4Result.jobRequirements.preferredSkills.map((skill, i) => (
+                      {stage5Result.jobRequirements.preferredSkills.length > 0 ? (
+                        stage5Result.jobRequirements.preferredSkills.map((skill, i) => (
                           <span
                             key={i}
-                            className="px-2 py-0.5 rounded bg-slate-200/80 text-slate-700 text-[11px]"
+                            className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[11px]"
                           >
                             {skill}
                           </span>
                         ))
                       ) : (
-                        <span className="text-slate-400">None specified</span>
+                        <span className="text-slate-400 text-[11px]">None specified</span>
                       )}
                     </div>
                   </div>
-                </div>
 
-                {stage4Result.jobRequirements.summary && (
-                  <p className="text-slate-600 border-t border-slate-200/60 pt-2 leading-relaxed">
-                    <span className="font-medium text-slate-700">Summary:</span>{' '}
-                    {stage4Result.jobRequirements.summary}
-                  </p>
-                )}
+                  <div>
+                    <span className="text-slate-500 font-medium block mb-1">Experience & Education:</span>
+                    <p className="text-slate-700 text-[11px]">
+                      {stage5Result.jobRequirements.requiredExperienceYears !== null
+                        ? `${stage5Result.jobRequirements.requiredExperienceYears}+ years required`
+                        : 'No minimum experience specified'}
+                    </p>
+                    {stage5Result.jobRequirements.educationRequirements.length > 0 && (
+                      <p className="text-slate-500 text-[11px] mt-0.5">
+                        {stage5Result.jobRequirements.educationRequirements[0]}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
 
-            {/* Candidate Profiles List */}
-            <div className="space-y-3">
-              <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider">
-                Extracted Candidate Profiles ({stage4Result.candidates.length})
-              </h4>
+            {/* Warning notices for any unreadable or failed PDFs */}
+            {(stage5Result.unprocessedResumes.length > 0 || stage5Result.failedCandidates.length > 0) && (
+              <div className="p-4 rounded-xl border border-amber-200 bg-amber-50/60 text-xs text-amber-900 space-y-1">
+                <div className="flex items-center gap-1.5 font-semibold text-amber-800">
+                  <AlertTriangle className="w-4 h-4 text-amber-600" />
+                  <span>Some files could not be processed:</span>
+                </div>
+                <ul className="list-disc list-inside space-y-0.5 pl-1 text-[11px] text-amber-800">
+                  {stage5Result.unprocessedResumes.map((item, idx) => (
+                    <li key={`unproc-${idx}`}>
+                      <span className="font-medium">{item.fileName}:</span> {item.message || 'Unreadable PDF'}
+                    </li>
+                  ))}
+                  {stage5Result.failedCandidates.map((item, idx) => (
+                    <li key={`failcand-${idx}`}>
+                      <span className="font-medium">{item.fileName}:</span> {item.message || 'AI extraction failed'}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
-              {stage4Result.candidates.map((cand) => {
-                if (cand.status === 'failed' || !cand.profile) {
-                  return (
-                    <div
-                      key={cand.id}
-                      className="p-4 rounded-xl border border-amber-200 bg-amber-50/50 text-xs space-y-1"
-                    >
-                      <div className="flex items-center gap-2 font-semibold text-amber-900">
-                        <AlertTriangle className="w-4 h-4 text-amber-600" />
-                        <span>{cand.fileName}</span>
-                      </div>
-                      <p className="text-amber-800">
-                        {cand.message || 'AI extraction failed for this candidate resume.'}
-                      </p>
-                    </div>
-                  );
-                }
-
-                const { profile } = cand;
-                return (
-                  <div
-                    key={profile.id}
-                    className="p-4 rounded-xl border border-slate-200 bg-white hover:border-slate-300 shadow-2xs text-xs space-y-3"
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <div className="flex items-center gap-2.5">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                        <h5 className="text-sm font-bold text-slate-900">
-                          {profile.name || 'Candidate Name Not Found'}
-                        </h5>
-                        <span className="text-slate-400 font-mono text-[11px]">
-                          ({profile.fileName})
-                        </span>
-                      </div>
-
-                      {/* Unboxed metadata */}
-                      <div className="flex items-center gap-2 text-slate-500 text-[11px]">
-                        {profile.email && <span>{profile.email}</span>}
-                        {profile.email && profile.phone && <span aria-hidden="true">·</span>}
-                        {profile.phone && <span>{profile.phone}</span>}
-                        {profile.totalExperienceYears !== null && (
-                          <>
-                            <span aria-hidden="true">·</span>
-                            <span className="font-semibold text-slate-700">
-                              {profile.totalExperienceYears} yrs experience
-                            </span>
-                          </>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Counts overview */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] pt-1 border-t border-slate-100">
-                      <div className="flex items-center gap-1.5 text-slate-700">
-                        <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-                        <span>{profile.skills.length} skills detected</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 text-slate-700">
-                        <Briefcase className="w-3.5 h-3.5 text-slate-500" />
-                        <span>{profile.experience.length} experience entries</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 text-slate-700">
-                        <FolderGit2 className="w-3.5 h-3.5 text-slate-500" />
-                        <span>{profile.projects.length} projects</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 text-slate-700">
-                        <GraduationCap className="w-3.5 h-3.5 text-slate-500" />
-                        <span>{profile.education.length} education entries</span>
-                      </div>
-                    </div>
-
-                    {/* Detected Skills preview */}
-                    {profile.skills.length > 0 && (
-                      <div className="flex flex-wrap gap-1 pt-1">
-                        {profile.skills.map((skill, i) => (
-                          <span
-                            key={i}
-                            className="px-2 py-0.5 rounded bg-slate-100 text-slate-800 text-[11px]"
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Summary */}
-                    {profile.summary && (
-                      <p className="text-slate-600 leading-relaxed italic bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-                        "{profile.summary}"
-                      </p>
-                    )}
-
-                    {/* Claims to verify preview */}
-                    {profile.claimsToVerify.length > 0 && (
-                      <div className="p-2.5 rounded-lg bg-amber-50/60 border border-amber-200 text-amber-900 text-[11px] space-y-1">
-                        <div className="flex items-center gap-1 font-semibold text-amber-800">
-                          <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-                          <span>Claims flagged for verification ({profile.claimsToVerify.length}):</span>
-                        </div>
-                        <ul className="list-disc list-inside space-y-0.5 pl-1">
-                          {profile.claimsToVerify.map((c, idx) => (
-                            <li key={idx}>
-                              <span className="font-medium">"{c.claim}"</span> —{' '}
-                              <span className="text-amber-700">
-                                {c.evidence ? `Supporting mention: ${c.evidence}` : 'Evidence not clearly found in resume'}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between text-xs text-slate-500 gap-2">
-              <span>
-                Factual candidate signals structured successfully. Ready for Stage 5 deterministic scoring.
-              </span>
-              <button
-                type="button"
-                onClick={() => setStage4Result(null)}
-                className="text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
-              >
-                Reset & Test Another Batch
-              </button>
-            </div>
+            {/* Candidate List with client-side search, tier filters, sorting */}
+            <CandidateList
+              candidates={stage5Result.candidates}
+              selectedCandidateId={selectedCandidateId || undefined}
+              onSelectCandidate={(id) => setSelectedCandidateId(id)}
+            />
           </div>
         )}
 
@@ -550,7 +437,7 @@ export default function LandingPage() {
                 Transparent 100-Point Scoring Model
               </h2>
               <p className="text-xs text-slate-500">
-                Deterministic mathematical weights ensure reproducible, unbiased candidate ranking
+                Mathematical weights ensure reproducible, unbiased candidate ranking without AI scoring hallucinations
               </p>
             </div>
             <FileCheck2 className="w-5 h-5 text-slate-400" />
@@ -574,11 +461,19 @@ export default function LandingPage() {
           </div>
 
           <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between text-xs text-slate-500 gap-2">
-            <span>Total Weighted Score: 100%</span>
-            <span>AI extracts semantic structured signals · Code computes deterministic rank</span>
+            <span>Total Weighted Score: 100 points</span>
+            <span>AI extracts factual signals · Deterministic code computes rank & explanations</span>
           </div>
         </section>
       </main>
+
+      {/* Match Details Drawer Modal */}
+      {selectedCandidate && (
+        <MatchDetails
+          candidate={selectedCandidate}
+          onClose={() => setSelectedCandidateId(null)}
+        />
+      )}
 
       {/* Footer */}
       <footer className="border-t border-slate-200/80 bg-white py-6 mt-auto">
@@ -589,7 +484,7 @@ export default function LandingPage() {
             <span aria-hidden="true">·</span>
             <span>Zero Data Stored</span>
             <span aria-hidden="true">·</span>
-            <span>Client-Private</span>
+            <span>Deterministic Scoring</span>
           </div>
         </div>
       </footer>

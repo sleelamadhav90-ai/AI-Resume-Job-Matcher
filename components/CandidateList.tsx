@@ -1,121 +1,164 @@
 import React, { useState, useMemo } from 'react';
-import { Search, ArrowUpDown, SlidersHorizontal, Users } from 'lucide-react';
-import { CandidateMatchResult } from '../lib/types';
+import { Search, Filter, ArrowUpDown } from 'lucide-react';
 import { CandidateCard } from './CandidateCard';
+import { RankedCandidate, ScoreTierLabel } from '../lib/types';
 
 interface CandidateListProps {
-  results: CandidateMatchResult[];
-  selectedCandidateId: string | null;
-  onSelectCandidate: (id: string) => void;
+  candidates: RankedCandidate[];
+  selectedCandidateId?: string;
+  onSelectCandidate: (candidateId: string) => void;
 }
 
 export const CandidateList: React.FC<CandidateListProps> = ({
-  results,
+  candidates,
   selectedCandidateId,
-  onSelectCandidate
+  onSelectCandidate,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [minScore, setMinScore] = useState<number>(0);
-  const [sortBy, setSortBy] = useState<'score-desc' | 'score-asc' | 'name'>('score-desc');
+  const [tierFilter, setTierFilter] = useState<'All' | ScoreTierLabel>('All');
+  const [sortBy, setSortBy] = useState<'best' | 'lowest' | 'name'>('best');
+
+  const filterTiers: Array<'All' | ScoreTierLabel> = [
+    'All',
+    'Strong Match',
+    'Good Match',
+    'Moderate Match',
+    'Weak Match',
+  ];
 
   const filteredAndSortedCandidates = useMemo(() => {
-    return results
-      .filter((res) => {
-        const candidateName = res.candidate.name || 'Candidate';
-        const matchesQuery =
-          candidateName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          res.candidate.skills.some((s) => s.toLowerCase().includes(searchQuery.toLowerCase())) ||
-          res.matchedSkills.some((s) => s.toLowerCase().includes(searchQuery.toLowerCase()));
+    return candidates
+      .filter((cand) => {
+        // 1. Text Search matching name, skills, role
+        const q = searchQuery.toLowerCase().trim();
+        let matchesQuery = true;
+        if (q) {
+          const name = (cand.profile.name || '').toLowerCase();
+          const skills = cand.profile.skills.map((s) => s.toLowerCase());
+          const roles = cand.profile.experience.map((e) => (e.role || '').toLowerCase());
+          const matchedSkills = cand.match.matchedRequiredSkills.map((s) => s.toLowerCase());
 
-        const matchesMinScore = res.score.totalScore >= minScore;
-        return matchesQuery && matchesMinScore;
+          matchesQuery =
+            name.includes(q) ||
+            skills.some((s) => s.includes(q)) ||
+            roles.some((r) => r.includes(q)) ||
+            matchedSkills.some((s) => s.includes(q));
+        }
+
+        // 2. Tier Filter
+        let matchesTier = true;
+        if (tierFilter !== 'All') {
+          matchesTier = cand.match.label === tierFilter;
+        }
+
+        return matchesQuery && matchesTier;
       })
       .sort((a, b) => {
-        if (sortBy === 'score-desc') return b.score.totalScore - a.score.totalScore;
-        if (sortBy === 'score-asc') return a.score.totalScore - b.score.totalScore;
-        return (a.candidate.name || '').localeCompare(b.candidate.name || '');
+        if (sortBy === 'best') {
+          // Default: rank ascending (Rank 1 is best)
+          return a.rank - b.rank;
+        }
+        if (sortBy === 'lowest') {
+          return a.match.totalScore - b.match.totalScore;
+        }
+        if (sortBy === 'name') {
+          return (a.profile.name || '').localeCompare(b.profile.name || '');
+        }
+        return 0;
       });
-  }, [results, searchQuery, minScore, sortBy]);
+  }, [candidates, searchQuery, tierFilter, sortBy]);
 
   return (
     <div className="space-y-4">
-      {/* Filter and Search Bar */}
+      {/* Search and Filters toolbar */}
       <div className="bg-white rounded-xl border border-slate-200/80 shadow-xs p-4 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+        {/* Search */}
         <div className="relative flex-1">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search candidates by name or skill..."
-            className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-slate-200 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+            placeholder="Search candidates by name, skill, or role..."
+            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400"
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Min score filter */}
-          <div className="flex items-center gap-1.5 text-xs text-slate-600 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-200">
-            <SlidersHorizontal className="w-3.5 h-3.5 text-slate-400" />
-            <span>Min Score:</span>
-            <select
-              value={minScore}
-              onChange={(e) => setMinScore(Number(e.target.value))}
-              className="bg-transparent font-medium focus:outline-none cursor-pointer"
-            >
-              <option value={0}>All</option>
-              <option value={50}>50%+</option>
-              <option value={70}>70%+</option>
-              <option value={85}>85%+</option>
-            </select>
+        {/* Filters and Sort */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Tier Pills */}
+          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg text-xs">
+            {filterTiers.map((tier) => (
+              <button
+                key={tier}
+                type="button"
+                onClick={() => setTierFilter(tier)}
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
+                  tierFilter === tier
+                    ? 'bg-white text-slate-900 shadow-2xs font-semibold'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {tier}
+              </button>
+            ))}
           </div>
 
-          {/* Sort selector */}
-          <div className="flex items-center gap-1.5 text-xs text-slate-600 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-200">
-            <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
-            <span>Sort:</span>
+          {/* Sort Selector */}
+          <div className="flex items-center gap-1.5 border border-slate-200 rounded-lg px-2.5 py-1.5 bg-slate-50 text-xs">
+            <ArrowUpDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="bg-transparent font-medium focus:outline-none cursor-pointer"
+              className="bg-transparent text-slate-700 font-medium focus:outline-none cursor-pointer pr-1"
             >
-              <option value="score-desc">Highest Score</option>
-              <option value="score-asc">Lowest Score</option>
-              <option value="name">Name (A-Z)</option>
+              <option value="best">Best Match (Rank)</option>
+              <option value="lowest">Lowest Match</option>
+              <option value="name">Candidate Name (A-Z)</option>
             </select>
           </div>
         </div>
       </div>
 
-      {/* Results Header */}
+      {/* Results Header Count */}
       <div className="flex items-center justify-between text-xs text-slate-500 px-1">
         <span>
-          Showing {filteredAndSortedCandidates.length} of {results.length} candidates
+          Showing {filteredAndSortedCandidates.length} of {candidates.length} ranked candidate
+          {candidates.length === 1 ? '' : 's'}
         </span>
-        <span>Ranked by weighted criteria</span>
+        {tierFilter !== 'All' && (
+          <span className="font-medium text-slate-700">Filter: {tierFilter}</span>
+        )}
       </div>
 
-      {/* Candidate Cards */}
-      {filteredAndSortedCandidates.length === 0 ? (
-        <div className="bg-white rounded-xl border border-slate-200 p-10 text-center">
-          <Users className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-          <p className="text-sm font-medium text-slate-700">No candidates match your filters</p>
-          <p className="text-xs text-slate-400 mt-1">
-            Try adjusting your search query or lowering the minimum score.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {filteredAndSortedCandidates.map((res, index) => (
+      {/* Candidate Cards Stack */}
+      <div className="space-y-3">
+        {filteredAndSortedCandidates.length > 0 ? (
+          filteredAndSortedCandidates.map((candidate) => (
             <CandidateCard
-              key={res.candidate.id}
-              result={res}
-              rank={index + 1}
-              isSelected={selectedCandidateId === res.candidate.id}
+              key={candidate.id}
+              candidate={candidate}
+              isSelected={selectedCandidateId === candidate.profile.id}
               onSelect={onSelectCandidate}
             />
-          ))}
-        </div>
-      )}
+          ))
+        ) : (
+          <div className="bg-white rounded-xl border border-slate-200 p-8 text-center text-xs text-slate-500 space-y-2">
+            <p className="font-semibold text-slate-700">No matching candidates found.</p>
+            <p>Try clearing your search query or switching tier filters.</p>
+            <button
+              type="button"
+              onClick={() => {
+                setSearchQuery('');
+                setTierFilter('All');
+              }}
+              className="mt-2 text-blue-600 hover:underline font-semibold cursor-pointer"
+            >
+              Reset Filters
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

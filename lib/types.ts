@@ -42,15 +42,6 @@ export interface CandidateProfile {
   claimsToVerify: ResumeClaim[];
 }
 
-export interface CandidateExtractionItem {
-  id: string;
-  fileName: string;
-  status: 'processed' | 'failed';
-  profile?: CandidateProfile;
-  reason?: string;
-  message?: string;
-}
-
 export interface JobRequirements {
   jobTitle: string | null;
   requiredSkills: string[];
@@ -63,31 +54,64 @@ export interface JobRequirements {
   summary: string;
 }
 
-export interface ScoreBreakdown {
-  skillsScore: number;       // 40% weight
-  experienceScore: number;   // 25% weight
-  educationScore: number;    // 15% weight
-  projectsScore: number;     // 10% weight
-  otherScore: number;        // 10% weight
-  totalScore: number;        // 0-100
-}
+export type ScoreTierLabel = 'Strong Match' | 'Good Match' | 'Moderate Match' | 'Weak Match';
 
-export interface ClaimToVerify {
-  claim: string;
-  context: string;
-  reason: string;
-}
+export interface MatchAnalysis {
+  candidateId: string;
+  totalScore: number;
+  label: ScoreTierLabel;
 
-export interface CandidateMatchResult {
-  candidate: CandidateProfile;
-  score: ScoreBreakdown;
-  matchedSkills: string[];
-  missingSkills: string[];
-  relevantExperience: string[];
+  skillScore: number;           // 0 - 40 total
+  requiredSkillScore: number;   // 0 - 30
+  preferredSkillScore: number;  // 0 - 10
+
+  experienceScore: number;      // 0 - 25
+  educationScore: number;       // 0 - 15
+  projectScore: number;         // 0 - 10
+  requirementsScore: number;    // 0 - 10
+
+  matchedRequiredSkills: string[];
+  missingRequiredSkills: string[];
+
+  matchedPreferredSkills: string[];
+  missingPreferredSkills: string[];
+
+  partialSkills: string[];
+
+  experienceMatch: {
+    candidateYears: number | null;
+    requiredYears: number | null;
+    status: 'meets' | 'partial' | 'unknown';
+  };
+
+  educationMatch: {
+    status: 'matches' | 'partial' | 'missing' | 'not_required';
+    evidence: string[];
+  };
+
   relevantProjects: string[];
-  educationMatch: string;
-  overallExplanation: string;
-  claimsToVerify: ClaimToVerify[];
+
+  matchedRequirements: string[];
+  missingRequirements: string[];
+
+  explanation: string;
+}
+
+export interface RankedCandidate {
+  id: string;
+  rank: number;
+  fileName: string;
+  status: 'processed';
+  profile: CandidateProfile;
+  match: MatchAnalysis;
+}
+
+export interface FailedCandidateItem {
+  id: string;
+  fileName: string;
+  status: 'failed';
+  reason?: string;
+  message?: string;
 }
 
 export interface ExtractedResumeItem {
@@ -102,11 +126,15 @@ export interface ExtractedResumeItem {
   message?: string;
 }
 
-export interface AnalyzeStage4Response {
+export interface AnalyzeStage5Response {
   success: boolean;
   message: string;
   jobRequirements?: JobRequirements;
-  candidates: CandidateExtractionItem[];
+  candidates: RankedCandidate[];
+  failedCandidates: FailedCandidateItem[];
   unprocessedResumes: ExtractedResumeItem[];
   error?: string;
 }
+
+// Backward compatibility alias if needed
+export type AnalyzeResponse = AnalyzeStage5Response;

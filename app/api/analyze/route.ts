@@ -1,33 +1,36 @@
 /**
  * /api/analyze route handler
- * Stage 4: Real PDF text extraction + Gemini AI structured extraction
- * Handles job requirements extraction and per-candidate factual profiling.
+ * Stage 5: Real PDF text extraction + Gemini AI extraction + Deterministic Scoring & Ranking
  */
 
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import { extractTextFromPdf, PdfExtractionResult } from '../../../lib/parser';
 import { extractCandidateFromResume, extractJobRequirements } from '../../../lib/ai';
+import { rankCandidates } from '../../../lib/scoring';
 import {
-  AnalyzeStage4Response,
-  CandidateExtractionItem,
+  AnalyzeStage5Response,
+  CandidateProfile,
   ExtractedResumeItem,
-  JobRequirements
+  FailedCandidateItem,
+  JobRequirements,
+  RankedCandidate
 } from '../../../lib/types';
 
 const MAX_FILES = 10;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
 /**
- * Core business workflow for Stage 4 analysis:
+ * Core business workflow for Stage 5 analysis:
  * 1. Extract raw PDF text and filter valid resumes
  * 2. Verify Gemini API configuration
  * 3. Extract structured job requirements via Gemini (1 call)
  * 4. Extract structured candidate profiles via Gemini (1 call per valid resume)
+ * 5. Deterministically score & rank candidates using lib/scoring.ts
  */
 async function processAnalyzeWorkflow(
   jobDescription: string,
   pdfFiles: Array<{ name: string; buffer: Buffer }>
-): Promise<{ statusCode: number; data: AnalyzeStage4Response }> {
+): Promise<{ statusCode: number; data: AnalyzeStage5Response }> {
   // 1. Validate inputs
   if (!jobDescription || typeof jobDescription !== 'string' || !jobDescription.trim()) {
     return {
@@ -37,6 +40,7 @@ async function processAnalyzeWorkflow(
         message: 'Validation failed',
         error: 'No job description provided.',
         candidates: [],
+        failedCandidates: [],
         unprocessedResumes: [],
       },
     };
@@ -50,6 +54,7 @@ async function processAnalyzeWorkflow(
         message: 'Validation failed',
         error: 'Please upload at least one resume.',
         candidates: [],
+        failedCandidates: [],
         unprocessedResumes: [],
       },
     };
@@ -63,6 +68,7 @@ async function processAnalyzeWorkflow(
         message: 'Validation failed',
         error: `Maximum ${MAX_FILES} resumes allowed.`,
         candidates: [],
+        failedCandidates: [],
         unprocessedResumes: [],
       },
     };
@@ -133,6 +139,7 @@ async function processAnalyzeWorkflow(
         message: 'Extraction failed',
         error: 'No readable text could be extracted from any of the uploaded resumes.',
         candidates: [],
+        failedCandidates: [],
         unprocessedResumes,
       },
     };
@@ -148,6 +155,7 @@ async function processAnalyzeWorkflow(
         message: 'Configuration error',
         error: 'GEMINI_API_KEY is not configured.',
         candidates: [],
+        failedCandidates: [],
         unprocessedResumes,
       },
     };
@@ -166,13 +174,15 @@ async function processAnalyzeWorkflow(
         message: 'Job analysis error',
         error: `AI extraction for job description failed: ${err.message || 'Please try again.'}`,
         candidates: [],
+        failedCandidates: [],
         unprocessedResumes,
       },
     };
   }
 
-  // 5. Extract Structured Candidate Profiles (1 Gemini request per resume)
-  const candidateResults: CandidateExtractionItem[] = [];
+  // 5. Extract Structured Candidate Profiles (1 Gemini request per valid resume)
+  const successfulProfiles: CandidateProfile[] = [];
+  const failedCandidates: FailedCandidateItem[] = [];
 
   for (let i = 0; i < textExtractionResults.length; i++) {
     const item = textExtractionResults[i];
@@ -180,15 +190,10 @@ async function processAnalyzeWorkflow(
 
     try {
       const profile = await extractCandidateFromResume(item.text, item.name, candidateId);
-      candidateResults.push({
-        id: candidateId,
-        fileName: item.name,
-        status: 'processed',
-        profile,
-      });
+      successfulProfiles.push(profile);
     } catch (err: any) {
       console.error(`AI extraction failed for ${item.name}:`, err);
-      candidateResults.push({
+      failedCandidates.push({
         id: candidateId,
         fileName: item.name,
         status: 'failed',
@@ -198,9 +203,7 @@ async function processAnalyzeWorkflow(
     }
   }
 
-  const processedCandidatesCount = candidateResults.filter((c) => c.status === 'processed').length;
-
-  if (processedCandidatesCount === 0 && candidateResults.length > 0) {
+  if (successfulProfiles.length === 0 && failedCandidates.length > 0) {
     return {
       statusCode: 502,
       data: {
@@ -208,19 +211,24 @@ async function processAnalyzeWorkflow(
         message: 'AI processing error',
         error: 'AI extraction temporarily failed for all candidate resumes. Please try again.',
         jobRequirements,
-        candidates: candidateResults,
+        candidates: [],
+        failedCandidates,
         unprocessedResumes,
       },
     };
   }
 
+  // 6. Stage 5: Deterministic Scoring & Ranking
+  const rankedCandidates: RankedCandidate[] = rankCandidates(successfulProfiles, jobRequirements);
+
   return {
     statusCode: 200,
     data: {
       success: true,
-      message: 'AI structured extraction completed successfully',
+      message: 'Candidate matching and scoring completed successfully',
       jobRequirements,
-      candidates: candidateResults,
+      candidates: rankedCandidates,
+      failedCandidates,
       unprocessedResumes,
     },
   };
@@ -255,6 +263,7 @@ export async function POST(request: Request): Promise<Response> {
         message: 'Server error',
         error: 'Something went wrong while processing the resumes. Please try again.',
         candidates: [],
+        failedCandidates: [],
         unprocessedResumes: [],
       },
       { status: 500 }
@@ -284,6 +293,7 @@ export async function handleAnalyzeExpress(req: ExpressRequest, res: ExpressResp
       message: 'Server error',
       error: 'Something went wrong while processing the resumes. Please try again.',
       candidates: [],
+      failedCandidates: [],
       unprocessedResumes: [],
     });
   }

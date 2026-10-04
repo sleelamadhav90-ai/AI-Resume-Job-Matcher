@@ -160,7 +160,7 @@ Preferred:
   },
 ];
 
-// Initial pre-loaded demonstration session
+// Initial pre-loaded demonstration session candidates
 const INITIAL_DEMO_CANDIDATES: RankedCandidate[] = [
   {
     rank: 1,
@@ -387,6 +387,9 @@ export default function HireMeApp() {
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [analysisStep, setAnalysisStep] = useState<number>(0);
   
+  // Track if current candidates list is demo data or real uploaded data
+  const [isDemoSession, setIsDemoSession] = useState<boolean>(true);
+
   // LIVE SESSION STATE
   const [stage5Result, setStage5Result] = useState<AnalyzeStage5Response | null>({
     success: true,
@@ -504,6 +507,7 @@ export default function HireMeApp() {
       }
 
       setStage5Result(data);
+      setIsDemoSession(false); // Flag that we are now using real data!
       if (data.candidates && data.candidates.length > 0) {
         setSelectedCandidateId(data.candidates[0].profile?.id || data.candidates[0].id);
       }
@@ -535,29 +539,31 @@ export default function HireMeApp() {
       )}
 
       {/* ========================================================================= */}
-      {/* 1. TOP SUB-HEADER BAR */}
+      {/* 1. TOP SUB-HEADER BAR (Sleek professional ribbon establishing Website Name) */}
       {/* ========================================================================= */}
       <div className="bg-[#171817] text-white py-2 px-6 sm:px-10 text-[11px] font-mono font-medium border-b border-white/10">
         <div className="max-w-[1400px] mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-5 overflow-x-auto no-scrollbar">
-            <span className="text-[#7FAEA7] font-extrabold uppercase tracking-wider">HireMe Suite:</span>
-            <span className="hover:text-[#7FAEA7] cursor-pointer transition-colors" onClick={() => setActiveNav('home')}>CRM</span>
-            <span className="hover:text-[#7FAEA7] cursor-pointer transition-colors" onClick={() => setActiveNav('candidates')}>People</span>
-            <span className="hover:text-[#7FAEA7] cursor-pointer transition-colors" onClick={() => setActiveNav('jobs')}>Creator</span>
-            <span className="hover:text-[#7FAEA7] cursor-pointer transition-colors" onClick={() => setIsVoiceAIOpen(true)}>Voice AI</span>
-            <span className="hover:text-[#7FAEA7] cursor-pointer transition-colors" onClick={() => setActiveNav('reports')}>Audit</span>
+          
+          <div className="flex items-center gap-3">
+            <span className="text-[#00A86B] font-black uppercase tracking-wider">PLATFORM MODULE:</span>
+            <span className="font-extrabold text-white tracking-wider hover:text-[#00A86B] cursor-pointer transition-all" onClick={() => setActiveNav('home')}>
+              HIREME AI • COGNITIVE TALENT MATCHING PLATFORM
+            </span>
           </div>
 
-          <div className="flex items-center gap-4 shrink-0">
+          <div className="flex items-center gap-5 shrink-0">
+            <span className="hover:text-[#00A86B] cursor-pointer hidden md:inline" onClick={() => showToast('Hiring Manual opened in new tab.')}>Recruitment Playbook</span>
+            <span className="hover:text-[#00A86B] cursor-pointer hidden md:inline" onClick={() => showToast('All platform modules are fully operational.')}>System Status: Operational</span>
             <Search className="w-3.5 h-3.5 text-[#DDDCD6] cursor-pointer hover:text-white" onClick={() => setIsAskAIOpen(true)} />
             <button
               type="button"
               onClick={() => setIsSignInOpen(true)}
-              className="text-white hover:text-[#7FAEA7] cursor-pointer font-bold border-l border-white/20 pl-3"
+              className="text-white hover:text-[#00A86B] cursor-pointer font-bold border-l border-white/20 pl-3"
             >
               Sign In
             </button>
           </div>
+
         </div>
       </div>
 
@@ -756,7 +762,7 @@ export default function HireMeApp() {
                   />
                 </div>
 
-                <div className="lg:col-span-5 bg-[#F5F3EE] p-6 rounded-2xl border border-[#DDDCD6] space-y-4">
+                <div className="lg:col-span-5 bg-[#FAF7F2] p-6 rounded-2xl border border-[#DDDCD6] space-y-4">
                   <h4 className="font-extrabold text-sm text-[#171817] font-heading uppercase">
                     100-Point AI Rubric Analysis
                   </h4>
@@ -819,6 +825,19 @@ export default function HireMeApp() {
                 </p>
               </div>
 
+              {/* Data Transparency Callout */}
+              {isDemoSession ? (
+                <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-900 flex items-center gap-2.5 font-bold shadow-2xs">
+                  <AlertTriangle className="w-4 h-4 text-[#D97706] shrink-0 animate-bounce" />
+                  <span>Displaying demonstration candidate profiles. Upload your resume above to replace with real parsed resume data.</span>
+                </div>
+              ) : (
+                <div className="p-3.5 bg-[#E8F0E6] border border-[#0D3834]/20 rounded-2xl text-xs text-[#0D3834] flex items-center gap-2.5 font-bold shadow-2xs">
+                  <CheckCircle2 className="w-4 h-4 text-[#059669] shrink-0" />
+                  <span>Using real candidate evaluation data parsed directly from your uploaded resumes.</span>
+                </div>
+              )}
+
               <ATSWorkspaceShell
                 stage5Result={stage5Result}
                 selectedJobTitle={selectedJob.title}
@@ -852,6 +871,19 @@ export default function HireMeApp() {
                 + Upload & Analyze Resumes
               </button>
             </div>
+
+            {/* Data Transparency Callout */}
+            {isDemoSession ? (
+              <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-900 flex items-center gap-2.5 font-bold shadow-2xs">
+                <AlertTriangle className="w-4 h-4 text-[#D97706] shrink-0 animate-bounce" />
+                <span>Displaying demonstration candidate profiles. Upload your resume above to replace with real parsed resume data.</span>
+              </div>
+            ) : (
+              <div className="p-3.5 bg-[#E8F0E6] border border-[#0D3834]/20 rounded-2xl text-xs text-[#0D3834] flex items-center gap-2.5 font-bold shadow-2xs">
+                <CheckCircle2 className="w-4 h-4 text-[#059669] shrink-0" />
+                <span>Using real candidate evaluation data parsed directly from your uploaded resumes.</span>
+              </div>
+            )}
 
             {liveCandidates.length > 0 ? (
               <CandidateList
@@ -1096,6 +1128,19 @@ export default function HireMeApp() {
                   </span>
                 </div>
 
+                {/* Data Transparency Callout */}
+                {isDemoSession ? (
+                  <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-900 flex items-center gap-2.5 font-bold shadow-2xs">
+                    <AlertTriangle className="w-4 h-4 text-[#D97706] shrink-0 animate-bounce" />
+                    <span>Displaying demonstration candidate profiles. Upload your resume above to replace with real parsed resume data.</span>
+                  </div>
+                ) : (
+                  <div className="p-3.5 bg-[#E8F0E6] border border-[#0D3834]/20 rounded-2xl text-xs text-[#0D3834] flex items-center gap-2.5 font-bold shadow-2xs">
+                    <CheckCircle2 className="w-4 h-4 text-[#059669] shrink-0" />
+                    <span>Using real candidate evaluation data parsed directly from your uploaded resumes.</span>
+                  </div>
+                )}
+
                 <CandidateList
                   candidates={liveCandidates}
                   selectedCandidateId={selectedCandidateId || undefined}
@@ -1120,6 +1165,19 @@ export default function HireMeApp() {
                 Candidates marked for hiring manager review and interview scheduling.
               </p>
             </div>
+
+            {/* Data Transparency Callout */}
+            {isDemoSession ? (
+              <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-900 flex items-center gap-2.5 font-bold shadow-2xs">
+                <AlertTriangle className="w-4 h-4 text-[#D97706] shrink-0 animate-bounce" />
+                <span>Displaying demonstration candidate profiles. Upload your resume above to replace with real parsed resume data.</span>
+              </div>
+            ) : (
+              <div className="p-3.5 bg-[#E8F0E6] border border-[#0D3834]/20 rounded-2xl text-xs text-[#0D3834] flex items-center gap-2.5 font-bold shadow-2xs">
+                <CheckCircle2 className="w-4 h-4 text-[#059669] shrink-0" />
+                <span>Using real candidate evaluation data parsed directly from your uploaded resumes.</span>
+              </div>
+            )}
 
             <div className="bg-white rounded-3xl border border-[#DDDCD6] p-6 shadow-2xs">
               {shortlistedIds.size > 0 ? (
